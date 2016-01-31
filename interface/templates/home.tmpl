@@ -1,0 +1,268 @@
+#import autosub
+#import time
+#import cgi
+#import urllib
+#import re
+#from types import *
+#from autosub.Db import lastDown
+#from autosub.Helpers import ConvertTimestamp
+#from autosub.Helpers import getAttr
+#from autosub.Helpers import DisplaySubtitle
+
+#include $os.path.join($autosub.PATH.encode(), "interface/templates/header.tmpl")
+
+$autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
+
+        <div class="page-header"><h1>Home</h1></div>
+
+<div class="overview">
+#if $autosub.HOMELAYOUTFIRST == "Downloaded":
+	<div id="Display2">
+#else
+	<div id="Display1">
+#end if
+		<div class="well well-sm center well-header"><b>Wanted</b></div>
+#if not $autosub.DOWNLOADDUTCH and not $autosub.DOWNLOADENG:
+		<div class="alert alert-danger center"><span class="glyphicon glyphicon-info-sign"></span> <strong>Oh snap!</strong> You currently have Dutch and English disabled, you don't want to use me anymore? :( <span class="glyphicon glyphicon-info-sign"></span></div>
+#else		
+		<div class="well well-sm center">
+#if $len($autosub.WANTEDQUEUE) == 0
+		No data available at the moment.
+#end if		
+#if $len($autosub.WANTEDQUEUE) >= 1
+<div class="table-responsive">
+		<table id="wanted" class="table table-condensed table-hover table-striped">
+			<thead>
+				<tr>
+					<th class="center">Show name</th>
+					<th class="center">Season</th>
+					<th class="center">Episode</th>
+					<th class="center">Source</th>
+					<th class="center">Quality</th>
+					<th class="center">Codec</th>
+					<th class="center">Group</th>
+					<th class="center">Language</th>
+					<th class="center">Time</th>
+					<th class="center">&nbsp;</th>
+				</tr>
+			</thead>
+		<tbody>
+#for $var in $autosub.WANTEDQUEUE
+
+#set $title_escaped = $cgi.escape($var['title'], True)
+		<tr>
+			<td align="left"><a data-placement="right" data-toggle="tooltip" data-original-title="$var['originalFileLocationOnDisk']">$var['title']</a></td>
+			<td>$var['season']</td>
+			<td>$var['episode']</td>
+#if $type($var['source']) == UnicodeType:
+			<td>$var['source'].upper()</td>
+#else
+			<td>Unknown</td>
+#end if
+#if $type($var['quality']) == UnicodeType:
+			<td>$var['quality'].upper()</td>
+#else
+			<td>Unknown</td>
+#end if
+#if $type($var['codec']) == UnicodeType:
+			<td>$var['codec'].upper()</td>
+#else
+			<td>Unknown</td>
+#end if
+#if $type($var['releasegrp']) == UnicodeType:
+			<td>$var['releasegrp'].upper()</td>
+#else
+			<td>Unknown</td>
+#end if
+			<td>
+#for lang in $var['lang']
+#if lang == "Dutch"
+			<img src="$autosub.WEBROOT/images/Dutch.png" alt="$lang" title="$lang">
+#end if
+#if lang == "English"
+			<img src="$autosub.WEBROOT/images/English.png" alt="$lang" title="$lang">
+#end if
+#end for
+			</td>
+#if $type($var['timestamp']) == UnicodeType:
+			<td>$ConvertTimestamp($var['timestamp'])</td>
+#else
+			<td>Unknown</td>
+#end if	
+			<td>
+#set $SE = "S" + $var['season'] + "E" + $var['episode']		
+			<div class="navbar-collapse skipshow">
+			  <ul class="nav navbar-right">
+				<li class="dropdown">
+					  <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-wrench"></span></a>
+					  <ul class="dropdown-menu">
+						<li><a href="$autosub.WEBROOT/config/skipShow/$var['title'].replace(' ', '%20')/-1">Skip $var['title']</a></li>
+						<li><a href="$autosub.WEBROOT/config/skipShow/$var['title'].replace(' ', '%20')/$var['season']">Skip $var['title'] S$var['season']</a></li>
+						<li><a href="$autosub.WEBROOT/config/skipShow/$var['title'].replace(' ', '%20')/$var['season']/$var['episode']">Skip $var['title'] $SE</a></li>
+					  </ul>
+				</li>
+			  </ul>
+            </div>
+			
+			</td>
+		</tr>
+#end for
+
+		</tbody>
+			<tfoot>
+				<tr>
+					<th class="center">Show name</th>
+					<th class="center">Season</th>
+					<th class="center">Episode</th>
+					<th class="center">Source</th>
+					<th class="center">Quality</th>
+					<th class="center">Codec</th>
+					<th class="center">Group</th>
+					<th class="center">Language</th>
+					<th class="center">Time</th>
+					<th class="center">&nbsp;</th>
+				</tr>
+			</tfoot>
+		</table>
+</div>
+#end if
+		<br>
+		</div>
+#end if
+		<hr>
+	</div>
+		
+#set $lastdownload = lastDown().getlastDown()
+
+#if $autosub.HOMELAYOUTFIRST == "Downloaded":
+	<div id="Display1">
+#else
+	<div id="Display2">
+#end if	
+		<div class="well well-sm center well-header"><b>Downloaded</b></div>
+		<div class="well well-sm center">
+#if $len($lastdownload) == 0
+		No data available at the moment.
+#end if		
+#if $len($lastdownload) >= 1
+<div class="table-responsive">
+		<table id="downloaded" class="table table-condensed table-hover table-striped">
+			<thead>
+				<tr>
+					<th class="center">Show name</th>
+					<th class="center">Season</th>
+					<th class="center">Episode</th>
+					<th class="center">Source</th>
+					<th class="center">Quality</th>
+					<th class="center">Codec</th>
+					<th class="center">Group</th>
+					<th class="center">Language</th>
+					<th class="center">Time</th>
+					<th class="center">&nbsp;</th>
+				</tr>
+			</thead>
+			<tbody>
+#for $var in $lastdownload
+			<tr>
+				<td align="left"><a data-placement="right" data-toggle="tooltip" data-original-title="$var['subtitle'].upper()">$var['show_name']</a></td>
+				<td>$var['season']</td>
+				<td>$var['episode']</td>
+#if $type($var['source']) == UnicodeType:
+				<td>$var['source'].upper()</td>
+#else
+				<td>Unknown</td>
+#end if
+#if $type($var['quality']) == UnicodeType:
+				<td>$var['quality'].upper()</td>
+#else
+				<td>Unknown</td>
+#end if
+#if $type($var['codec']) == UnicodeType:
+				<td>$var['codec'].upper()</td>
+#else
+				<td>Unknown</td>
+#end if
+#if $type($var['releasegrp']) == UnicodeType:
+				<td>$var['releasegrp'].upper()</td>
+#else
+				<td>Unknown</td>
+#end if
+				<td>
+					#set $imageurl = $autosub.WEBROOT + "/images/" + $var['language'] + ".png"
+					<img src="$imageurl" alt="$var['language']" title="$var['language']" />
+				</td>
+#if $type($var['timestamp']) == UnicodeType:
+				<td>$ConvertTimestamp($var['timestamp'])</td>
+#else
+				<td>Unknown</td>
+#end if
+#if $var['destination']:
+#if $os.path.isfile($var['destination']):
+				<td>
+					<a style="cursor: default;"><span id="popover" data-toggle="popover" data-trigger="click" data-html="true" data-placement="left" title="<strong>Subtitle Preview</strong><br>$var['show_name']" data-content="$DisplaySubtitle($var['destination'])"><span class="glyphicon glyphicon-eye-open"></span></span></a>
+				</td>
+#else:
+				<td>
+					<a style="cursor: default;"><span id="popover" data-toggle="popover" data-trigger="click" data-html="true" data-placement="left" title="<strong>Subtitle Preview</strong><br>$var['show_name']" data-content="Preview is not available.<br>You probably moved the file."><span class="glyphicon glyphicon-eye-close"></span></span></a>
+				</td>
+#end if
+#else:
+				<td>
+					<a style="cursor: default;"><span id="popover" data-toggle="popover" data-trigger="click" data-html="true" data-placement="left" title="<strong>Subtitle Preview</strong><br>$var['show_name']" data-content="Preview is not available.<br>You probably moved the file."><span class="glyphicon glyphicon-eye-close"></span></span></a>
+				</td>
+#end if
+			</tr>	
+#end for
+			</tbody>
+			<tfoot>
+				<tr>
+					<th class="center">Show name</th>
+					<th class="center">Season</th>
+					<th class="center">Episode</th>
+					<th class="center">Source</th>
+					<th class="center">Quality</th>
+					<th class="center">Codec</th>
+					<th class="center">Group</th>
+					<th class="center">Language</th>
+					<th class="center">Time</th>
+					<th class="center">&nbsp;</th>
+				</tr>
+			</tfoot>
+		</table>
+</div>
+#end if
+		<br>
+		</div>
+	
+		<hr>
+	</div>
+</div>
+		<div class="well well-sm center well-header"><b>Next Run</b></div>
+		<div class="well well-sm center">
+		
+		<table class="table-nextrun">
+			<tr>
+				<td class="td-nextrun">ScanDisk</td>
+				<td class="td-nextrun">CheckSub</td>
+			</tr>
+			<tr>
+				<td class="td-nextrun">
+					#try
+					  $time.strftime('%H:%M:%S', $time.gmtime(($autosub.SCANDISK.interval - ($time.time() - $autosub.SCANDISK.lastrun) ))) <br>
+					#except
+					  Please wait...
+					#end try
+				</td>
+				<td class="td-nextrun">
+					#try
+					  $time.strftime('%H:%M:%S', $time.gmtime(($autosub.CHECKSUB.interval - ($time.time() - $autosub.CHECKSUB.lastrun) ))) <br>
+					#except
+					  Please wait...
+					#end try
+				</td>
+			</tr>
+		</table>
+		
+		</div>
+		
+#include $os.path.join($autosub.PATH.encode(), "interface/templates/footer.tmpl")

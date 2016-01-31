@@ -1,0 +1,129 @@
+#import autosub
+#import urllib2
+#from library.beautifulsoup import BeautifulStoneSoup
+#import HTMLParser
+#import sys
+#import os
+#import time
+#from autosub.version import autosubversion
+#from autosub.Addic7ed import Addic7edAPI
+
+#include $os.path.join($autosub.PATH.encode(), "interface/templates/header.tmpl")
+
+	<script type="text/javascript">
+    <!--
+        autosubRoot = "$autosub.WEBROOT";
+    //-->
+	</script>
+
+        <div class="page-header"><h1>Info & Help</h1></div>
+		
+		<div class="well well-sm" align="center"><font size="3"><b>Auto-Sub Bootstrap Bill Information</b></font></div>
+		<div class="well well-sm">
+		<strong>GENERAL</strong>
+		<table cellpadding="0" cellspacing="0" border="0" width="100%">
+			<tr>
+				<td width="200px">Config file</td>
+				<td>
+					#if $os.path.split($autosub.CONFIGFILE)[0] == ''	
+						$os.path.join($autosub.PATH, $autosub.CONFIGFILE)
+					#else
+						$autosub.CONFIGFILE
+					#end if
+				</td>
+			</tr>
+			<tr>
+				<td width="200px">Database file</td>
+				<td>$os.path.join($autosub.PATH, $autosub.DBFILE)</td>
+			</tr>
+			<tr>
+				<td width="200px">Log file</td>
+				<td>
+					#if $os.path.split($autosub.LOGFILE)[0] == ''	
+						$os.path.join($autosub.PATH, $autosub.LOGFILE)
+					#else
+						$autosub.LOGFILE
+					#end if
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2">&nbsp;</td>
+			</tr>
+			<tr>
+				<td width="200px">Auto-Sub version</td>
+				<td>Bootstrap Bill, $autosubversion</td>
+			</tr>
+			<tr>
+				<td width="200px">Python version</td>
+				<td>$sys.version</td>
+			</tr>
+			<tr>
+				<td width="200px">Python location</td>
+				<td>$os.path.dirname($sys.executable)</td>
+			</tr>
+		</table>
+		<hr>
+		<strong>WEBSITES</strong>
+		<table cellpadding="0" cellspacing="0" border="0" width="100%">
+			<tr>
+				<td width="200px">Source</td>
+				<td><a href="https://github.com/Donny87/autosub-bootstrapbill" target="_blank">https://github.com/Donny87/autosub-bootstrapbill</a></td>
+			</tr>
+			<tr>
+				<td width="200px">Open Issues</td>
+				<td><a href="https://github.com/Donny87/autosub-bootstrapbill/issues" target="_blank">https://github.com/Donny87/autosub-bootstrapbill/issues</a></td>
+			</tr>
+			<tr>
+				<td width="200px">Tweakers.net forum</td>
+				<td><a href="http://gathering.tweakers.net/forum/list_messages/1572892" target="_blank">http://gathering.tweakers.net/forum/list_messages/1572892</a></td>
+			</tr>
+			<tr>
+				<td width="200px">Synology forum</td>
+				<td><a href="http://www.synology-forum.nl/auto-sub" target="_blank">http://www.synology-forum.nl/auto-sub</a></td>
+			</tr>
+		</table>
+#if $autosub.ADDIC7EDLANG != "None":
+		<hr>
+		<strong>ADDIC7ED</strong>
+		<table cellpadding="0" cellspacing="0" border="0" width="100%">
+			<tr>
+				<td>
+					<span id="Addic7edCount-result">Click below to retrieve Addic7ed download count.</span>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<input type="button" class="btn btn-default" value="Retrieve Count" id="RetrieveAddic7edCount" />
+				</td>
+			</tr>
+		</table>
+#end if
+		<hr>
+		<strong>API CALLS REMAINING</strong>
+		<table>
+			<tr>
+				<td width="200px">SubtitleSeeker</td>
+				<td>
+				#if ($autosub.APICALLSRESETINT_SUBSEEKER - ($time.time() - $autosub.APICALLSLASTRESET_SUBSEEKER)) < 0
+					#set $apimessage = "AT NEXT API CALL"
+				#else
+					#set $apimessage = $time.strftime('%H:%M:%S', $time.gmtime(($autosub.APICALLSRESETINT_SUBSEEKER - ($time.time() - $autosub.APICALLSLASTRESET_SUBSEEKER) )))
+				#end if
+				$autosub.APICALLS_SUBSEEKER <a data-placement="right" data-toggle="tooltip" data-original-title="Resetting in: $apimessage"><span class="glyphicon glyphicon-info-sign"></span></a>
+				</td>
+			</tr>
+			<tr>
+				<td width="200px">TVDB</td>
+				<td>
+				#if ($autosub.APICALLSRESETINT_TVDB - ($time.time() - $autosub.APICALLSLASTRESET_TVDB)) < 0
+					#set $apimessage = "AT NEXT API CALL"
+				#else
+					#set $apimessage = $time.strftime('%H:%M:%S', $time.gmtime(($autosub.APICALLSRESETINT_TVDB - ($time.time() - $autosub.APICALLSLASTRESET_TVDB) )))
+				#end if
+				$autosub.APICALLS_TVDB <a data-placement="right" data-toggle="tooltip" data-original-title="Resetting in: $apimessage"><span class="glyphicon glyphicon-info-sign"></span></a>
+				</td>
+			</tr>
+		</table>
+		</div>
+
+#include $os.path.join($autosub.PATH.encode(), "interface/templates/footer.tmpl")

@@ -1,0 +1,214 @@
+#import autosub
+
+		<hr>
+
+		<div class="form-group">
+			<label for="Seriesfolder" class="col-sm-2 control-label">Series Folder <a data-placement="bottom" data-toggle="tooltip" data-original-title="The folder(s) where your series are located. You can add more folders by separating with a comma. Example: D:\Series1,D:\Series2 - This field is required!"><span class="glyphicon glyphicon-info-sign"></span></a></label>
+			<div class="col-sm-10">
+			<input type="text" class="form-control" name="rootpath" value="$autosub.ROOTPATH" placeholder="Series folder">
+			</div>
+		</div>
+			
+		<hr>
+
+		<div class="form-group">
+			<label for="DownloadDutch" class="col-sm-2 control-label">Download Dutch <a data-placement="bottom" data-toggle="tooltip" data-original-title="When Enabled, Dutch subtitles are always downloaded. Default is Enabled."><span class="glyphicon glyphicon-info-sign"></span></a></label>
+			<div class="col-sm-10">
+			<select name="downloaddutch" id="downloaddutch" class="form-control enabler">
+				<option value="True" #if $autosub.DOWNLOADDUTCH == True then 'selected="selected"' else ""#>Enabled</option>
+				<option value="False" #if $autosub.DOWNLOADDUTCH == False then 'selected="selected"' else ""#>Disabled</option>
+			</select>
+			</div>
+		</div>
+		
+		<div id="content_downloaddutch">
+			<div class="form-group">
+				<label for="NotifyDutch" class="col-sm-2 control-label">Notify Dutch <a data-placement="bottom" data-toggle="tooltip" data-original-title="When enabled, Auto-Sub will send a notification when a Dutch subtitle has been downloaded. Default is Enabled."><span class="glyphicon glyphicon-info-sign"></span></a></label>
+				<div class="col-sm-10">
+				<select name="notifynl" class="form-control">
+					<option value="True" #if $autosub.NOTIFYNL == True then 'selected="selected"' else ""#>Enabled</option>
+					<option value="False" #if $autosub.NOTIFYNL == False then 'selected="selected"' else ""#>Disabled</option>
+				</select>
+				</div>
+			</div>
+			
+			<div class="form-group">	
+				<label for="DutchSubtitleSuffix" class="col-sm-2 control-label">Dutch Suffix <a data-placement="bottom" data-toggle="tooltip" data-original-title="When downloading Dutch subtitles, files are renamed to: filename.srt when left emtpy. Default is Empty."><span class="glyphicon glyphicon-info-sign"></span></a></label>
+				<div class="col-sm-10">
+				<input type="text" class="form-control" name="subnl" value="$autosub.SUBNL" placeholder="">
+				</div>
+			</div>
+			
+			<div class="form-group">	
+				<label for="FallbacktoEnglish" class="col-sm-2 control-label">Fallback to English <a data-placement="bottom" data-toggle="tooltip" data-original-title="When Enabled, English subtitles are downloaded when there are no Dutch subtitles available. Default is Enabled."><span class="glyphicon glyphicon-info-sign"></span></a></label>
+				<div class="col-sm-10">
+				<select name="fallbacktoeng" class="form-control">
+					<option value="True" #if $autosub.FALLBACKTOENG == True then 'selected="selected"' else ""#>Enabled</option>
+					<option value="False" #if $autosub.FALLBACKTOENG == False then 'selected="selected"' else ""#>Disabled</option>
+				</select>
+				</div>
+			</div>
+			
+			<div class="form-group">	
+				<label for="CleanUpEnglish" class="col-sm-2 control-label">Clean up English <a data-placement="bottom" data-toggle="tooltip" data-original-title="Do you want to remove the English subtitle when the Dutch subtitle is downloaded?"><span class="glyphicon glyphicon-info-sign"></span></a></label>
+				<div class="col-sm-10">
+				<select name="englishsubdelete" class="form-control">
+					<option value="True" #if $autosub.ENGLISHSUBDELETE == True then 'selected="selected"' else ""#>Enabled</option>
+					<option value="False" #if $autosub.ENGLISHSUBDELETE == False then 'selected="selected"' else ""#>Disabled</option>
+				</select>
+				</div>
+			</div>		
+			
+		</div>
+				
+		<hr>
+		
+		<div class="form-group">
+			<label for="DownloadEnglish" class="col-sm-2 control-label">Download English <a data-placement="bottom" data-toggle="tooltip" data-original-title="When Enabled, English subtitles are always downloaded. Default is Disabled."><span class="glyphicon glyphicon-info-sign"></span></a></label>
+			<div class="col-sm-10">
+			<select name="downloadeng" class="form-control"> <!--value="$autosub.DOWNLOADENG" />-->
+				<option value="True" #if $autosub.DOWNLOADENG == True then 'selected="selected"' else ""#>Enabled</option>
+				<option value="False" #if $autosub.DOWNLOADENG == False then 'selected="selected"' else ""#>Disabled</option>
+			</select>
+			</div>
+		</div>
+		
+		<div class="form-group">
+			<label for="NotifyEnglish" class="col-sm-2 control-label">Notify English <a data-placement="bottom" data-toggle="tooltip" data-original-title="When enabled, Auto-Sub will send a notification when an English subtitle has been downloaded. Default is Enabled."><span class="glyphicon glyphicon-info-sign"></span></a></label>
+			<div class="col-sm-10">
+			<select name="notifyen" class="form-control">
+				<option value="True" #if $autosub.NOTIFYEN == True then 'selected="selected"' else ""#>Enabled</option>
+				<option value="False" #if $autosub.NOTIFYEN == False then 'selected="selected"' else ""#>Disabled</option>
+				</select>
+			</div>
+		</div>
+		
+		<div class="form-group">
+			<label for="EnglishSubtitleSuffix" class="col-sm-2 control-label">English Suffix <a data-placement="bottom" data-toggle="tooltip" data-original-title="When Fallback to English is enabled, English subtitles are renamed to: filename.subeng.srt. Default is 'en' (filename.en.srt)."><span class="glyphicon glyphicon-info-sign"></span></a></label>
+			<div class="col-sm-10">
+			<input type="text" class="form-control" name="subeng" value="$autosub.SUBENG" placeholder="">
+			</div>
+		</div>
+
+		<hr>
+		
+		<div class="form-group">
+			<label for="HomeTableOrder" class="col-sm-2 control-label">Home table order <a data-placement="bottom" data-toggle="tooltip" data-original-title="Which table do you want displayed first on the Home page?"><span class="glyphicon glyphicon-info-sign"></span></a></label>
+			<div class="col-sm-10">
+			<select name="homelayoutfirst" class="form-control">
+				<option value="Wanted" #if $autosub.HOMELAYOUTFIRST == "Wanted" then 'selected="selected"' else ""#>Wanted, Downloaded</option>
+				<option value="Downloaded" #if $autosub.HOMELAYOUTFIRST == "Downloaded" then 'selected="selected"' else ""#>Downloaded, Wanted</option>
+			</select>
+			</div>
+		</div>
+		
+		<div class="form-group">
+			<label for="WebDl" class="col-sm-2 control-label">WEB-DL <a data-placement="bottom" data-toggle="tooltip" data-original-title="Which subtitles do you want to download for WEB-DL episodes?"><span class="glyphicon glyphicon-info-sign"></span></a></label>
+			<div class="col-sm-10">
+			<select name="webdl" class="form-control">
+				<option value="None" #if $autosub.WEBDL == "None" then 'selected="selected"' else ""#>None</option>
+				<option value="DutchOnly" #if $autosub.WEBDL == "DutchOnly" then 'selected="selected"' else ""#>Dutch Only</option>
+				<option value="Both" #if $autosub.WEBDL == "Both" then 'selected="selected"' else ""#>Both</option>
+			</select>
+			</div>
+		</div>	
+					
+		<hr>
+		
+		<h4 align="center">Advanced settings</h4><br>
+		
+		<div class="form-group">
+			<label for="InstallationFolder" class="col-sm-2 control-label">Installation Folder <a data-placement="bottom" data-toggle="tooltip" data-original-title="The folder where the Auto-Sub files are located. This field is required and is usually not changed!"><span class="glyphicon glyphicon-info-sign"></span></a></label>
+			<div class="col-sm-10">
+			<input type="text" class="form-control" name="path" value="$autosub.PATH" readonly placeholder="">
+			</div>
+		</div>
+		
+		<div class="form-group">
+			<label for="Logfile" class="col-sm-2 control-label">Logfile <a data-placement="bottom" data-toggle="tooltip" data-original-title="The location and the name of the logfile. When not set, AutoSubService.log will be used. This field is required!"><span class="glyphicon glyphicon-info-sign"></span></a></label>
+			<div class="col-sm-10">
+			<input type="text" class="form-control" name="logfile" value="$autosub.LOGFILE" placeholder="">
+			</div>
+		</div>
+		
+		<div class="form-group">
+			<label for="Launchbrowser" class="col-sm-2 control-label">Launch Browser <a data-placement="bottom" data-toggle="tooltip" data-original-title="Should we start a browser every time Auto-Sub starts? This overwrites the commandline parameters."><span class="glyphicon glyphicon-info-sign"></span></a></label>
+			<div class="col-sm-10">
+			<select name="launchbrowser" class="form-control">
+				<option value="True" #if $autosub.LAUNCHBROWSER == True then 'selected="selected"' else ""#>Enabled</option>
+				<option value="False" #if $autosub.LAUNCHBROWSER == False then 'selected="selected"' else ""#>Disabled</option>
+			</select>
+			</div>
+		</div>
+		
+		<div class="form-group">
+			<label for="PostProcess" class="col-sm-2 control-label">Post Process <a data-placement="bottom" data-toggle="tooltip" data-original-title="Auto-Sub will run this command after downloading a subtitle. Check the wiki for more info."><span class="glyphicon glyphicon-info-sign"></span></a></label>
+			<div class="col-sm-10">
+			<input type="text" class="form-control" name="postprocesscmd" value="$autosub.POSTPROCESSCMD" placeholder="">
+			</div>
+		</div>
+		
+		<div class="form-group">
+			<label for="SkipHidden" class="col-sm-2 control-label">Skip Hidden <a data-placement="bottom" data-toggle="tooltip" data-original-title="Should we scan hidden directories (directories that start with a dot, for example .AppleDouble)? Doesn't work for Windows style hidden directories."><span class="glyphicon glyphicon-info-sign"></span></a></label>
+			<div class="col-sm-10">
+			<select name="skiphiddendirs" class="form-control">
+				<option value="True" #if $autosub.SKIPHIDDENDIRS == True then 'selected="selected"' else ""#>Enabled</option>
+				<option value="False" #if $autosub.SKIPHIDDENDIRS == False then 'selected="selected"' else ""#>Disabled</option>
+			</select>
+			</div>
+		</div>
+		
+		<div class="form-group">
+			<label for="MinMatchScore" class="col-sm-2 control-label">MinMatchScore <a data-placement="bottom" data-toggle="tooltip" data-original-title="What items should match before a subtitle is downloaded via the API?"><span class="glyphicon glyphicon-info-sign"></span></a></label>
+			<div class="col-sm-10">
+				#set $temp = $autosub.MINMATCHSCORE
+				#set $temp = $temp - 8
+				Source: 
+				#if $temp >= 0
+					<input type="checkbox" name="mmssource" checked value="1">
+				#else
+					<input type="checkbox" name="mmssource" value="1">
+					#set $temp = $temp + 8
+				#end if
+
+				#set $temp = $temp - 4
+				Quality: 
+				#if $temp >= 0
+					<input type="checkbox" name="mmsquality" checked value="1">
+				#else
+					<input type="checkbox" name="mmsquality" value="1">
+					#set $temp = $temp + 4
+				#end if
+
+				#set $temp = $temp - 2
+				Codec: 
+				#if $temp >= 0
+					<input type="checkbox" name="mmscodec" checked value="1">
+				#else
+					<input type="checkbox" name="mmscodec" value="1">
+					#set $temp = $temp + 2
+				#end if
+
+				#set $temp = $temp - 1
+				Releasegroup: 
+				#if $temp >= 0
+					<input type="checkbox" name="mmsrelease" checked value="1">
+				#else
+					<input type="checkbox" name="mmsrelease" value="1">
+				#end if
+			</div>
+		</div>
+		
+		<div class="form-group">
+			<label for="ScanDisk" class="col-sm-2 control-label">ScanDisk <a data-placement="bottom" data-toggle="tooltip" data-original-title="Change the interval of the ScanDisk thread, it scans the disk for missing subtitle files. Time is in seconds, default is 3600 seconds."><span class="glyphicon glyphicon-info-sign"></span></a></label>
+			<div class="col-sm-10">
+			<input type="text" class="form-control" name="scandisk" value="$autosub.SCHEDULERSCANDISK" placeholder="">
+			</div>
+		</div>
+		
+		<div class="form-group">
+			<label for="CheckSub" class="col-sm-2 control-label">CheckSub <a data-placement="bottom" data-toggle="tooltip" data-original-title="Change the interval of the CheckSub thread, it checks if there is a match on the Subtitleseeker API. Cannot not be set lower then 21600. Time is in seconds, default is 28800 seconds."><span class="glyphicon glyphicon-info-sign"></span></a></label>
+			<div class="col-sm-10">
+			<input type="text" class="form-control" name="checksub" value="$autosub.SCHEDULERCHECKSUB" placeholder="">
+			</div>
+		</div>
