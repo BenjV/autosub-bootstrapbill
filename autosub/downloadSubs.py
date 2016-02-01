@@ -75,7 +75,6 @@ def openSubtitles(DownloadPage):
     try:
         TimeOut()
         RequestResult = autosub.OPENSUBTTITLESSESSION.get(DownloadPage, timeout=10)
-        autosub.OPENSUBTTITLESSESSION.headers.update({'referer': DownloadPage})
     except:
         log.debug('openSubtitles: Could not connect to OpenSubtitles.')
         return None
@@ -96,7 +95,6 @@ def openSubtitles(DownloadPage):
         DownloadUrl = autosub.OPENSUBTITLESDL + DownloadId
         TimeOut()
         RequestResult = autosub.OPENSUBTTITLESSESSION.get( DownloadUrl, timeout=10)
-        autosub.OPENSUBTTITLESSESSION.headers.update({'referer': DownloadUrl})
     except:
         log.debug('openSubtitles: Could not connect to Opensubtitles.org.')
         return None

@@ -169,8 +169,6 @@ def Opensubtitles(EpisodeId, language, releaseDetails):
     try:
         TimeOut()
         RequestResult = autosub.OPENSUBTTITLESSESSION.get(autosub.OPENSUBTITLESURL + SearchUrl, timeout=10)
-        Referer = SearchUrl.replace('/xml','')
-        autosub.OPENSUBTTITLESSESSION.headers.update({'referer': Referer})
     except:
         log.debug('getSubLinks: Could not connect to OpenSubtitles.')
         return None
