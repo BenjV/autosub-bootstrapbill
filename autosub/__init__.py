@@ -169,7 +169,7 @@ def Initialize():
     release = autosubversion.split(' ')[0]
     versionnumber = autosubversion.split(' ')[1]
     
-    VERSIONURL = 'https://raw.githubusercontent.com/Donny87/autosub-bootstrapbill/master/autosub/version.py'
+    VERSIONURL = 'https://raw.githubusercontent.com/BenjV/autosub-bootstrapbill/master/autosub/version.py'
     USERAGENT = 'AutoSub/' + versionnumber + release.lower()[0]
 
     WANTEDQUEUE = []
