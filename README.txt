@@ -1,8 +1,8 @@
 README 
 
-IMPORTANT INFO
-Due to the removal of the main repo this fork now serves as the latest "well tested" version of Auto-Sub Bootstrap Bill. This isn't my code and I'm certainly not the main developer. If you're interested in the further development of the program, please visit https://github.com/BenjV/autosub-bootstrapbill
-If you encounter any issues while using Auto-Sub, please report them at https://github.com/BenjV/autosub-bootstrapbill/issues
+Important info.
+Due to changes in the Website of Opensubtitle the scraper for Opensubtitles does not work anymore.
+Until this is fixed it is no longer possible to use Opensubtitles
 
 +--- Auto-Sub Bootstrap Bill
      |
