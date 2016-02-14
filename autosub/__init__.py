@@ -47,7 +47,7 @@ OPENSUBTITLESUSER=None
 OPENSUBTITLESPASSWD=None
 OPENSUBTITLESAPI=None
 OPENSUBTITLESURL=None
-OPENSUBTITLESLOGGED_IN=False
+OPENSUBTITLESTOKEN=None
 OPENSUBTTITLESSESSION=None
 OPENSUBTITLESDL=None
 OPENSUBTITLESTIME = float(0)
@@ -161,7 +161,7 @@ def Initialize():
     ENGLISH, DUTCH, PODNAPISILANG, SUBSCENELANG, OPENSUBTITLESLANG, UNDERTEXTERLANG, \
     ADDIC7EDLANG, ADDIC7EDUSER, ADDIC7EDPASSWD, NOTIFYBOXCAR2, BOXCAR2TOKEN, \
     NOTIFYPLEX, PLEXSERVERHOST, PLEXSERVERPORT, OPENSUBTITLESDL,OPENSUBTITLESTIME,\
-    OPENSUBTITLESLOGGED_IN, OPENSUBTTITLESSESSION, CURRENTLANG, OPENSUBTITLESUSER, OPENSUBTITLESPASSWD, OPENSUBTITLESURL, OPENSUBTITLESAPI
+    OPENSUBTTITLESSESSION, CURRENTLANG, OPENSUBTITLESUSER, OPENSUBTITLESPASSWD, OPENSUBTITLESURL, OPENSUBTITLESUSERAGENT,OPENSUBTITLESTOKEN,OPENSUBTITLESSERVER
 
     
     DBFILE = 'database.db'
@@ -171,7 +171,7 @@ def Initialize():
     
     VERSIONURL = 'https://raw.githubusercontent.com/BenjV/autosub-bootstrapbill/master/autosub/version.py'
     USERAGENT = 'AutoSub/' + versionnumber + release.lower()[0]
-
+    OPENSUBTITLESUSERAGENT = 'PYAutosub V' + versionnumber
     WANTEDQUEUE = []
 
     APIKEY = "24430affe80bea1edf0e8413c3abf372a64afff2"
@@ -189,7 +189,7 @@ def Initialize():
     
     API = "http://api.subtitleseeker.com/get/title_subtitles/?api_key=%s" %APIKEY
     IMDBAPI = "http://thetvdb.com/api/"
-    OPENSUBTITLESURL = "http://www.opensubtitles.org/nl"
+    OPENSUBTITLESURL = 'https://api.opensubtitles.org/xml-rpc'
     OPENSUBTITLESDL  = 'http://dl.opensubtitles.org/nl/download/file/'
     MOBILEUSERAGENTS = ["midp", "240x320", "blackberry", "netfront", "nokia", "panasonic", 
                         "portalmmm", "sharp", "sie-", "sonyericsson", "symbian", "windows ce", 

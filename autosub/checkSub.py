@@ -13,7 +13,7 @@ import autosub.getSubLinks
 from autosub.Db import idCache, EpisodeIdCache
 import autosub.Helpers as Helpers
 from autosub.downloadSubs import DownloadSub
-from autosub.OpenSubtitles import OpenSubtitlesLogin, OpenSubtitlesLogout, GetEpisodeId
+from autosub.OpenSubtitles import OpenSubtitlesLogin, OpenSubtitlesLogout
 
 # Settings
 log = logging.getLogger('thelogger')
@@ -57,6 +57,13 @@ class checkSub():
             UseOpensubtitles = OpenSubtitlesLogin()
         else:
             UseOpensubtitles = False
+
+        if (autosub.SUBSCENELANG != 'None' or autosub.PODNAPISILANG != 'None'):
+            UseSubseeker = True
+        else:
+            UseSubseeker = False
+
+
         for index, wantedItem in enumerate(autosub.WANTEDQUEUE):
             title = wantedItem['title']
             season = wantedItem['season']
@@ -87,12 +94,9 @@ class checkSub():
 
             
             #lets try to find a showid; no showid? skip this item
-            showid,a7_id, OsId = Helpers.getShowid(title, UseAddic, UseOpensubtitles)
-            if UseOpensubtitles and OsId:
-                EpisodeId = GetEpisodeId(OsId, season, episode)
-            else:
-                EpisodeId = None
-            log.debug("checkSub: ID's - IMDB: %s, Addic7ed: %s, OpenSubtitles: %s" %(showid,a7_id, OsId))
+            showid,a7_id = Helpers.getShowid(title, UseAddic)
+
+            log.debug("checkSub: ID's - IMDB: %s, Addic7ed: %s" %(showid,a7_id))
             if not showid:
                 continue
             
@@ -107,7 +111,7 @@ class checkSub():
 
                 log.debug("checkSub: trying to get a downloadlink for %s, language is %s" % (originalfile, lang))
                 # get all links higher than the minmatch as input for downloadSub
-                allResults = autosub.getSubLinks.getSubLinks(showid, a7_id, EpisodeId, lang, wantedItem)
+                allResults = autosub.getSubLinks.getSubLinks(showid, a7_id, lang, wantedItem)
                 
                 if not allResults:
                     log.debug("checkSub: no suitable subtitles were found for %s based on your minmatchscore" % downloadItem['originalFileLocationOnDisk'])
@@ -123,7 +127,7 @@ class checkSub():
                     log.debug("checkSub: destination filename %s" % downloadItem['destinationFileLocationOnDisk'])
                 
                     
-                if not DownloadSub(allResults, UseAddic, downloadItem):
+                if not DownloadSub(downloadItem, allResults):
                     continue
                 
                 #Remove downloaded language
@@ -157,7 +161,7 @@ class checkSub():
         if autosub.ADDIC7EDAPI:
             autosub.ADDIC7EDAPI.logout()
 
-        if autosub.OPENSUBTITLESLOGGED_IN:
+        if autosub.OPENSUBTITLESTOKEN:
             OpenSubtitlesLogout()
                                         
         i = len(toDelete_wantedQueue) - 1

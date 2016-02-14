@@ -6,10 +6,11 @@
 
 import re
 import library.requests as requests
+import library.requests.packages.chardet as chardet
 from bs4 import BeautifulSoup
 import time
 import sys
-
+import urllib
 import autosub
 import autosub.Helpers
 import autosub.Tvdb
@@ -491,6 +492,7 @@ class Addic7edAPI():
         if r.status_code == 302:
             log.info('Addic7edAPI: Logged in')
             self.logged_in = True
+            time.sleep(10)
             return True
         else:
             log.error('Addic7edAPI: Failed to login')
@@ -527,11 +529,11 @@ class Addic7edAPI():
             log.error('Addic7edAPI: Unexpected error: %s' % sys.exc_info()[0])
             return None
         
-        if r.status_code != 200:
+        if r.status_code > 399:
             log.error('Addic7edAPI: Request failed with status code %d' % r.status_code)
 
-        log.debug("Addic7edAPI: Resting for 60 seconds to prevent errors")
-        time.sleep(60)
+        log.debug("Addic7edAPI: Resting for 30 seconds to prevent a ban")
+        time.sleep(30)
         r.encoding = 'utf-8'
         return r.text
 
@@ -549,7 +551,7 @@ class Addic7edAPI():
             log.error('Addic7edAPI: Unexpected error: %s' % sys.exc_info()[0])
             return None
 
-        if r.status_code != 200:
+        if r.status_code > 399:
             log.error('Addic7edAPI: Request failed with status code %d' % r.status_code)
         else:
             log.debug('Addic7edAPI: Request successful with status code %d' % r.status_code)
@@ -558,9 +560,10 @@ class Addic7edAPI():
             log.error('Addic7edAPI: Expected srt file but got HTML; report this!')
             log.debug("Addic7edAPI: Response content: %s" % r.content)
             return None
-        log.debug("Addic7edAPI: Resting for 60 seconds to prevent errors")
-        time.sleep(60)
-        return r.content
+        log.debug("Addic7edAPI: Resting for 30 seconds to prevent a ban")
+        r.encoding = r.apparent_encoding
+        time.sleep(30)
+        return r.text
     
     def checkCurrentDownloads(self, logout=True):      
         self.login()
@@ -591,59 +594,57 @@ class Addic7edAPI():
     def geta7ID(self,TvdbShowName, localShowName):
         # Last resort: lookup official name and try to match with a7 show list
 
-        show_ids={}
-        html = self.get('/shows.php', login=False)
+        #html = self.get('/shows.php', login=False)
+        fp   = urllib.urlopen('http://www.addic7ed.com/shows.php')
+        html = fp.read()
+        fp.close()
         if not html:
+            log.debug('geta7ID: Could not get the show page form the addic7ed website')
             return None
-        show_ids = dict(url.split("\">") for url in re.findall(r'<a href=[\'"]/show/?([^<]+)', html))
+        #Put the showname's and Addic7ed's in a dict with the showname as key.
+        show_ids={}
+        AddicName = u''
+        for url in re.findall(r'<a href=[\'"]/show/?([^<]+)', html):
+            AddicId = url.split("\">")[0].decode('utf-8')
+            if AddicId.isdigit():
+                try:
+                    AddicName = url.split("\">")[1].decode('utf-8').replace('&amp;','&')
+                    show_ids[AddicName] = AddicId
+                except:
+                    pass
 
-        #----------------------------------------------------------------#
-        # changed the beautifull soup call to a simpel regex             #
-        # beautifull soup takes alsmost 20 seconds to process this page. #
-        #----------------------------------------------------------------#
+        # here we make a list of possible combinations of names and suffixes
+        SearchList = []
+        #First the Tvdb show name from the parameterlist 
+        SearchList.append(TvdbShowName)
 
-        #try:
-        #    soup = self.get('/shows.php', login=False)
-        #    for html_show in soup.select('td.version > h3 > a[href^="/show/"]'):
-        #        show_ids[html_show.string.lower()] = int(html_show['href'][6:]) 
-        #except:
-        #    log.error('geta7IDApi: failed to retrieve a7 show list')
-        #    return None
-        
-        
-        # First clip of year or US, UK from the name
-        show_regex = [re.compile('(.+)\s+\(?(\d{4})\)?', re.IGNORECASE),
-                      re.compile('(.+)\s+\(?(us)\)?', re.IGNORECASE),
-                      re.compile('(.+)\s+\(?(uk)\)?', re.IGNORECASE)]
+        # If there is a suffix add the combinations of suffixes e.g. with and without ()
+        SearchName, Suffix = _getShow(TvdbShowName)
+        if Suffix:
+            SearchList.append(SearchName)
+            if '(' + Suffix +')' in TvdbShowName:
+                SearchList.append(SearchName + ' ' + Suffix)
+            else:
+                SearchList.append(SearchName + '(' + Suffix + ')')
 
+        # If the local show name is different then we do the same for that name
+        if TvdbShowName != localShowName:
+            if localShowName not in SearchList:
+                SearchList.append(localShowName)
+            SearchName, Suffix = _getShow(localShowName)
+            if Suffix:
+                if SearchName not in SearchList:
+                    SearchList.append(SearchName)
+                if '(' + Suffix +')' in localShowName :
+                    SearchList.append(SearchName + ' ' + Suffix)
+                else:
+                    SearchList.append(SearchName + ' (' + Suffix + ')')
 
-        searchName_off, suffix_off = _getShow(TvdbShowName)
-        for Id, show in show_ids.iteritems():
-            # First try it with the official show name from TvDB
-            m = re.match('%s(.*)' % searchName_off, show, re.I)
-            if m:
-                # Get False-Positive UK titles out; assumes UK is always indicated
-                if not re.search('UK', suffix_off, re.I) and re.search('UK', m.group(1), re.I):
-                    continue
-                if len(searchName_off) < len(show):
-                    log.debug("geta7IDApi: Skipping %s because we found a just a partial match for %s" %(show,TvdbShowName))
-                    continue
-                a7_id = Id
-                log.debug("geta7IDApi: Addic7ed ID %s found using the official show name %s" %(a7_id, TvdbShowName))
-                return a7_id
-            # If the official show name is different try also the one from the episode file
-            if localShowName != TvdbShowName:
-                searchName_local, suffix_local = _getShow(localShowName)
-                n = re.match('%s(.*)' % searchName_local, show, re.I)
-                if n:
-                    # Get False-Positive UK titles out; assumes UK is always indicated
-                    if not re.search('UK', suffix_local, re.I) and re.search('UK', n.group(1), re.I):
-                        continue
-                    if len(searchName_local) < len(show):
-                        log.debug("geta7IDApi: Skipping %s because we found a just a partial match for %s" %(show,localShowName))
-                        continue
-                    a7_id = Id
-                    log.debug("geta7IDApi: Addic7ed ID %s found using filename show name %s" % (a7_id, localShowName))
-                    return a7_id
+        # Try all the combinations untill we find one
+        for Name in SearchList:
+            if Name in show_ids:
+                log.debug("geta7IDApi: Addic7ed ID %s found using filename show name %s" % (show_ids[Name], localShowName))
+                return show_ids[Name]
 
+        log.info('geta7ID: The show %s could not be found on the Addic7ed website.' % localShowName)
         return None

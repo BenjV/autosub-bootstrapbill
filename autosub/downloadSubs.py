@@ -1,4 +1,3 @@
-# Autosub downloadSubs.py - https://github.com/Donny87/autosub-bootstrapbill
 #
 # The Autosub downloadSubs module
 # Scrapers are used for websites:
@@ -9,7 +8,7 @@ import autosub
 import logging
 
 from bs4 import BeautifulSoup
-from zipfile import ZipFile
+import zipfile
 from StringIO import StringIO
 import re 
 from urlparse import urljoin
@@ -20,13 +19,16 @@ import tempfile
 import autosub
 
 from autosub.Db import lastDown
-from autosub.OpenSubtitles import TimeOut
 import autosub.notify as notify
 import autosub.Helpers
 
-import xml.etree.cElementTree as ET
+try:
+    import xml.etree.cElementTree as ET
+except:
+    import xml.etree.ElementTree as ET
 import library.requests as requests
-
+import library.requests.packages.chardet as chardet
+import xmlrpclib, io, gzip
 # Settings
 log = logging.getLogger('thelogger')
 
@@ -43,235 +45,154 @@ def getSoup(url):
 def unzip(url):
     # returns a file-like StringIO object    
     try:
-        api = autosub.Helpers.API(url)
-        tmpfile = StringIO(api.resp.read())
+        Session = requests.session()
+        Result = Session.get(url)
     except:
         log.debug("unzip: Zip file at %s couldn't be retrieved" % url)
-        return None     
-    try: 
-        zipfile = ZipFile(tmpfile)
-    except:
-        log.debug("unzip: Expected a zip file but got error for link %s" % url)
-        log.debug("unzip: %s is likely a dead link, this is known for opensubtitles.org" % url)
         return None
-
-    nameList = zipfile.namelist()
+    try: 
+       zip =  zipfile.ZipFile(io.BytesIO(Result.content))
+    except Exception as error:
+        log.debug("unzip: Expected a zip file but got error for link %s" % url)
+        log.debug("unzip: %s is likely a dead link" % url)
+        return None
+    nameList = zip.namelist()
     for name in nameList:
         # sometimes .nfo files are in the zip container
-        tmpname = name.lower()
-        if tmpname.endswith('srt'):
-            subtitleFile = StringIO(zipfile.open(name).read())
-            log.debug("unzip: Retrieving zip file for %s was succesful" % url )
-            return subtitleFile
-        else: 
-            log.debug("unzip: No subtitle files was found in the zip archive for %s" % url)
-            log.debug("unzip: Subtitle with different extention than .srt?")
-            return None  
+        if name.lower().endswith('srt'):
+            try:
+                Codec = chardet.detect(zip.read(name))['encoding']
+                fpr = io.TextIOWrapper(zip.open(name),encoding = Codec,newline='')
+                SubData = fpr.read()
+                fpr.close()
+                if SubData:
+                    return SubData
+            except Exception as error:
+                pass
+    log.debug("unzip: No subtitle files was found in the zip archive for %s" % url)
+    return None
+  
 
-def openSubtitles(DownloadPage):
+def openSubtitles(SubId, SubCodec):
 
-    log.debug("OpenSubtitles: DownloadPage: %s" % DownloadPage)
+    log.debug("OpenSubtitles: Download subtitle: %s" % SubId)
+    Result = autosub.OPENSUBTITLESSERVER.DownloadSubtitles(autosub.OPENSUBTITLESTOKEN, [SubId])
+
+    if Result['status'] == '200 OK':
+        compressed_data = Result['data'][0]['data'].decode('base64')
+    
+        SubDataBytes = gzip.GzipFile(fileobj=io.BytesIO(compressed_data)).read()
+        # Opensubtitles sees not difference in UTF-8 and UTF8-SIG so we check with chardet the correct encoding
+        if SubCodec == 'UTF-8':
+            SubCodec = chardet.detect(SubDataBytes)['encoding']
+        SubData = SubDataBytes.decode(SubCodec)
+        return(SubData)
+    else:
+        log.debug('OpenSubtitles: Download subtitle with ID: %s failed' %SubId)
+        return None
+
+
+
+def subseeker(subSeekerLink,website):
+
+    baselink = 'http://www.' + website 
+    Session = requests.session()
+    SubLinkPage = Session.get(subSeekerLink)
 
     try:
-        TimeOut()
-        RequestResult = autosub.OPENSUBTTITLESSESSION.get(DownloadPage, timeout=10)
-    except:
-        log.debug('openSubtitles: Could not connect to OpenSubtitles.')
+        SubLink = re.findall('Download : <a href="(.*?)"', SubLinkPage.text)[0]
+    except Exception as error:
+        log.error("subseeker: Failed to find the redirect link on SubtitleSeekers")        
         return None
-    if 'text/xml' not in RequestResult.headers['Content-Type']:
-        log.error('openSubtitles: OpenSubtitles responded with an error')
-        return None
+    Result= requests.get(SubLink)
+    Result.encoding = 'utf-8'
+    if website == 'podnapisi.net':
+        DownLoadLink = re.findall('form-inline download-form\" action=(.*?)>', Result.text)[0]
+        DownLoadLink = urljoin(baselink, DownLoadLink) if DownLoadLink else None
+    elif website =='subscene.com':
+        DownLoadLink = re.findall('<a href=\"/subtitle/download(.*?)\"', Result.text)[0]
+        DownLoadLink = urljoin(baselink + '/subtitle/download', DownLoadLink) if DownLoadLink else None
+    if not DownLoadLink:
+        log.error('downloadsubs: Could not find the downloadlink %s on %s' % (DownLoadLink, website))
     try:
-        root = ET.fromstring(RequestResult.content)
+        SubData = unzip(DownLoadLink)
+        return(SubData)
     except:
-        log.debug('openSubtitles: Serie with IMDB ID %s could not be found on OpenSubtitles.' %ImdbId)
-        return None
-    try:
-        DownloadId = root.find('.//SubBrowse/Subtitle/SubtitleFile/File').get('ID')
-    except:
-        log.debug('openSubtitles: Could not get the download link from OpenSubtitles')
-        return None
-    try:
-        DownloadUrl = autosub.OPENSUBTITLESDL + DownloadId
-        TimeOut()
-        RequestResult = autosub.OPENSUBTTITLESSESSION.get( DownloadUrl, timeout=10)
-    except:
-        log.debug('openSubtitles: Could not connect to Opensubtitles.org.')
-        return None
-    if RequestResult.headers['Content-Type'] == 'text/html':
-        log.error('openSubtitles: Expected srt file but got HTML; report this!')
-        log.debug("openSubtitles: Response content: %s" % r.content)
-        return None
-    return StringIO(RequestResult.content)
-
-def undertexter(subSeekerLink):
-    engSub = 'http://www.engsub.net/getsub.php?id='    
-    soup = getSoup(subSeekerLink)
-    if soup:
-        tag = soup.find('iframe', src=True)
-        link = tag['src'].strip('/')     
-    else:
-        log.error("Undertexter: Failed to extract download link using SubtitleSeekers's link")        
-        return None
-    try:
-        zipUrl = engSub + link.split('/')[3].encode('utf8')
-    except:
-        log.error("Undertexter: Something went wrong with parsing the downloadlink")        
-        return None
-    subtitleFile = unzip(zipUrl)
-    return subtitleFile
-
-def podnapisi(subSeekerLink):
-    baseLink = 'http://www.podnapisi.net/'
-    soup = getSoup(subSeekerLink)    
-    if soup:
-        linkToPodnapisi = soup.select('p > a[href]')[0]['href'].strip('/')
-    else:
-        log.error("Podnapisi: Failed to find the redirect link using SubtitleSeekers's link")        
-        return None
-    if baseLink in linkToPodnapisi:
-        soup = getSoup(linkToPodnapisi)
-    else:
-        log.error("Podnapisi: Failed to find the Podnapisi page.")
-        return None
-    if soup:
-        downloadLink = soup.find('form', class_='form-inline download-form').get('action')
-    else:
-        log.error("Podnapisi: Failed to find the download link on Podnapisi page")     
-        return None
-    zipUrl = urljoin(baseLink,downloadLink.encode('utf8'))
-    subtitleFile = unzip(zipUrl)
-    return subtitleFile
-
-def subscene(subSeekerLink):
-    baseLink = 'http://subscene.com/'
-    soup = getSoup(subSeekerLink)
-    if soup:
-        linkToSubscene = soup.select('p > a[href]')[0]['href'].strip('/')
-    else:
-        log.error("Subscene: Failed to find the redirect link using SubtitleSeekers's link")        
-        return None
-    if baseLink in linkToSubscene :
-        soup = getSoup(linkToSubscene)
-    else:
-        log.error("subscene: Failed to find the subscene page.")
-        return None
-    if soup:
-        downloadLink = soup.select('div.download > a[href]')[0]['href'].strip('/')
-    else:
-        log.error("Subscene: Failed to find the download link on Subscene.com")        
-        return None
-    zipUrl = urljoin(baseLink,downloadLink.encode('utf8'))
-    subtitleFile = unzip(zipUrl)
-    return subtitleFile               
-
-def addic7ed(url):
-    subtitleFile = autosub.ADDIC7EDAPI.download(url)
-    if subtitleFile:
-        autosub.DOWNLOADS_A7 += 1
-        log.debug("addic7ed: Your current Addic7ed download count is: %s" % autosub.DOWNLOADS_A7)
-        return StringIO(subtitleFile)
+        log.error('downloadsubs:Problem unzipping file %s from %s.' % (DownLoadLink,website))
     return None
 
-def DownloadSub(allResults, a7Response, downloadItem):    
+def addic7ed(url):
+    SubData = autosub.ADDIC7EDAPI.download(url)
+    if SubData:
+        autosub.DOWNLOADS_A7 += 1
+        log.debug("addic7ed: Your current Addic7ed download count is: %s" % autosub.DOWNLOADS_A7)
+        return SubData
+    return None
+
+def WriteSubFile(SubData,SubFileOnDisk):
+# this routine tries to download the sub and check if it is a correct sub
+# this is done by checking the first two line for the correct subtitles format
+    if SubData[0] == u'1':
+        StartPos = 3 if SubData[1] == u'\r' else 2
+        if re.match("\d{2}:\d{2}:\d{2},\d{3}\s*-->\s*\d{2}:\d{2}:\d{2},\d{3}",SubData[StartPos:StartPos + 29]):
+            try:
+                log.debug("downloadSubs: Saving the subtitle file %s to the filesystem." % SubFileOnDisk)
+                fp = io.open(SubFileOnDisk, 'wb')
+                fp.write(SubData.encode('utf-8'))
+                fp.close()
+                return True
+            except Exception as error:
+                pass
+        else:
+            log.debug('WriteSubFile: File is not a valid subtitle format. skipping it.')
+    return False  
+
+def DownloadSub(Wanted,SubList):    
     
     log.debug("downloadSubs: Starting DownloadSub function")    
-    
-    if not 'destinationFileLocationOnDisk' in downloadItem.keys():
-        log.error("downloadSub: No locationOnDisk found at downloadItem, skipping")
-        return False
-    
-    log.debug("downloadSubs: Download dict seems OK. Dumping it for debug: %r" % downloadItem) 
-    destsrt = downloadItem['destinationFileLocationOnDisk']
+   
+    log.debug("downloadSubs: Download dict seems OK. Dumping it for debug: %r" % Wanted) 
+    destsrt = Wanted['destinationFileLocationOnDisk']
     destdir = os.path.split(destsrt)[0]
     if not os.path.exists(destdir):
         log.debug("checkSubs: no destination directory %s" %destdir)
         return False
-    elif not os.path.lexists(destdir):
+    elif not os.path.exists(destdir):
         log.debug("checkSubs: no destination directory %s" %destdir)
         return False        
-    
-    HIfallback = {}
-    fileStringIO = None
-        
-    for result in allResults:   
-        url = result['url']
-        release = result['releasename']
-        website = result['website']             
-       
-        log.debug("downloadSubs: Trying to download subtitle from %s using this link %s" % (website,url))      
 
-        if website == 'undertexter.se':
-            log.debug("downloadSubs: Scraper for Undertexter.se is chosen for subtitle %s" % destsrt)
-            fileStringIO = undertexter(url) 
-        elif website == 'subscene.com':    
-            log.debug("downloadSubs: Scraper for Subscene.com is chosen for subtitle %s" % destsrt)
-            fileStringIO = subscene(url)
-        elif website == 'podnapisi.net':
-            log.debug("downloadSubs: Scraper for Podnapisi.net is chosen for subtitle %s" % destsrt)
-            fileStringIO = podnapisi(url)
-        elif website == 'opensubtitles.org':
-            log.debug("downloadSubs: Scraper for opensubtitles.org is chosen for subtitle %s" % destsrt)
-            fileStringIO = openSubtitles(url)
-            time.sleep(6)
-        elif website == 'addic7ed.com' and a7Response:
+    SubData = None
+    Downloaded = False 
+    for Sub in SubList:   
+        log.debug("downloadSubs: Trying to download subtitle from %s using this link %s" % (Sub['website'],Sub['url']))      
+
+        if Sub['website'] == 'opensubtitles.org':
+            log.debug("downloadSubs: Api for opensubtitles.org is chosen for subtitle %s" % destsrt)
+            SubData = openSubtitles(Sub['url'],Sub['SubCodec'])
+        elif Sub['website'] == 'addic7ed.com':
             log.debug("downloadSubs: Scraper for Addic7ed.com is chosen for subtitle %s" % destsrt)
-            if result['HI']:
-                if not HIfallback:
-                    log.debug("downloadSubs: Addic7ed HI version: store as fallback")
-                    HIfallback = result            
-                continue
-            fileStringIO = addic7ed(url)   
+            SubData = autosub.ADDIC7EDAPI.download(Sub['url'])
         else:
-            log.error("downloadSubs: %s is not recognized. Something went wrong!" % website)
+            log.debug("downloadSubs: Scraper for %s is chosen for subtitle %s" % (Sub['website'],destsrt))
+            SubData = subseeker(Sub['url'],Sub['website'])
+        if SubData:
+            if WriteSubFile(SubData,destsrt):
+                Downloaded = True           
+                break
+    if Downloaded:
+        log.info("downloadSubs: Subtitle %s is downloaded from %s" % (Sub['releaseName'],Sub['website']))
+    else:
+        log.error("downloadSubs: Could not download any correct subtitle file for %s" % Wanted['releaseName'])
+        return False   
+    Wanted['subtitle'] = "%s downloaded from %s" % (Sub['releaseName'],Sub['website'])
+    Wanted['timestamp'] = time.strftime('%Y-%m-%d %H:%M:%S',time.gmtime(os.path.getmtime(destsrt)))
 
-        if fileStringIO:
-            log.debug("downloadSubs: Subtitle is downloading from %s" % website)      
-            break
-   
-        log.debug("downloadSubs: Trying to download another subtitle for this episode")
-    
-    
-    if not fileStringIO:
-        if HIfallback:
-            log.debug("downloadSubs: Downloading HI subtitle as fallback")
-            fileStringIO = addic7ed(url)
-            release = HIfallback['releasename']
-            website = HIfallback['website']
-        else: return False
-    if not fileStringIO: 
-        log.debug("downloadSubs: No suitable subtitle was found")
-        return False
-    
-    #Lets first download the subtitle to a tempfile and then write it to the destination
-    tmpfile = tempfile.TemporaryFile('w+b')
-        
-    try:
-        tmpfile.write(fileStringIO.getvalue())
-        tmpfile.write('\n') #If subtitle has some footer which doesn't have a line feed >.>
-        tmpfile.seek(0) #Return to the start of the file
-    except:
-        log.error("downloadSubs: Error while downloading subtitle %s. Subtitle might be corrupt %s." % (destsrt, website))
+    lastDown().setlastDown(dict = Wanted)
+    # Send notification 
 
-    try:
-        log.debug("downloadSubs: Trying to save the subtitle to the filesystem")
-        open(destsrt, 'wb').write(tmpfile.read())
-        tmpfile.close()
-    except IOError:
-        log.error("downloadSubs: Could not write subtitle file. Permission denied? Enough diskspace?")
-        tmpfile.close()
-        return False
-        
-    log.info("downloadSubs: DOWNLOADED: %s" % destsrt)
-        
-    downloadItem['subtitle'] = "%s downloaded from %s" % (release,website)
-    downloadItem['timestamp'] = time.strftime('%Y-%m-%d %H:%M:%S')
-    
-    lastDown().setlastDown(dict = downloadItem)
-    # Send notification        
-    notify.notify(downloadItem['downlang'], destsrt, downloadItem["originalFileLocationOnDisk"], website)
+    notify.notify(Wanted['downlang'], destsrt, Wanted["originalFileLocationOnDisk"], Sub['website'])
     if autosub.POSTPROCESSCMD:
-        postprocesscmdconstructed = autosub.POSTPROCESSCMD + ' "' + downloadItem["destinationFileLocationOnDisk"] + '" "' + downloadItem["originalFileLocationOnDisk"] + '" "' + downloadItem["downlang"] + '" "' + downloadItem["title"] + '" "' + downloadItem["season"] + '" "' + downloadItem["episode"] + '" '
+        postprocesscmdconstructed = autosub.POSTPROCESSCMD + ' "' + Wanted["dstFileOnDisk"] + '" "' + Wanted["originalFileLocationOnDisk"] + '" "' + Wanted["downlang"] + '" "' + Wanted["season"] + '" "' + Wanted["episode"] + '" '
         log.debug("downloadSubs: Postprocess: running %s" % postprocesscmdconstructed)
         log.info("downloadSubs: Running PostProcess")
         postprocessoutput, postprocesserr = autosub.Helpers.RunCmd(postprocesscmdconstructed)
@@ -280,5 +201,5 @@ def DownloadSub(allResults, a7Response, downloadItem):
             log.error("downloadSubs: PostProcess: %s" % postprocesserr)
             #log.debug("downloadSubs: PostProcess Output:% s" % postprocessoutput)
     
-    log.debug('downloadSubs: Finished for %s' % downloadItem["originalFileLocationOnDisk"])
+    log.debug('downloadSubs: Finished for %s' % Wanted["originalFileLocationOnDisk"])
     return True

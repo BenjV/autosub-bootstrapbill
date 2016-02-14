@@ -15,7 +15,6 @@ from ast import literal_eval
 
 from library import version
 from autosub.version import autosubversion
-from autosub.OpenSubtitles import GetOpensubtitlesId
 import autosub
 import Tvdb
 
@@ -302,7 +301,7 @@ def checkAPICallsTvdb(use=False):
     else:
         return False
 
-def getShowid(ShowName, UseAddic, UseOs):
+def getShowid(ShowName, UseAddic):
     AddicId = ImdbId = OsId = AddicIdMapping = ImdbNameMappingId = None
     UpdateCache = False
     log.debug('getShowid: Trying to get IMDB, Addic7ed and OpenSubtitles ID for %s' %ShowName)
@@ -323,10 +322,12 @@ def getShowid(ShowName, UseAddic, UseOs):
         log.debug('getShowid: Trying TvdbID to find info')
         ImdbId, TvdbShowName = Tvdb.getShowidApi(ShowName)
         if ImdbId:
-            UpdateCache = True
+            AddicId,CacheName = idCache().getInfo(ImdbId)
+            if not CacheName:
+                UpdateCache = True
         else:
-            log.debug('getShowid: No ImdbId found for this show.')
-            return None, None, None
+            log.debug('getShowid: No ImdbId found on Tvdb for %s.' % ShowName)
+            return None, None
 
     if UseAddic:
         # check the namemapping
@@ -336,7 +337,7 @@ def getShowid(ShowName, UseAddic, UseOs):
             log.debug('getShowid: Addic7ed ID found in Namemapping: %s' %AddicId)
         else:
             if not AddicId:
-                #Try to find the Addice7ed Id on the show page of the Addic7ed website           AddicId = Addic7edAPI().geta7ID(TvdbShowName, ShowName)
+                #Try to find the Addice7ed Id on the show page of the Addic7ed website
                 AddicId = Addic7edAPI().geta7ID(TvdbShowName, ShowName)
                 if AddicId:
                     log.debug('getShowid: Addic7ed ID found on Website: %s' %AddicId)
@@ -344,16 +345,11 @@ def getShowid(ShowName, UseAddic, UseOs):
                 else:
                     log.debug('getShowid: Addic7ed ID not found.')
 
-    if UseOs and not OsId:
-        #Try to find the OpenSubtitles ID on the OpenSubtitles website
-        OsId = GetOpensubtitlesId(ImdbId,TvdbShowName)
-        if OsId:
-            UpdateCache = True
 
     if UpdateCache:
         idCache().setId(ImdbId, AddicId, OsId, TvdbShowName)
     log.debug("getShowid: Returned ID's - IMDB: %s, Addic7ed: %s, OpenSubtitles: %s" %(ImdbId,AddicId,OsId))
-    return ImdbId, AddicId, OsId
+    return ImdbId, AddicId
 
 
 def DisplayLogFile(loglevel):

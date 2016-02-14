@@ -165,7 +165,7 @@ def ReadConfig(configfile):
             autosub.OPENSUBTITLESLANG = cfg.get("config", "opensubtitleslang")
         else:
             autosub.OPENSUBTITLESLANG = u"Both"
-        autosub.OPENSUBTITLESLANG = 'None'
+
         if cfg.has_option("config", "opensubtitlesuser"):
             autosub.OPENSUBTITLESUSER = cfg.get("config", "opensubtitlesuser")
         else:

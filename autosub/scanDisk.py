@@ -143,6 +143,7 @@ def walkDir(path):
                             filenameResults['originalFileLocationOnDisk'] = os.path.join(dirname, filename)
                             filenameResults['timestamp'] = unicode(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(os.path.getctime(filenameResults['originalFileLocationOnDisk']))))
                             filenameResults['lang'] = lang
+                            filenameResults['container'] = ext
                             autosub.WANTEDQUEUE.append(filenameResults)
 
                         else:

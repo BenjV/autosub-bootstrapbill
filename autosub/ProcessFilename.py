@@ -1,4 +1,3 @@
-# Autosub ProcessFilename.py - https://code.google.com/p/autosub-bootstrapbill/
 #
 # The Autosub ProcessFilename module
 #

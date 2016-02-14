@@ -21,6 +21,7 @@ def dict_factory(cursor, row):
 class idCache():
     def __init__(self):
         self.query_getId    = "SELECT imdb_id, a7_id, os_id FROM show_id_cache WHERE show_name = ?"
+        self.query_getInfo  = "SELECT a7_id, show_name FROM show_id_cache WHERE imdb_id = ?"
         self.query_checkId  = "SELECT * FROM show_id_cache WHERE imdb_id = ?"
         self.query_updateId = "UPDATE show_id_cache SET  a7_id = ?, os_id = ? WHERE imdb_id = ?"
         self.query_setId    = "INSERT INTO show_id_cache VALUES (?,?,?,?)"
@@ -36,6 +37,17 @@ class idCache():
         except Exception as error:
             log.error('getId: Database error: %s' % error)
             return None, None, None
+
+    def getInfo(self, ImdbId):
+        try:
+            Result = self.cursor.execute(self.query_getInfo, [ImdbId]).fetchone()
+            if Result:
+                return Result[0],Result[1]
+            else:
+                return None, None
+        except Exception as error:
+            log.error('getInfo: Database error: %s' % error)
+            return None, None
 
     def setId(self, ImdbId, AddicId, OsId, ShowName):
         try:
