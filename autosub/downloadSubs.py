@@ -182,7 +182,7 @@ def DownloadSub(Wanted,SubList):
     if Downloaded:
         log.info("downloadSubs: Subtitle %s is downloaded from %s" % (Sub['releaseName'],Sub['website']))
     else:
-        log.error("downloadSubs: Could not download any correct subtitle file for %s" % Wanted['releaseName'])
+        log.error("downloadSubs: Could not download any correct subtitle file for %s" % Wanted['originalFileLocationOnDisk'])
         return False   
     Wanted['subtitle'] = "%s downloaded from %s" % (Sub['releaseName'],Sub['website'])
     Wanted['timestamp'] = time.strftime('%Y-%m-%d %H:%M:%S',time.gmtime(os.path.getmtime(destsrt)))
