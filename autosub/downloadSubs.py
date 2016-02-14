@@ -192,7 +192,7 @@ def DownloadSub(Wanted,SubList):
 
     notify.notify(Wanted['downlang'], destsrt, Wanted["originalFileLocationOnDisk"], Sub['website'])
     if autosub.POSTPROCESSCMD:
-        postprocesscmdconstructed = autosub.POSTPROCESSCMD + ' "' + destsrt + '" "' + Wanted["originalFileLocationOnDisk"] + '" "' + Wanted["downlang"] + '" "' + Wanted["season"] + '" "' + Wanted["episode"] + '" '
+        postprocesscmdconstructed = autosub.POSTPROCESSCMD + ' "' + Wanted['destinationFileLocationOnDisk'] + '" "' + Wanted["originalFileLocationOnDisk"] + '" "' + Wanted["downlang"] + '" "' + downloadItem["title"] + '" "' + Wanted["season"] + '" "' + Wanted["episode"] + '" '
         log.debug("downloadSubs: Postprocess: running %s" % postprocesscmdconstructed)
         log.info("downloadSubs: Running PostProcess")
         postprocessoutput, postprocesserr = autosub.Helpers.RunCmd(postprocesscmdconstructed)
