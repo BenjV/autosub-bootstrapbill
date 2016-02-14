@@ -38,6 +38,9 @@ def SubtitleSeeker(ImdbId, lang, Wanted, sourceWebsites):
         log.error("API: out of api calls for SubtitleSeeker.com")
         return
     scoreList = []
+    if int(Result['results']['total_matches']) == 0:
+        return
+
     for Item in Result['results']['items']:
         if (Item['site'].lower() == u'podnapisi.net' and (autosub.PODNAPISILANG == lang or autosub.PODNAPISILANG == 'Both')) or \
            (Item['site'].lower() == u'subscene.com' and (autosub.SUBSCENELANG == lang or  autosub.SUBSCENELANG == 'Both')):
