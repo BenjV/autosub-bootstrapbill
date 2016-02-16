@@ -122,7 +122,7 @@ def _returnSceneNumber(number):
 
 def ProcessFilename(filename, fileext):
     show_info = _returnGroup(show_regex, filename)
-    log.debug("ProcessFileName: Dumping show_info dict for debug %r" %show_info)
+    log.debug("ProcessFileName: Dumping info %r" %show_info)
     title = None
     season = None
     episode = None
@@ -154,6 +154,7 @@ def ProcessFilename(filename, fileext):
         show_dict['quality'] = quality
         show_dict['codec'] = codec
         show_dict['releasegrp'] = releasegrp
+        show_dict['container'] = fileext[1:]
         log.debug("ProcessFileName: Dumping dict for debug %r" %show_dict)
         return show_dict
     else: 

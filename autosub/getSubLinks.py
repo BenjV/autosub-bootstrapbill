@@ -5,7 +5,7 @@
 #
 
 import logging
-
+import time
 from xml.dom import minidom
 try:
     import xml.etree.cElementTree as ET
@@ -68,7 +68,7 @@ def Addic7ed(a7ID , language, releaseDetails):
     else:
         langs = '|17|'
     SearchUrl = '/ajax_loadShow.php?show=' + a7ID + '&season=' +season.lstrip('0') + '&langs=' + langs + '&hd=0&hi=0'
-    log.info('getSubLinks: Addic7ed search request URL: %s' % u'http://www.addic7ed.com' + SearchUrl)
+    log.info('getSubLinks: Addic7ed search URL: %s' % u'http://www.addic7ed.com' + SearchUrl)
 
     Result = autosub.ADDIC7EDAPI.get(SearchUrl)
     if Result:
@@ -118,6 +118,8 @@ def Addic7ed(a7ID , language, releaseDetails):
 
 
 def Opensubtitles(ImdbId, language, Wanted):
+    if not Wanted:
+        return None
     Data = {}
     if 'English' in language:
         Data['sublanguageid'] = 'eng'
@@ -126,7 +128,12 @@ def Opensubtitles(ImdbId, language, Wanted):
     Data['imdbid' ] = ImdbId
     Data['season']  = Wanted['season']
     Data['episode'] = Wanted['episode']
-    Subs = autosub.OPENSUBTITLESSERVER.SearchSubtitles(autosub.OPENSUBTITLESTOKEN, [Data])
+    time.sleep(6)
+    try:
+        Subs = autosub.OPENSUBTITLESSERVER.SearchSubtitles(autosub.OPENSUBTITLESTOKEN, [Data])
+    except:
+        log.debug('Opensubtitles: Error from Opensubtitles search API')
+        return None
 
     if Subs['status'] != '200 OK':
         log.info('Opensubtitles: No subs found for %s on Opensubtitles.' % Wanted['releaseName'])
@@ -178,7 +185,7 @@ def getSubLinks(ImdbId, a7_id, lang, releaseDetails):
         scoreListAddic7ed = Addic7ed(a7_id, lang, releaseDetails)
 
     # Use OpenSubtitles if selected
-    if (autosub.OPENSUBTITLESLANG == lang or autosub.OPENSUBTITLESLANG == 'Both'):
+    if (autosub.OPENSUBTITLESLANG == lang or autosub.OPENSUBTITLESLANG == 'Both') and autosub.OPENSUBTITLESTOKEN:
         scoreListOpensubtitles = Opensubtitles(ImdbId, lang, releaseDetails)
 
     for list in [scoreListSubSeeker, scoreListAddic7ed, scoreListOpensubtitles]:

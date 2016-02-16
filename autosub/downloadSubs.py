@@ -76,14 +76,19 @@ def unzip(url):
 def openSubtitles(SubId, SubCodec):
 
     log.debug("OpenSubtitles: Download subtitle: %s" % SubId)
-    Result = autosub.OPENSUBTITLESSERVER.DownloadSubtitles(autosub.OPENSUBTITLESTOKEN, [SubId])
+    time.sleep(6)
+    try:
+        Result = autosub.OPENSUBTITLESSERVER.DownloadSubtitles(autosub.OPENSUBTITLESTOKEN, [SubId])
+    except:
+        log.debug('Opensubtitles: error from Opensubtitles API')
+        return None
 
     if Result['status'] == '200 OK':
         compressed_data = Result['data'][0]['data'].decode('base64')
     
         SubDataBytes = gzip.GzipFile(fileobj=io.BytesIO(compressed_data)).read()
         # Opensubtitles sees not difference in UTF-8 and UTF8-SIG so we check with chardet the correct encoding
-        if SubCodec == 'UTF-8':
+        if SubCodec == 'UTF-8' or not SubCodec:
             SubCodec = chardet.detect(SubDataBytes)['encoding']
         SubData = SubDataBytes.decode(SubCodec)
         return(SubData)
@@ -104,22 +109,36 @@ def subseeker(subSeekerLink,website):
     except Exception as error:
         log.error("subseeker: Failed to find the redirect link on SubtitleSeekers")        
         return None
-    Result= requests.get(SubLink)
+    Result= requests.get(SubLink) 
+    if Result.status_code > 399 or not Result.text:
+        return False
     Result.encoding = 'utf-8'
-    if website == 'podnapisi.net':
-        DownLoadLink = re.findall('form-inline download-form\" action=(.*?)>', Result.text)[0]
-        DownLoadLink = urljoin(baselink, DownLoadLink) if DownLoadLink else None
-    elif website =='subscene.com':
-        DownLoadLink = re.findall('<a href=\"/subtitle/download(.*?)\"', Result.text)[0]
-        DownLoadLink = urljoin(baselink + '/subtitle/download', DownLoadLink) if DownLoadLink else None
-    if not DownLoadLink:
-        log.error('downloadsubs: Could not find the downloadlink %s on %s' % (DownLoadLink, website))
     try:
-        SubData = unzip(DownLoadLink)
-        return(SubData)
+        if website == 'podnapisi.net':
+            try:
+                DownLoadLink = re.findall('form-inline download-form\" action=(.*?)>', Result.text)[0]
+            except:
+                log.error("subseeker: Could not find the subseeker link on the podnapisi website.") 
+                return None
+            DownLoadLink = urljoin(baselink, DownLoadLink) if DownLoadLink else None
+        elif website =='subscene.com':
+            try:
+                DownLoadLink = re.findall('<a href=\"/subtitle/download(.*?)\"', Result.text)[0]
+            except:
+                log.error("subseeker: Could not find the subseeker link on the subscene website.") 
+                return None
+            DownLoadLink = urljoin(baselink + '/subtitle/download', DownLoadLink) if DownLoadLink else None
+        if not DownLoadLink:
+            log.error('downloadsubs: Could not find the downloadlink %s on %s' % (DownLoadLink, website))
+        try:
+            SubData = unzip(DownLoadLink)
+            return(SubData)
+        except:
+            log.error('downloadsubs:Problem unzipping file %s from %s.' % (DownLoadLink,website))
+        return None
     except:
-        log.error('downloadsubs:Problem unzipping file %s from %s.' % (DownLoadLink,website))
-    return None
+        log.error('downloadsubs:Problem downloading file %s from %s.' % (DownLoadLink,website))
+        return None
 
 def addic7ed(url):
     SubData = autosub.ADDIC7EDAPI.download(url)

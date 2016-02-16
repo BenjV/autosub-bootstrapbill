@@ -45,9 +45,9 @@ def walkDir(path):
 
         for filename in filenames:
             splitname = filename.split(".")
-            ext = splitname[len(splitname) - 1]
+            ext = os.path.splitext(filename)[1]
 
-            if ext in ('avi', 'mkv', 'wmv', 'ts', 'mp4'):
+            if ext[1:] in ('avi', 'mkv', 'wmv', 'ts', 'mp4'):
                 if re.search('sample', filename): continue
                 
                 if autosub.WEBDL == 'None':
@@ -121,7 +121,7 @@ def walkDir(path):
                     continue
 
                 log.debug("scanDir: File %s is missing subtitle(s): %s" % (filename, ', '.join(map(str,lang))))
-                filenameResults = ProcessFilename(os.path.splitext(filename)[0], os.path.splitext(filename)[1])
+                filenameResults = ProcessFilename(os.path.splitext(filename)[0], ext)
                 if 'title' in filenameResults.keys():
                     if 'season' in filenameResults.keys():
                         if 'episode' in filenameResults.keys():
@@ -143,7 +143,6 @@ def walkDir(path):
                             filenameResults['originalFileLocationOnDisk'] = os.path.join(dirname, filename)
                             filenameResults['timestamp'] = unicode(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(os.path.getctime(filenameResults['originalFileLocationOnDisk']))))
                             filenameResults['lang'] = lang
-                            filenameResults['container'] = ext
                             autosub.WANTEDQUEUE.append(filenameResults)
 
                         else:
