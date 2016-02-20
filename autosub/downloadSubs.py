@@ -85,12 +85,15 @@ def openSubtitles(SubId, SubCodec):
 
     if Result['status'] == '200 OK':
         compressed_data = Result['data'][0]['data'].decode('base64')
-    
+        if not compressed_data:
+            log.debug('DownloadSub: No data returned from DownloadSubtitles API call. Skipping this one.')
+            return None
         SubDataBytes = gzip.GzipFile(fileobj=io.BytesIO(compressed_data)).read()
         # Opensubtitles sees not difference in UTF-8 and UTF8-SIG so we check with chardet the correct encoding
         if SubCodec == 'UTF-8' or not SubCodec:
             SubCodec = chardet.detect(SubDataBytes)['encoding']
-        SubData = SubDataBytes.decode(SubCodec)
+        if SubCodec:
+            SubData = SubDataBytes.decode(SubCodec)
         return(SubData)
     else:
         log.debug('OpenSubtitles: Download subtitle with ID: %s failed' %SubId)
@@ -161,6 +164,7 @@ def WriteSubFile(SubData,SubFileOnDisk):
                 fp.close()
                 return True
             except Exception as error:
+                log.error('WriteSubFile: Problem writing subfile. Message is: %s' %error)
                 pass
         else:
             log.debug('WriteSubFile: File is not a valid subtitle format. skipping it.')
