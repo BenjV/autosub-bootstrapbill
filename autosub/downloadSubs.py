@@ -77,6 +77,18 @@ def openSubtitles(SubId, SubCodec):
 
     log.debug("OpenSubtitles: Download subtitle: %s" % SubId)
     time.sleep(6)
+    if time.time() - autosub.OPENSUBTITLESTIME > 840:
+        try:
+            Result = autosub.OPENSUBTITLESSERVER.NoOperation(autosub.OPENSUBTITLESTOKEN)
+            if Result['status'] != '200 OK':
+                log.debug('Opensubtitles: Error from Opensubtitles NoOp API. Message : %s' % Result['status'])
+                autosub.OPENSUBTITLESTOKEN = None
+            else:
+                autosub.OPENSUBTITLESTIME = time.time()
+        except:
+            autosub.OPENSUBTITLESTOKEN = None
+            log.debug('Opensubtitles: Error from Opensubtitles NoOp API')
+            return None
     try:
         Result = autosub.OPENSUBTITLESSERVER.DownloadSubtitles(autosub.OPENSUBTITLESTOKEN, [SubId])
     except:
@@ -96,7 +108,7 @@ def openSubtitles(SubId, SubCodec):
             SubData = SubDataBytes.decode(SubCodec)
         return(SubData)
     else:
-        log.debug('OpenSubtitles: Download subtitle with ID: %s failed' %SubId)
+        log.debug('Opensubtitles: Error from Opensubtitles downloadsubs API. Message : %s' % Result['status'])
         return None
 
 

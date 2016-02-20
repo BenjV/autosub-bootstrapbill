@@ -129,6 +129,16 @@ def Opensubtitles(ImdbId, language, Wanted):
     Data['season']  = Wanted['season']
     Data['episode'] = Wanted['episode']
     time.sleep(6)
+    if time.time() - autosub.OPENSUBTITLESTIME > 840:
+        try:
+            Result = autosub.OPENSUBTITLESSERVER.NoOperation(autosub.OPENSUBTITLESTOKEN)
+            if Result['status'] != '200 OK':
+                autosub.OPENSUBTITLESTOKEN = None
+            else:
+                autosub.OPENSUBTITLESTIME = time.time()
+        except:
+            log.debug('Opensubtitles: Error from Opensubtitles NoOp API')
+            autosub.OPENSUBTITLESTOKEN = None
     try:
         Subs = autosub.OPENSUBTITLESSERVER.SearchSubtitles(autosub.OPENSUBTITLESTOKEN, [Data])
     except:

@@ -2,6 +2,7 @@
 import autosub
 import xmlrpclib
 import logging
+import time
 
 log = logging.getLogger('thelogger')
 
@@ -19,6 +20,7 @@ def OpenSubtitlesLogin(opensubtitlesusername=None,opensubtitlespasswd=None):
             return False
         log.info('OpenSubtitlesLogin: Test Login with User %s. Result is: %s' %  (opensubtitlesusername,Result['status']))
         if Result['status'] == '200 OK':
+            autosub.OPENSUBTITLESTIME = time.time()
             autosub.OPENSUBTITLESTOKEN = Result['token']
             return True
         else:
@@ -37,7 +39,6 @@ def OpenSubtitlesLogin(opensubtitlesusername=None,opensubtitlespasswd=None):
             log.info('OpenSubtitlesLogin: Login with User %s. Message is: %s' %  (autosub.OPENSUBTITLESUSER, Result['status']))
             if Result['status'] == '200 OK':
                 autosub.OPENSUBTITLESTOKEN = Result['token']
-                return True
             else:            
                 autosub.OPENSUBTITLESTOKEN = None
                 return False
