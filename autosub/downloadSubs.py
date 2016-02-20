@@ -119,7 +119,12 @@ def subseeker(subSeekerLink,website):
     except Exception as error:
         log.error("subseeker: Failed to find the redirect link on SubtitleSeekers")        
         return None
-    Result= requests.get(SubLink) 
+    try:
+        Result= requests.get(SubLink)
+    except:
+        log.debug('subseeker: Link from SubtitleSeeker not found, maybe outdated. Link is: %s' % subSeekerLink)
+        return None
+
     if Result.status_code > 399 or not Result.text:
         return False
     Result.encoding = 'utf-8'
@@ -215,7 +220,7 @@ def DownloadSub(Wanted,SubList):
         log.error("downloadSubs: Could not download any correct subtitle file for %s" % Wanted['originalFileLocationOnDisk'])
         return False   
     Wanted['subtitle'] = "%s downloaded from %s" % (Sub['releaseName'],Sub['website'])
-    Wanted['timestamp'] = time.strftime('%Y-%m-%d %H:%M:%S',time.gmtime(os.path.getmtime(destsrt)))
+    Wanted['timestamp'] = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(os.path.getmtime(destsrt)))
 
     lastDown().setlastDown(dict = Wanted)
     # Send notification 
