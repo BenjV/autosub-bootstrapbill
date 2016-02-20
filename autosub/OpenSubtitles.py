@@ -38,6 +38,7 @@ def OpenSubtitlesLogin(opensubtitlesusername=None,opensubtitlespasswd=None):
                 return False
             log.info('OpenSubtitlesLogin: Login with User %s. Message is: %s' %  (autosub.OPENSUBTITLESUSER, Result['status']))
             if Result['status'] == '200 OK':
+                autosub.OPENSUBTITLESTIME = time.time()
                 autosub.OPENSUBTITLESTOKEN = Result['token']
             else:            
                 autosub.OPENSUBTITLESTOKEN = None
@@ -47,20 +48,42 @@ def OpenSubtitlesLogin(opensubtitlesusername=None,opensubtitlespasswd=None):
             return True
 
 def OpenSubtitlesLogout():
-    if autosub.OPENSUBTITLESTOKEN:
-        
+    if autosub.OPENSUBTITLESTOKEN:  
         try:
-            Result = autosub.OPENSUBTITLESSERVER.LogOut(autosub.OPENSUBTITLESTOKEN)['status']
+            Result = autosub.OPENSUBTITLESSERVER.LogOut(autosub.OPENSUBTITLESTOKEN)
         except:
             autosub.OPENSUBTITLESTOKEN = None
-            log.info('OpenSubtitles: Logout with User %s failed.')
+            log.info('OpenSubtitles: Logout with User %s failed. Probably a lost connection' % autosub.OPENSUBTITLESUSER)
             return False
-        if Result == '200 OK':
+        if Result['status'] == '200 OK':
             autosub.OPENSUBTITLESTOKEN = None
             log.info('OpenSubtitlesLogout: User: %s logged out.', autosub.OPENSUBTITLESUSER)
             return True
         else:
-            log.info('OpenSubtitles: Logout with User %s failed. Message is: %s' %  (autosub.OPENSUBTITLESUSER, Result))
+            log.info('OpenSubtitles: Logout with User %s failed. Message is: %s' %  (autosub.OPENSUBTITLESUSER, Result['status']))
             return False
 
 
+def OpenSubtitlesNoOp():
+    if time.time() - autosub.OPENSUBTITLESTIME > 840:
+        try:
+            Result = autosub.OPENSUBTITLESSERVER.NoOperation(autosub.OPENSUBTITLESTOKEN)
+            if Result['status'] != '200 OK':
+                log.debug('Opensubtitles: Error from Opensubtitles NoOp API. Message: %s' % Result['status'] )
+                if OpenSubtitlesLogin():
+                    log.info('Opensubtitles: Re-established connection')
+                else:
+                    log.info('Opensubtitles: Could not Re-established connection. ')
+                    autosub.OPENSUBTITLESTOKEN = None
+                    return False
+            else:
+                autosub.OPENSUBTITLESTIME = time.time()
+        except:
+            log.debug('Opensubtitles: Error from Opensubtitles NoOp API. Maybe a lost connection. Trying to login again')
+            if OpenSubtitlesLogin():
+                log.info('Opensubtitles: Re-established connection')
+            else:
+                log.info('Opensubtitles: Could not Re-established connection. ')
+                autosub.OPENSUBTITLESTOKEN = None
+                return False
+    return True

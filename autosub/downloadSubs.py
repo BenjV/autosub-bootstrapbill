@@ -6,7 +6,7 @@
 #
 import autosub
 import logging
-
+from autosub.OpenSubtitles import OpenSubtitlesNoOp
 from bs4 import BeautifulSoup
 import zipfile
 from StringIO import StringIO
@@ -77,23 +77,14 @@ def openSubtitles(SubId, SubCodec):
 
     log.debug("OpenSubtitles: Download subtitle: %s" % SubId)
     time.sleep(6)
-    if time.time() - autosub.OPENSUBTITLESTIME > 840:
-        try:
-            Result = autosub.OPENSUBTITLESSERVER.NoOperation(autosub.OPENSUBTITLESTOKEN)
-            if Result['status'] != '200 OK':
-                log.debug('Opensubtitles: Error from Opensubtitles NoOp API. Message : %s' % Result['status'])
-                autosub.OPENSUBTITLESTOKEN = None
-            else:
-                autosub.OPENSUBTITLESTIME = time.time()
-        except:
-            autosub.OPENSUBTITLESTOKEN = None
-            log.debug('Opensubtitles: Error from Opensubtitles NoOp API')
-            return None
+    if not OpenSubtitlesNoOp():
+        return None
     try:
         Result = autosub.OPENSUBTITLESSERVER.DownloadSubtitles(autosub.OPENSUBTITLESTOKEN, [SubId])
     except:
-        log.debug('Opensubtitles: error from Opensubtitles API')
-        return None
+        autosub.OPENSUBTITLESTOKEN = None
+        log.error('Opensubtitles: Error from Opensubtitles download API')
+        return   
 
     if Result['status'] == '200 OK':
         compressed_data = Result['data'][0]['data'].decode('base64')
@@ -101,8 +92,9 @@ def openSubtitles(SubId, SubCodec):
             log.debug('DownloadSub: No data returned from DownloadSubtitles API call. Skipping this one.')
             return None
         SubDataBytes = gzip.GzipFile(fileobj=io.BytesIO(compressed_data)).read()
-        # Opensubtitles sees not difference in UTF-8 and UTF8-SIG so we check with chardet the correct encoding
-        if SubCodec == 'UTF-8' or not SubCodec:
+        # Opensubtitles makes no difference in UTF-8 and UTF8-SIG so we check with chardet the correct encoding
+        # also if Opensubtile does not know the encoding
+        if SubCodec == 'UTF-8' or SubCodec == 'Unknown' or not SubCodec:
             SubCodec = chardet.detect(SubDataBytes)['encoding']
         if SubCodec:
             SubData = SubDataBytes.decode(SubCodec)

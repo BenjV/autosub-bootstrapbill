@@ -16,6 +16,7 @@ from operator import itemgetter
 from bs4 import BeautifulSoup
 import autosub.Helpers
 from autosub.ProcessFilename import ProcessFilename
+from autosub.OpenSubtitles import OpenSubtitlesNoOp
 import autosub.Addic7ed
 # Settings
 log = logging.getLogger('thelogger')
@@ -129,22 +130,13 @@ def Opensubtitles(ImdbId, language, Wanted):
     Data['season']  = Wanted['season']
     Data['episode'] = Wanted['episode']
     time.sleep(6)
-    if time.time() - autosub.OPENSUBTITLESTIME > 840:
-        try:
-            Result = autosub.OPENSUBTITLESSERVER.NoOperation(autosub.OPENSUBTITLESTOKEN)
-            if Result['status'] != '200 OK':
-                autosub.OPENSUBTITLESTOKEN = None
-            else:
-                autosub.OPENSUBTITLESTIME = time.time()
-        except:
-            log.debug('Opensubtitles: Error from Opensubtitles NoOp API')
-            autosub.OPENSUBTITLESTOKEN = None
+    if not OpenSubtitlesNoOp():
+        return None
     try:
         Subs = autosub.OPENSUBTITLESSERVER.SearchSubtitles(autosub.OPENSUBTITLESTOKEN, [Data])
     except:
-        log.debug('Opensubtitles: Error from Opensubtitles search API')
-        return None
-
+        log.error('Opensubtitles: Error from Opensubtitles search API')
+        return
     if Subs['status'] != '200 OK':
         log.info('Opensubtitles: No subs found for %s on Opensubtitles.' % Wanted['releaseName'])
         return
