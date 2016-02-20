@@ -189,7 +189,7 @@ def Initialize():
     
     API = "http://api.subtitleseeker.com/get/title_subtitles/?api_key=%s" %APIKEY
     IMDBAPI = "http://thetvdb.com/api/"
-    OPENSUBTITLESURL = 'https://api.opensubtitles.org/xml-rpc'
+    OPENSUBTITLESURL = 'http://api.opensubtitles.org/xml-rpc'
     OPENSUBTITLESDL  = 'http://dl.opensubtitles.org/nl/download/file/'
     MOBILEUSERAGENTS = ["midp", "240x320", "blackberry", "netfront", "nokia", "panasonic", 
                         "portalmmm", "sharp", "sie-", "sonyericsson", "symbian", "windows ce", 
