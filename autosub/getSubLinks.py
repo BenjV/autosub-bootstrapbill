@@ -135,23 +135,23 @@ def Opensubtitles(ImdbId, language, Wanted):
     try:
         Subs = autosub.OPENSUBTITLESSERVER.SearchSubtitles(autosub.OPENSUBTITLESTOKEN, [Data])
     except:
+        autosub.OPENSUBTITLESTOKEN = None
         log.error('Opensubtitles: Error from Opensubtitles search API')
-        return
+        return None
     if Subs['status'] != '200 OK':
         log.info('Opensubtitles: No subs found for %s on Opensubtitles.' % Wanted['releaseName'])
-        return
+        return None
     scoreList = []
     for Sub in Subs['data']:
-        if int(Sub['SubBad']) > '0' or int(Sub['SubHearingImpaired']) > 0 :
+        if int(Sub['SubBad']) > 0 or int(Sub['SubHearingImpaired']) > 0 or not Sub['MovieReleaseName'] or not Sub['IDSubtitleFile']:
             continue
         NameDict = ProcessFilename(Sub['MovieReleaseName'],Wanted['container'])
-        SubId = Sub['IDSubtitleFile']
-        LangCode = Sub['ISO639']
-        if not NameDict or not SubId or not LangCode: continue
+        if not NameDict:
+            continue
          # here we score the subtitle and if it's high enough we add it to the list 
         score = autosub.Helpers.scoreMatch(NameDict, Sub['MovieReleaseName'], Wanted['quality'], Wanted['releasegrp'], Wanted['source'], Wanted['codec'])
         if score >= autosub.MINMATCHSCORE:
-            scoreList.append({'score':score, 'url':SubId , 'website':'opensubtitles.org','releaseName':Sub['MovieReleaseName'], 'SubCodec':Sub['SubEncoding']})
+            scoreList.append({'score':score, 'url':Sub['IDSubtitleFile'] , 'website':'opensubtitles.org','releaseName':Sub['MovieReleaseName'], 'SubCodec':Sub['SubEncoding']})
         else:
             log.debug('Opensubtitles: %s has scorematch %s skipping it.' % (Sub['MovieReleaseName'],score))
     return scoreList
