@@ -42,10 +42,9 @@ def getSoup(url):
         log.error("getSoup: The server returned an error for request %s" % url)
         return None   
 
-def unzip(url):
+def unzip(Session, url):
     # returns a file-like StringIO object    
     try:
-        Session = requests.session()
         Result = Session.get(url)
     except:
         log.debug("unzip: Zip file at %s couldn't be retrieved" % url)
@@ -110,19 +109,18 @@ def openSubtitles(SubId, SubCodec):
 
 def subseeker(subSeekerLink,website):
 
-    baselink = 'http://www.' + website 
     Session = requests.session()
     SubLinkPage = Session.get(subSeekerLink)
-
+    time.sleep(6)
     try:
         SubLink = re.findall('Download : <a href="(.*?)"', SubLinkPage.text)[0]
     except Exception as error:
-        log.error("subseeker: Failed to find the redirect link on SubtitleSeekers")        
+        log.error("subseeker: Failed to find the redirect link on SubtitleSeekers. Message : %s" % error)        
         return None
     try:
-        Result= requests.get(SubLink)
-    except:
-        log.debug('subseeker: Link from SubtitleSeeker not found, maybe outdated. Link is: %s' % subSeekerLink)
+        Result= Session.get(SubLink)
+    except Exception as error:
+        log.error("subseeker: Failed to get the downloadpage. Message : %s" % error) 
         return None
 
     if Result.status_code > 399 or not Result.text:
@@ -135,18 +133,18 @@ def subseeker(subSeekerLink,website):
             except:
                 log.error("subseeker: Could not find the subseeker link on the podnapisi website.") 
                 return None
-            DownLoadLink = urljoin(baselink, DownLoadLink) if DownLoadLink else None
+            DownLoadLink = urljoin('https://www.podnapisi.net', DownLoadLink) if DownLoadLink else None
         elif website =='subscene.com':
             try:
                 DownLoadLink = re.findall('<a href=\"/subtitle/download(.*?)\"', Result.text)[0]
             except:
                 log.error("subseeker: Could not find the subseeker link on the subscene website.") 
                 return None
-            DownLoadLink = urljoin(baselink + '/subtitle/download', DownLoadLink) if DownLoadLink else None
+            DownLoadLink = urljoin('http://www.' + website  + '/subtitle/download', DownLoadLink) if DownLoadLink else None
         if not DownLoadLink:
             log.error('downloadsubs: Could not find the downloadlink %s on %s' % (DownLoadLink, website))
         try:
-            SubData = unzip(DownLoadLink)
+            SubData = unzip(Session, DownLoadLink)
             return(SubData)
         except:
             log.error('downloadsubs:Problem unzipping file %s from %s.' % (DownLoadLink,website))
