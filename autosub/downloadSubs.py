@@ -98,6 +98,7 @@ def openSubtitles(SubId, SubCodec):
             SubCodec = chardet.detect(SubDataBytes)['encoding']
             SubCodec = SubCodec.rsplit('|')[0]
         if SubCodec:
+            SubCodec = SubCodec.rsplit('|')[0]
             SubData = SubDataBytes.decode(SubCodec)
             return(SubData)
         else:
