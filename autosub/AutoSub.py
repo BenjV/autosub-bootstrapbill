@@ -125,21 +125,13 @@ def start():
     if autosub.LAUNCHBROWSER:
         launchBrowser()
 
-    log.info("AutoSub: Starting scanDisk thread")
-    autosub.SCANDISK = autosub.Scheduler.Scheduler(autosub.scanDisk.scanDisk(), autosub.SCHEDULERSCANDISK, True, "LOCALDISK")
-    autosub.SCANDISK.thread.start()
-    log.info("AutoSub: scanDisk thread started")
-    
+    autosub.CERTIFICATEPATH = os.path.normpath(autosub.PATH +'/library/requests\cacert.pem')
     log.info("AutoSub: Starting checkSub thread")
     autosub.CHECKSUB = autosub.Scheduler.Scheduler(autosub.checkSub.checkSub(), autosub.SCHEDULERCHECKSUB, True, "CHECKSUB")
     autosub.CHECKSUB.thread.start()
-    log.info("AutoSub: checkSub thread started")
+
 
 def stop():
-    log.info("AutoSub: Stopping scanDisk thread")
-    autosub.SCANDISK.stop = True
-    autosub.SCANDISK.thread.join(10)
-
     log.info("AutoSub: Stopping checkSub thread")
     autosub.CHECKSUB.stop = True
     autosub.CHECKSUB.thread.join(10)

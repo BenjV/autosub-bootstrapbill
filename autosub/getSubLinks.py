@@ -26,21 +26,21 @@ def SubtitleSeeker(ImdbId, lang, Wanted, sourceWebsites):
     # Get the scored list for all SubtitleSeeker hits
 
     SearchUrl = "%s&imdb=%s&season=%s&episode=%s&language=%s&return_type=json" % (autosub.API, ImdbId, Wanted['season'], Wanted['episode'], lang)
-    log.info('getSubLinks: SubtitleSeeker request URL: %s' % SearchUrl)
+    log.debug('getSubLinks: SubtitleSeeker request URL: %s' % SearchUrl)
     if autosub.Helpers.checkAPICallsSubSeeker(use=True):
         try:
             SubseekerSession = requests.session()
             Result = SubseekerSession.get(SearchUrl).json()
             SubseekerSession.close()
-        except:
-            log.error("getSubLink: The server returned an error for request %s" % getSubLinkUrl)
-            return
+        except Exception as error:
+            log.error("getSubLink: The server returned an error for request %s. Message is %s" % (SearchUrl,error))
+            return None
     else:
         log.error("API: out of api calls for SubtitleSeeker.com")
-        return
+        return None
     scoreList = []
     if int(Result['results']['total_matches']) == 0:
-        return
+        return None
 
     for Item in Result['results']['items']:
         if (Item['site'].lower() == u'podnapisi.net' and (autosub.PODNAPISILANG == lang or autosub.PODNAPISILANG == 'Both')) or \
@@ -69,7 +69,7 @@ def Addic7ed(a7ID , language, releaseDetails):
     else:
         langs = '|17|'
     SearchUrl = '/ajax_loadShow.php?show=' + a7ID + '&season=' +season.lstrip('0') + '&langs=' + langs + '&hd=0&hi=0'
-    log.info('getSubLinks: Addic7ed search URL: %s' % u'http://www.addic7ed.com' + SearchUrl)
+    log.debug('getSubLinks: Addic7ed search URL: %s' % u'http://www.addic7ed.com' + SearchUrl)
 
     Result = autosub.ADDIC7EDAPI.get(SearchUrl)
     if Result:
@@ -139,7 +139,7 @@ def Opensubtitles(ImdbId, language, Wanted):
         log.error('Opensubtitles: Error from Opensubtitles search API')
         return None
     if Subs['status'] != '200 OK':
-        log.info('Opensubtitles: No subs found for %s on Opensubtitles.' % Wanted['releaseName'])
+        log.debug('Opensubtitles: No subs found for %s on Opensubtitles.' % Wanted['releaseName'])
         return None
     scoreList = []
     for Sub in Subs['data']:

@@ -10,7 +10,8 @@ import sqlite3
 
 # Autosub specific modules
 import autosub.getSubLinks
-from autosub.Db import idCache, EpisodeIdCache
+import autosub.scanDisk
+from autosub.Db import idCache
 import autosub.Helpers as Helpers
 from autosub.downloadSubs import DownloadSub
 from autosub.OpenSubtitles import OpenSubtitlesLogin, OpenSubtitlesLogout
@@ -25,22 +26,18 @@ class checkSub():
     If the subtitles are found, call DownloadSub
     """
     def run(self):
-        log.debug("checkSub: Starting round of checkSub")
-        # First we check if checksub in not still running
-        if autosub.WANTEDQUEUELOCK:
-            log.info("checkSub: Exiting, another threat is using the queues. Will try again in 60 seconds")
-            time.sleep(60)
-            return False
-        else:
-            autosub.WANTEDQUEUELOCK = True
+        StartTime = time.time()
+        count = 0
+        del autosub.WANTEDQUEUE[:]
+        autosub.scanDisk.scanDisk().run()
+        log.info("checkSub: Starting round of checkSub." )
         autosub.DBCONNECTION = sqlite3.connect(autosub.DBFILE)
         autosub.DBIDCACHE = idCache()
-        autosub.DBEPISODECACHE = EpisodeIdCache()
-
         toDelete_wantedQueue = []
         if not Helpers.checkAPICallsTvdb() or not Helpers.checkAPICallsSubSeeker():            
             log.warning("checkSub: out of api calls")
-            return True
+            autosub.SEARCHTIME = time.time() - StartTime
+            return
                              
         # Initiate the Addic7ed API and check the current number of downloads
         UseAddic= False
@@ -123,12 +120,11 @@ class checkSub():
                     downloadItem['destinationFileLocationOnDisk'] = engsrtfile
                     
                 if allResults:                   
-                    log.info("checkSub: The episode %s - Season %s Episode %s has 1 or more matching subtitles on SubtitleSeeker, downloading it!" % (title, season, episode))
-                    log.debug("checkSub: destination filename %s" % downloadItem['destinationFileLocationOnDisk'])
-                
-                    
-                if not DownloadSub(downloadItem, allResults):
-                    continue
+                    log.info("checkSub: The episode %s - Season %s Episode %s has 1 or more matching subtitles, downloading it!" % (title, season, episode))
+                    log.debug("checkSub: destination filename %s" % downloadItem['destinationFileLocationOnDisk'])    
+                    DownloadSub(downloadItem, allResults)
+                else:
+                    log.info('checkSub: The episode %s - Season %s Episode %s has no matching %s subtitles!' % (title, season, episode,lang))
                 
                 #Remove downloaded language
                 languages.remove(lang)
@@ -139,7 +135,6 @@ class checkSub():
                         languages.remove(autosub.ENGLISH)
                 
                     if autosub.ENGLISHSUBDELETE:
-                        log.info("checkSub: Clean up English enabled")
                         if os.path.exists(engsrtfile):
                             log.debug("checkSub: Trying to delete English subtitle: %s" % engsrtfile)
                             try:
@@ -148,7 +143,7 @@ class checkSub():
                             except:
                                 log.error("checkSub: Error while trying to remove subtitle %s." % engsrtfile)
                         else:
-                            log.info("checkSub: English subtitle not found.")
+                            log.debug("checkSub: English subtitle not found.")
                 
                 if len(languages) == 0:
                     toDelete_wantedQueue.append(index)
@@ -157,7 +152,6 @@ class checkSub():
         autosub.DBCONNECTION.close()
         del autosub.DBCONNECTION
         del autosub.DBIDCACHE
-        del  autosub.DBEPISODECACHE
         if autosub.ADDIC7EDAPI:
             autosub.ADDIC7EDAPI.logout()
 
@@ -170,6 +164,6 @@ class checkSub():
             autosub.WANTEDQUEUE.pop(toDelete_wantedQueue[i])
             i = i - 1
 
-        log.debug("checkSub: Finished round of checkSub")
-        autosub.WANTEDQUEUELOCK = False
-        return True
+        log.info("checkSub: Finished round of checkSub")
+        autosub.SEARCHTIME = time.time() - StartTime
+        return

@@ -149,16 +149,24 @@ _rlsgrps_h264 = ['TLA',
                  'BAJSKOR']
 
 _rlsgrps_webdl=['BS',
+                'Coo7',
                 'CtrlHD',
+                'DRACULA',
                 'ECI',
+                'FiRE',
+                'FLEET',
                 'FUM',
                 'HWD',
                 'KiNGS',
                 'NFHD',
                 'NTb',
+                'Oosh',
                 'PCSYNDICATE',
+                'PLLs',
                 'POD',
+                'QUEENS,'
                 'TVSmash',
+                'VietHD',
                 'YFN']
 
 
@@ -468,8 +476,7 @@ class Addic7edAPI():
         self.logged_in = False
                 
     def login(self, addic7eduser=None, addic7edpasswd=None):        
-        log.debug('Addic7edAPI: Logging in')
-        
+
         # Expose to test login
         # When fields are empty it will check the config file
         if not addic7eduser:
@@ -534,7 +541,6 @@ class Addic7edAPI():
 
         log.debug("Addic7edAPI: Resting for 30 seconds to prevent a ban")
         time.sleep(30)
-        r.encoding = 'utf-8'
         return r.text
 
     def download(self, downloadlink):
@@ -543,7 +549,7 @@ class Addic7edAPI():
             return None
         
         try:
-            r = self.session.get(self.server + downloadlink, timeout=10, headers={'Referer': autosub.USERAGENT})
+            r = self.session.get(self.server + downloadlink, timeout=10)
         except requests.Timeout:
             log.error('Addic7edAPI: Timeout after 10 seconds')
             return None
@@ -592,19 +598,22 @@ class Addic7edAPI():
         return True    
     
     def geta7ID(self,TvdbShowName, localShowName):
-        # Last resort: lookup official name and try to match with a7 show list
+        # lookup official name and try to match with a7 show list
 
-        #html = self.get('/shows.php', login=False)
-        fp   = urllib.urlopen('http://www.addic7ed.com/shows.php')
-        html = fp.read()
-        fp.close()
+        try:
+            fp   = urllib.urlopen('http://www.addic7ed.com/shows.php')
+            html = fp.read()
+            fp.close()
+        except Exception as error:
+            log.debug('geta7ID: Problem tring to get the addic7ed show page. Message is: %s' % error)
+            return None
         if not html:
             log.debug('geta7ID: Could not get the show page form the addic7ed website')
             return None
         #Put the showname's and Addic7ed's in a dict with the showname as key.
         show_ids={}
         AddicName = u''
-        for url in re.findall(r'<a href=[\'"]/show/?([^<]+)', html):
+        for url in re.findall(r'<a href=[\'"]/show/?([^<]+)', html, flags=re.IGNORECASE):
             AddicId = url.split("\">")[0].decode('utf-8')
             if AddicId.isdigit():
                 try:
@@ -646,5 +655,5 @@ class Addic7edAPI():
                 log.debug("geta7IDApi: Addic7ed ID %s found using filename show name %s" % (show_ids[Name], localShowName))
                 return show_ids[Name]
 
-        log.info('geta7ID: The show %s could not be found on the Addic7ed website.' % localShowName)
+        log.info('geta7ID: The show %s could not be found on the Addic7ed website. Please make an Addi7ed map!' % localShowName)
         return None

@@ -237,29 +237,26 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 		<hr>
 	</div>
 </div>
-		<div class="well well-sm center well-header"><b>Next Run</b></div>
+
 		<div class="well well-sm center">
-		
+
 		<table class="table-nextrun">
 			<tr>
-				<td class="td-nextrun">ScanDisk</td>
-				<td class="td-nextrun">CheckSub</td>
-			</tr>
-			<tr>
-				<td class="td-nextrun">
-					#try
-					  $time.strftime('%H:%M:%S', $time.gmtime(($autosub.SCANDISK.interval - ($time.time() - $autosub.SCANDISK.lastrun) ))) <br>
-					#except
-					  Please wait...
-					#end try
-				</td>
-				<td class="td-nextrun">
-					#try
-					  $time.strftime('%H:%M:%S', $time.gmtime(($autosub.CHECKSUB.interval - ($time.time() - $autosub.CHECKSUB.lastrun) ))) <br>
-					#except
-					  Please wait...
-					#end try
-				</td>
+				#try:
+				    #if ($time.time() - $autosub.CHECKSUB.lastrun) > $autosub.CHECKSUB.interval
+                        <td class="td-nextrun"><b>Search is running for: </b> $time.strftime('%H:%M:%S', $time.gmtime(($time.time() - $autosub.CHECKSUB.lastrun - $autosub.CHECKSUB.interval)))</td>
+                    #else:
+					    <td class="td-nextrun"><b>Next run over: </b>
+						    #try
+							    $time.strftime('%H:%M:%S', $time.gmtime(($autosub.CHECKSUB.interval - ($time.time() - $autosub.CHECKSUB.lastrun) )))
+						    #except
+							    <b>Search is running: </b> </td>
+						    #end try
+					    </td>
+				    #end if
+                #except
+				    <b>Search is running: </b> </td>
+				#end try
 			</tr>
 		</table>
 		

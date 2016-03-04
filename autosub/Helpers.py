@@ -18,7 +18,7 @@ from autosub.version import autosubversion
 import autosub
 import Tvdb
 
-from autosub.Db import idCache,EpisodeIdCache
+from autosub.Db import idCache
 from autosub.ID_lookup import a7IdDict
 from autosub.Addic7ed import Addic7edAPI
 

@@ -14,7 +14,6 @@ except:
 from xml.dom import minidom
 import autosub
 import autosub.Helpers
-from autosub.Db import EpisodeIdCache
 
 # Settings
 log = logging.getLogger('thelogger')

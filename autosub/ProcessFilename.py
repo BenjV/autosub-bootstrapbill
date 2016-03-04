@@ -154,7 +154,7 @@ def ProcessFilename(filename, fileext):
         show_dict['quality'] = quality
         show_dict['codec'] = codec
         show_dict['releasegrp'] = releasegrp
-        show_dict['container'] = fileext[1:]
+        show_dict['container'] = fileext
         log.debug("ProcessFileName: Dumping dict for debug %r" %show_dict)
         return show_dict
     else: 

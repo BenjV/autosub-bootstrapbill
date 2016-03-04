@@ -7,10 +7,10 @@ import time
 import threading
 import os
 import traceback
+import autosub
 
 class Scheduler:
-    def __init__(self, command, interval, runnow, name):
-        self.lastrun = time.time()
+    def __init__(self, command, interval, runnow, name):      
         self.command = command
         self.name = name
         self.interval = interval
@@ -19,6 +19,7 @@ class Scheduler:
         if runnow:
             try:
                 self.command.run()
+                self.lastrun = time.time()
                 self.runnow = False
             except:
                 print traceback.format_exc()
@@ -26,11 +27,10 @@ class Scheduler:
             
     def runcommand(self):
         while True:
-            currentime = time.time()
-            if currentime - self.lastrun > self.interval:
+            if time.time() - self.lastrun > self.interval:
                 try:
-                    if self.command.run():
-                        self.lastrun = currentime
+                    self.command.run()
+                    self.lastrun = time.time() 
                 except:
                     print traceback.format_exc()
                     os._exit(1)

@@ -69,11 +69,6 @@ def ReadConfig(configfile):
         else:
             autosub.MINMATCHSCORE = 0
 
-        if cfg.has_option('config', 'scandisk'):
-            autosub.SCHEDULERSCANDISK = int(cfg.get('config', 'scandisk'))
-        else:
-            autosub.SCHEDULERSCANDISK = 3600
-
         if cfg.has_option('config', 'checksub'):
             autosub.SCHEDULERCHECKSUB = int(cfg.get('config', 'checksub'))
             # CHECKSUB may only be ran 4 times a day, to prevent the API key from being banned
@@ -176,11 +171,6 @@ def ReadConfig(configfile):
         else:
             autosub.OPENSUBTITLESPASSWD = u"" 
             
-        if cfg.has_option("config", "undertexterlang"):
-            autosub.UNDERTEXTERLANG = cfg.get("config", "undertexterlang")
-        else:
-            autosub.UNDERTEXTERLANG = u"Both"
-
         if cfg.has_option("config", "addic7edlang"):
             autosub.ADDIC7EDLANG = cfg.get("config", "addic7edlang")
         else:
@@ -210,7 +200,6 @@ def ReadConfig(configfile):
         autosub.DOWNLOADENG = False
         autosub.DOWNLOADDUTCH = True        
         autosub.MINMATCHSCORE = 8
-        autosub.SCHEDULERSCANDISK = 3600
         autosub.SCHEDULERCHECKSUB = 28800
         print "Config ERROR: Variable ROOTPATH is missing. This is required! Using current working directory instead."
         autosub.ROOTPATH = unicode(os.getcwd(), autosub.SYSENCODING)
@@ -230,7 +219,6 @@ def ReadConfig(configfile):
         autosub.OPENSUBTITLESLANG = u"Both"
         autosub.OPENSUBTITLESUSER = u""
         autosub.OPENSUBTITLESPASSWD = u""
-        autosub.UNDERTEXTERLANG = u"Both"
         autosub.ADDIC7EDLANG = u"None"
         autosub.ADDIC7EDUSER = u""
         autosub.ADDIC7EDPASSWD = u""
@@ -948,7 +936,6 @@ def saveConfigSection():
     cfg.set(section, "downloadeng", str(autosub.DOWNLOADENG))
     cfg.set(section, "downloaddutch", str(autosub.DOWNLOADDUTCH))    
     cfg.set(section, "minmatchscore", str(autosub.MINMATCHSCORE))
-    cfg.set(section, "scandisk", str(autosub.SCHEDULERSCANDISK))
     cfg.set(section, "checksub", str(autosub.SCHEDULERCHECKSUB))
     cfg.set(section, "rootpath", autosub.ROOTPATH)
     cfg.set(section, "fallbacktoeng", str(autosub.FALLBACKTOENG))
@@ -969,7 +956,6 @@ def saveConfigSection():
     cfg.set(section, "opensubtitleslang", autosub.OPENSUBTITLESLANG)
     cfg.set(section, "opensubtitlesuser", autosub.OPENSUBTITLESUSER)
     cfg.set(section, "opensubtitlespasswd", autosub.OPENSUBTITLESPASSWD)
-    cfg.set(section, "undertexterlang", autosub.UNDERTEXTERLANG)
     cfg.set(section, "addic7edlang", autosub.ADDIC7EDLANG)
     cfg.set(section, "addic7eduser", autosub.ADDIC7EDUSER)
     cfg.set(section, "addic7edpasswd", autosub.ADDIC7EDPASSWD)
@@ -1185,7 +1171,6 @@ def checkForRestart():
         pass
 
     # Set the default values
-    schedulerscandisk = 3600
     schedulerchecksub = 86400
     loglevel = logging.INFO
     loglevelconsole = logging.ERROR
@@ -1199,9 +1184,6 @@ def checkForRestart():
 
     # Check if an option excists in the config file, if so replace the default value
     if cfg.has_section('config'):
-        if cfg.has_option('config', 'scandisk'):
-            schedulerscandisk = int(cfg.get('config', 'scandisk'))
-
         if cfg.has_option('config', 'checksub'):
             schedulerchecksub = int(cfg.get('config', 'checksub'))
 
@@ -1252,7 +1234,7 @@ def checkForRestart():
             password = cfg.get('webserver', 'password')
 
     # Now compare the values, if one differs a restart is required.
-    if schedulerscandisk != autosub.SCHEDULERSCANDISK or schedulerchecksub != autosub.SCHEDULERCHECKSUB or loglevel != autosub.LOGLEVEL or loglevelconsole != autosub.LOGLEVELCONSOLE or logsize != autosub.LOGSIZE or lognum != autosub.LOGNUM or webserverip != autosub.WEBSERVERIP or webserverport != autosub.WEBSERVERPORT or username != autosub.USERNAME or password != autosub.PASSWORD or webroot != autosub.WEBROOT:
+    if schedulerchecksub != autosub.SCHEDULERCHECKSUB or loglevel != autosub.LOGLEVEL or loglevelconsole != autosub.LOGLEVELCONSOLE or logsize != autosub.LOGSIZE or lognum != autosub.LOGNUM or webserverip != autosub.WEBSERVERIP or webserverport != autosub.WEBSERVERPORT or username != autosub.USERNAME or password != autosub.PASSWORD or webroot != autosub.WEBROOT:
         return True
     else:
         return False

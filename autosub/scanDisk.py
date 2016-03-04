@@ -143,6 +143,7 @@ def walkDir(path):
                             filenameResults['originalFileLocationOnDisk'] = os.path.join(dirname, filename)
                             filenameResults['timestamp'] = unicode(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(os.path.getctime(filenameResults['originalFileLocationOnDisk']))))
                             filenameResults['lang'] = lang
+                            filenameResults['container'] = ext
                             autosub.WANTEDQUEUE.append(filenameResults)
 
                         else:
@@ -161,15 +162,7 @@ class scanDisk():
     If found add these Dutch or English subtitles to the WANTEDQUEUE.
     """
     def run(self):
-        log.debug("scanDir: Starting round of local disk checking at %s" % autosub.ROOTPATH)
-        if autosub.WANTEDQUEUELOCK == True:
-            log.debug("scanDir: Exiting, another threat is using the queue's. Will try again in 60 seconds")
-            time.sleep(60)
-            return False
-        else:
-            autosub.WANTEDQUEUELOCK = True
-
-        autosub.WANTEDQUEUE = []
+        log.info("scanDisk: Starting round of local disk checking at %s" % autosub.ROOTPATH)
 
         seriespaths = [x.strip() for x in autosub.ROOTPATH.split(',')]
         for seriespath in seriespaths:
@@ -185,6 +178,5 @@ class scanDisk():
                 log.error("scanDir: Something went wrong when traversing directory %s" % seriespath)
                 return False
 
-        log.debug("scanDir: Finished round of local disk checking")
-        autosub.WANTEDQUEUELOCK = False
+        log.info("scanDir: Finished round of local disk checking")
         return True

@@ -121,11 +121,11 @@ class Config:
         return str(tmpl)
 
     @cherrypy.expose  
-    def saveConfig(self, subeng, checksub, scandisk, skiphiddendirs, webdl, subnl, postprocesscmd, 
+    def saveConfig(self, subeng, checksub, skiphiddendirs, webdl, subnl, postprocesscmd, 
                    path, logfile, rootpath, launchbrowser, fallbacktoeng, downloadeng, englishsubdelete, username, 
                    password, webroot, skipshow, lognum, loglevelconsole, logsize, loglevel, 
                    webserverip, webserverport, usernamemapping, useraddic7edmapping, notifyen, notifynl, homelayoutfirst,
-                   podnapisilang, subscenelang, undertexterlang, opensubtitleslang, opensubtitlesuser, opensubtitlespasswd,
+                   podnapisilang, subscenelang, opensubtitleslang, opensubtitlesuser, opensubtitlespasswd,
                    addic7edlang, addic7eduser, addic7edpasswd, downloaddutch,
                    mmssource = None, mmsquality = None, mmscodec = None, mmsrelease = None):
                    
@@ -150,7 +150,6 @@ class Config:
         autosub.OPENSUBTITLESLANG = opensubtitleslang
         autosub.OPENSUBTITLESUSER = opensubtitlesuser
         autosub.OPENSUBTITLESPASSWD = opensubtitlespasswd.replace("%","%%")
-        autosub.UNDERTEXTERLANG = undertexterlang
         autosub.ADDIC7EDLANG = addic7edlang
         autosub.ADDIC7EDUSER = addic7eduser
         autosub.ADDIC7EDPASSWD = addic7edpasswd.replace("%","%%")
@@ -166,7 +165,6 @@ class Config:
         if mmsrelease:
             autosub.MINMATCHSCORE += 1 
                
-        autosub.SCHEDULERSCANDISK = int(scandisk)
         autosub.SCHEDULERCHECKSUB = int(checksub)
         autosub.LOGLEVEL = int(loglevel)
         autosub.LOGNUM = int(lognum)
@@ -397,16 +395,14 @@ class Config:
     
     @cherrypy.expose
     def RetrieveAddic7edCount(self):
-        if autosub.WANTEDQUEUELOCK != True:
-            log.info("Addic7ed: Retrieving Addic7ed download count")
-            result = Addic7edAPI().checkCurrentDownloads()
-            if result:
-                return "Addic7ed count: %s of %s" % (autosub.DOWNLOADS_A7, autosub.DOWNLOADS_A7MAX)
-            else:
-                return "Unable to retrieve count at the moment."
+
+        log.info("Addic7ed: Retrieving Addic7ed download count")
+        result = Addic7edAPI().checkCurrentDownloads()
+        if result:
+            return "Addic7ed count: %s of %s" % (autosub.DOWNLOADS_A7, autosub.DOWNLOADS_A7MAX)
         else:
-            return "Auto-Sub is currently checking Addic7ed for subtitles, unable to refresh data at the moment."
-    
+            return "Unable to retrieve count at the moment."
+
     @cherrypy.expose
     def testOpenSubtitles(self, opensubtitlesuser, opensubtitlespasswd):
         log.info('OpenSubtitles: Testing Login with user %s' % opensubtitlesuser)
@@ -486,7 +482,6 @@ class Home:
     
     @cherrypy.expose
     def runNow(self):
-        #time.sleep is here to prevent a timing issue, where checksub is runned before scandisk
         useragent = cherrypy.request.headers.get("User-Agent", '')
         tmpl = PageTemplate(file="interface/templates/home.tmpl")
         if autosub.Helpers.CheckMobileDevice(useragent) and autosub.MOBILEAUTOSUB:
@@ -498,8 +493,6 @@ class Home:
             tmpl.modalheader = "Information"
             return str(tmpl)
 
-        autosub.SCANDISK.runnow = True
-        time.sleep(5)
         autosub.CHECKSUB.runnow = True
 
         tmpl.message = "Auto-Sub is now checking for subtitles!"
