@@ -37,9 +37,9 @@ class Scheduler:
             
             if self.runnow:
                 try:
-                    if self.command.run():
-                        self.lastrun = currentime
-                        self.runnow = False
+                    self.command.run()
+                    self.lastrun = time.time()
+                    self.runnow = False
                 except:
                     print traceback.format_exc()
                     os._exit(1)
