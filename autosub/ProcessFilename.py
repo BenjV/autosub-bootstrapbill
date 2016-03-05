@@ -121,6 +121,7 @@ def _returnSceneNumber(number):
     return unicode(number)
 
 def ProcessFilename(filename, fileext):
+    filename = filename.replace(',','.')
     show_info = _returnGroup(show_regex, filename)
     log.debug("ProcessFileName: Dumping info %r" %show_info)
     title = None
