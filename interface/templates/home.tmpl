@@ -35,15 +35,15 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 			<thead>
 				<tr>
 					<th class="center">Show name</th>
-					<th class="center">Imdb:A7 Id's</th>
-					<th class="center">Season</th>
-					<th class="center">Episode</th>
+					<th class="center">Imdb:A7 Id</th>
+					<th class="center">Se</th>
+					<th class="center">Ep</th>
 					<th class="center">Source</th>
 					<th class="center">Quality</th>
 					<th class="center">Codec</th>
 					<th class="center">Group</th>
 					<th class="center">Lang</th>
-                    <th class="center">Time</th>
+					<th class="center">File Date/Time</th>
 					<th class="center">&nbsp;</th>
 				</tr>
 			</thead>
@@ -53,7 +53,7 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 #set $title_escaped = $cgi.escape($var['title'], True)
 		<tr>
 			<td align="left"><a data-placement="right" data-toggle="tooltip" data-original-title="$var['originalFileLocationOnDisk']">$var['title']</a></td>
-			<td>$var['DisplayIds']</td>
+                     <td>$var['DisplayIds']</td>
 			<td>$var['season']</td>
 			<td>$var['episode']</td>
 #if $type($var['source']) == UnicodeType:
@@ -85,28 +85,28 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 			<img src="$autosub.WEBROOT/images/English.png" alt="$lang" title="$lang">
 #end if
 #end for
+			</td>
 #if $type($var['timestamp']) == UnicodeType:
 			<td>$ConvertTimestamp($var['timestamp'])</td>
 #else
 			<td>Unknown</td>
 #end if	
-			</td>
-			<td>
+		<td>
 #set $SE = "S" + $var['season'] + "E" + $var['episode']		
-			<div class="navbar-collapse skipshow">
-			  <ul class="nav navbar-right">
-				<li class="dropdown">
-					  <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-wrench"></span></a>
-					  <ul class="dropdown-menu">
-						<li><a href="$autosub.WEBROOT/config/skipShow/$var['title'].replace(' ', '%20')/-1">Skip $var['title']</a></li>
-						<li><a href="$autosub.WEBROOT/config/skipShow/$var['title'].replace(' ', '%20')/$var['season']">Skip $var['title'] S$var['season']</a></li>
-						<li><a href="$autosub.WEBROOT/config/skipShow/$var['title'].replace(' ', '%20')/$var['season']/$var['episode']">Skip $var['title'] $SE</a></li>
-					  </ul>
+		<div class="navbar-collapse skipshow">
+			<ul class="nav navbar-right">
+			    <li class="dropdown">
+				<a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-wrench"></span></a>
+				    <ul class="dropdown-menu">
+					<li><a href="$autosub.WEBROOT/config/skipShow/$var['title'].replace(' ', '%20')/-1">Skip $var['title']</a></li>
+					<li><a href="$autosub.WEBROOT/config/skipShow/$var['title'].replace(' ', '%20')/$var['season']">Skip $var['title'] S$var['season']</a></li>
+					<li><a href="$autosub.WEBROOT/config/skipShow/$var['title'].replace(' ', '%20')/$var['season']/$var['episode']">Skip $var['title'] $SE</a></li>
+				    </ul>
 				</li>
-			  </ul>
+			</ul>
             </div>
 			
-			</td>
+		</td>
 		</tr>
 #end for
 
@@ -114,15 +114,15 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 			<tfoot>
 				<tr>
 					<th class="center">Show name</th>
-					<th class="center">ImdbId</th>
-					<th class="center">AddicId</th>
+					<th class="center">Imdb:A7 Id</th>
 					<th class="center">Season</th>
 					<th class="center">Episode</th>
 					<th class="center">Source</th>
 					<th class="center">Quality</th>
 					<th class="center">Codec</th>
 					<th class="center">Group</th>
-					<th class="center">Language</th>
+					<th class="center">Lang</th>
+					<th class="center">File Date/Time</th>
 					<th class="center">&nbsp;</th>
 				</tr>
 			</tfoot>
@@ -148,11 +148,13 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 		No data available at the moment.
 #end if		
 #if $len($lastdownload) >= 1
+
 <div class="table-responsive">
 		<table id="downloaded" class="table table-condensed table-hover table-striped">
 			<thead>
 				<tr>
 					<th class="center">Show name</th>
+					<th class="center">#</th>
 					<th class="center">Season</th>
 					<th class="center">Episode</th>
 					<th class="center">Source</th>
@@ -160,14 +162,15 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 					<th class="center">Codec</th>
 					<th class="center">Group</th>
 					<th class="center">Language</th>
-					<th class="center">Time</th>
+					<th class="center">File Date/Time</th>
 					<th class="center">&nbsp;</th>
 				</tr>
 			</thead>
 			<tbody>
 #for $var in $lastdownload
 			<tr>
-				<td align="left"><a data-placement="right" data-toggle="tooltip" data-original-title="$var['subtitle']">$var['show_name']</a></td>
+				<td align="left"><a data-placement="right" data-toggle="tooltip" data-original-title="$var['subtitle'].upper()">$var['show_name']</a></td>
+				<td>$var['id']</td>
 				<td>$var['season']</td>
 				<td>$var['episode']</td>
 #if $type($var['source']) == UnicodeType:
@@ -191,35 +194,40 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 				<td>Unknown</td>
 #end if
 				<td>
+
 					#set $imageurl = $autosub.WEBROOT + "/images/" + $var['language'] + ".png"
-					<img src="$imageurl" alt="$var['language']" title="$var['language']" />
+					<img src="$imageurl" alt="$var['language']" title="$var['language']">
 				</td>
+
 #if $type($var['timestamp']) == UnicodeType:
-				<td>$ConvertTimestamp($var['timestamp'])</td>
+			<td>$ConvertTimestamp($var['timestamp'])</td>
 #else
-				<td>Unknown</td>
-#end if
+			<td>Unknown</td>
+#end if	
+
+
 #if $var['destination']:
 #if $os.path.isfile($var['destination']):
 				<td>
-					<a style="cursor: default;"><span id="popover" data-toggle="popover" data-trigger="click" data-html="true" data-placement="left" title="<strong>Subtitle Preview</strong><br>$var['show_name']" data-content="$DisplaySubtitle($var['destination'])"><span class="glyphicon glyphicon-eye-open"></span></span></a>
+					<a style="cursor: pointer;"><span id="popover" data-toggle="popover" data-trigger="click" data-html="true" data-placement="left" title="<strong>Subtitle Preview</strong><br>$var['show_name']" data-content="$DisplaySubtitle($var['destination'])"><span class="glyphicon glyphicon-eye-open"></span></span></a>
 				</td>
 #else:
 				<td>
-					<a style="cursor: default;"><span id="popover" data-toggle="popover" data-trigger="click" data-html="true" data-placement="left" title="<strong>Subtitle Preview</strong><br>$var['show_name']" data-content="Preview is not available.<br>You probably moved the file."><span class="glyphicon glyphicon-eye-close"></span></span></a>
+					<a style="cursor: pointer;"><span id="popover" data-toggle="popover" data-trigger="click" data-html="true" data-placement="left" title="<strong>Subtitle Preview</strong><br>$var['show_name']" data-content="Preview is not available.<br>You probably moved the file."><span class="glyphicon glyphicon-eye-close"></span></span></a>
 				</td>
 #end if
 #else:
 				<td>
-					<a style="cursor: default;"><span id="popover" data-toggle="popover" data-trigger="click" data-html="true" data-placement="left" title="<strong>Subtitle Preview</strong><br>$var['show_name']" data-content="Preview is not available.<br>You probably moved the file."><span class="glyphicon glyphicon-eye-close"></span></span></a>
+					<a style="cursor: pointer;"><span id="popover" data-toggle="popover" data-trigger="click" data-html="true" data-placement="left" title="<strong>Subtitle Preview</strong><br>$var['show_name']" data-content="Preview is not available.<br>You probably moved the file."><span class="glyphicon glyphicon-eye-close"></span></span></a>
 				</td>
 #end if
-			</tr>	
+		</tr>	
 #end for
 			</tbody>
 			<tfoot>
 				<tr>
 					<th class="center">Show name</th>
+					<th class="center">#</th>
 					<th class="center">Season</th>
 					<th class="center">Episode</th>
 					<th class="center">Source</th>
@@ -227,7 +235,7 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 					<th class="center">Codec</th>
 					<th class="center">Group</th>
 					<th class="center">Language</th>
-					<th class="center">Time</th>
+					<th class="center">File Date/Time</th>
 					<th class="center">&nbsp;</th>
 				</tr>
 			</tfoot>
@@ -240,26 +248,29 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 		<hr>
 	</div>
 </div>
-
+		<div class="well well-sm center well-header"><b>Next Run</b></div>
 		<div class="well well-sm center">
-
+		
 		<table class="table-nextrun">
 			<tr>
-				#try:
-				    #if ($time.time() - $autosub.CHECKSUB.lastrun) > $autosub.CHECKSUB.interval
-                        <td class="td-nextrun"><b>Search is running for: </b> $time.strftime('%H:%M:%S', $time.gmtime(($time.time() - $autosub.CHECKSUB.lastrun - $autosub.CHECKSUB.interval)))</td>
-                    #else:
-					    <td class="td-nextrun"><b>Next run over: </b>
-						    #try
-							    $time.strftime('%H:%M:%S', $time.gmtime(($autosub.CHECKSUB.interval - ($time.time() - $autosub.CHECKSUB.lastrun) )))
-						    #except
-							    <b>Search is running: </b> </td>
-						    #end try
-					    </td>
-				    #end if
-                #except
-				    <b>Search is running: </b> </td>
-				#end try
+				<td class="td-nextrun">ScanDisk</td>
+				<td class="td-nextrun">CheckSub</td>
+			</tr>
+			<tr>
+				<td class="td-nextrun">
+					#try
+					  $time.strftime('%H:%M:%S', $time.gmtime(($autosub.SCANDISK.interval - ($time.time() - $autosub.SCANDISK.lastrun) ))) <br>
+					#except
+					  Please wait...
+					#end try
+				</td>
+				<td class="td-nextrun">
+					#try
+					  $time.strftime('%H:%M:%S', $time.gmtime(($autosub.CHECKSUB.interval - ($time.time() - $autosub.CHECKSUB.lastrun) ))) <br>
+					#except
+					  Please wait...
+					#end try
+				</td>
 			</tr>
 		</table>
 		
