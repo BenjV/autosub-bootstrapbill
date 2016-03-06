@@ -472,7 +472,7 @@ class Addic7edAPI():
     def __init__(self):
         self.session = requests.Session()
         self.server = 'http://www.addic7ed.com'
-        self.session.headers = {'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/525.13 (KHTML, like Gecko) Chrome/0.A.B.C Safari/525.13', 'Referer' : 'http://www.addic7ed.com', 'Pragma': 'no-cache'}
+        self.session.headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko', 'Referer' : 'http://www.addic7ed.com', 'Pragma': 'no-cache'}
         self.logged_in = False
                 
     def login(self, addic7eduser=None, addic7edpasswd=None):        
@@ -499,7 +499,6 @@ class Addic7edAPI():
         if r.status_code == 302:
             log.info('Addic7edAPI: Logged in')
             self.logged_in = True
-            time.sleep(10)
             return True
         else:
             log.error('Addic7edAPI: Failed to login')
@@ -527,6 +526,9 @@ class Addic7edAPI():
         if not self.logged_in and login:
             log.error("Addic7edAPI: You are not properly logged in. Check your credentials!")
             return None
+
+        log.debug("Addic7edAPI: Resting for 30 seconds to prevent a ban")
+        time.sleep(30)
         try:
             r = self.session.get(self.server + url, timeout=15)
         except requests.Timeout:
@@ -539,15 +541,14 @@ class Addic7edAPI():
         if r.status_code > 399:
             log.error('Addic7edAPI: Request failed with status code %d' % r.status_code)
 
-        log.debug("Addic7edAPI: Resting for 30 seconds to prevent a ban")
-        time.sleep(30)
         return r.text
 
     def download(self, downloadlink):
         if not self.logged_in:
             log.error("Addic7edAPI: You are not properly logged in. Check your credentials!")
             return None
-        
+        log.debug("Addic7edAPI: Resting for 30 seconds to prevent a ban")
+        time.sleep(30)
         try:
             r = self.session.get(self.server + downloadlink, timeout=10)
         except requests.Timeout:
@@ -566,9 +567,8 @@ class Addic7edAPI():
             log.error('Addic7edAPI: Expected srt file but got HTML; report this!')
             log.debug("Addic7edAPI: Response content: %s" % r.content)
             return None
-        log.debug("Addic7edAPI: Resting for 30 seconds to prevent a ban")
         r.encoding = r.apparent_encoding
-        time.sleep(30)
+
         return r.text
     
     def checkCurrentDownloads(self, logout=True):      
@@ -599,7 +599,8 @@ class Addic7edAPI():
     
     def geta7ID(self,TvdbShowName, localShowName):
         # lookup official name and try to match with a7 show list
-
+        log.debug("Addic7edAPI: Resting for 30 seconds to prevent a ban")
+        time.sleep(30)
         try:
             fp   = urllib.urlopen('http://www.addic7ed.com/shows.php')
             html = fp.read()

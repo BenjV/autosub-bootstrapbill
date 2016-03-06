@@ -22,10 +22,10 @@ import autosub.Addic7ed
 log = logging.getLogger('thelogger')
 
 
-def SubtitleSeeker(ImdbId, lang, Wanted, sourceWebsites):
+def SubtitleSeeker(lang, Wanted, sourceWebsites):
     # Get the scored list for all SubtitleSeeker hits
 
-    SearchUrl = "%s&imdb=%s&season=%s&episode=%s&language=%s&return_type=json" % (autosub.API, ImdbId, Wanted['season'], Wanted['episode'], lang)
+    SearchUrl = "%s&imdb=%s&season=%s&episode=%s&language=%s&return_type=json" % (autosub.API, Wanted['ImdbId'], Wanted['season'], Wanted['episode'], lang)
     log.debug('getSubLinks: SubtitleSeeker request URL: %s' % SearchUrl)
     if autosub.Helpers.checkAPICallsSubSeeker(use=True):
         try:
@@ -53,7 +53,7 @@ def SubtitleSeeker(ImdbId, lang, Wanted, sourceWebsites):
     return scoreList
 
 
-def Addic7ed(a7ID , language, releaseDetails):
+def Addic7ed(language, releaseDetails):
 
     title      = releaseDetails['title']      if 'title'      in releaseDetails.keys() else None
     season     = releaseDetails['season']     if 'season'     in releaseDetails.keys() else None
@@ -62,6 +62,7 @@ def Addic7ed(a7ID , language, releaseDetails):
     releasegrp = releaseDetails['releasegrp'] if 'releasegrp' in releaseDetails.keys() else None
     source     = releaseDetails['source']     if 'source'     in releaseDetails.keys() else None
     codec      = releaseDetails['codec']      if 'codec'      in releaseDetails.keys() else None
+    a7ID       = releaseDetails['A7Id']       if 'codec'      in releaseDetails.keys() else None
 
     langs = u''
     if 'English' in language:
@@ -118,7 +119,7 @@ def Addic7ed(a7ID , language, releaseDetails):
     return scoreList
 
 
-def Opensubtitles(ImdbId, language, Wanted):
+def Opensubtitles(language, Wanted):
     if not Wanted:
         return None
     Data = {}
@@ -126,7 +127,7 @@ def Opensubtitles(ImdbId, language, Wanted):
         Data['sublanguageid'] = 'eng'
     else: 
         Data['sublanguageid']= 'dut'
-    Data['imdbid' ] = ImdbId
+    Data['imdbid' ] = Wanted['ImdbId']
     Data['season']  = Wanted['season']
     Data['episode'] = Wanted['episode']
     time.sleep(6)
@@ -158,19 +159,17 @@ def Opensubtitles(ImdbId, language, Wanted):
 
 
 
-def getSubLinks(ImdbId, a7_id, lang, releaseDetails):
+def getSubLinks(lang, releaseDetails):
     """
     Return all the hits that reach minmatchscore, sorted with the best at the top of the list
     Each element had the downloadlink, score, releasename, and source website)
     Matching is based on the provided release details.
 
     Keyword arguments:
-    ImdbId -- The IMDB id of the show
-    a7_id  -- The Addic7ed id of the show
     lang -- Language of the wanted subtitle, Dutch or English
-    releaseDetails -- Dict containing the quality, releasegrp, source season and episode.
+    releaseDetails -- Dict containing the ImdbId, A7Id, quality, releasegrp, source season and episode.
     """
-    log.debug("getSubLinks: Show ID: %s - Addic7ed ID: %s - Language: %s - Release Details: %s" % (ImdbId,a7_id,lang,releaseDetails))
+    log.debug("getSubLinks: Show ID: %s - Addic7ed ID: %s - Language: %s - Release Details: %s" % (releaseDetails['ImdbId'],releaseDetails['A7Id'],lang,releaseDetails))
     sourceWebsites, scoreListSubSeeker, scoreListAddic7ed, scoreListOpensubtitles, fullScoreList  = [],[],[],[],[]
     if autosub.PODNAPISILANG == lang or autosub.PODNAPISILANG == 'Both':
         sourceWebsites.append('podnapisi.net')
@@ -179,16 +178,16 @@ def getSubLinks(ImdbId, a7_id, lang, releaseDetails):
 
     # If one of his websites choosen call subtitleseeker
     if len(sourceWebsites) > 0:
-        scoreListSubSeeker = SubtitleSeeker(ImdbId, lang, releaseDetails, sourceWebsites)
+        scoreListSubSeeker = SubtitleSeeker(lang, releaseDetails, sourceWebsites)
         log.debug("getSubLinks: dump scorelist: %s" % scoreListSubSeeker)
 
     # Use Addic7ed if selected
-    if (autosub.ADDIC7EDLANG == lang or autosub.ADDIC7EDLANG == 'Both') and a7_id:
-        scoreListAddic7ed = Addic7ed(a7_id, lang, releaseDetails)
+    if (autosub.ADDIC7EDLANG == lang or autosub.ADDIC7EDLANG == 'Both') and releaseDetails['A7Id']:
+        scoreListAddic7ed = Addic7ed(lang, releaseDetails)
 
     # Use OpenSubtitles if selected
     if (autosub.OPENSUBTITLESLANG == lang or autosub.OPENSUBTITLESLANG == 'Both') and autosub.OPENSUBTITLESTOKEN:
-        scoreListOpensubtitles = Opensubtitles(ImdbId, lang, releaseDetails)
+        scoreListOpensubtitles = Opensubtitles(lang, releaseDetails)
 
     for list in [scoreListSubSeeker, scoreListAddic7ed, scoreListOpensubtitles]:
         if list: fullScoreList.extend(list)

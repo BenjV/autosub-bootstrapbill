@@ -35,14 +35,15 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 			<thead>
 				<tr>
 					<th class="center">Show name</th>
+					<th class="center">Imdb:A7 Id's</th>
 					<th class="center">Season</th>
 					<th class="center">Episode</th>
 					<th class="center">Source</th>
 					<th class="center">Quality</th>
 					<th class="center">Codec</th>
 					<th class="center">Group</th>
-					<th class="center">Language</th>
-					<th class="center">Time</th>
+					<th class="center">Lang</th>
+                    <th class="center">Time</th>
 					<th class="center">&nbsp;</th>
 				</tr>
 			</thead>
@@ -52,25 +53,26 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 #set $title_escaped = $cgi.escape($var['title'], True)
 		<tr>
 			<td align="left"><a data-placement="right" data-toggle="tooltip" data-original-title="$var['originalFileLocationOnDisk']">$var['title']</a></td>
+			<td>$var['DisplayIds']</td>
 			<td>$var['season']</td>
 			<td>$var['episode']</td>
 #if $type($var['source']) == UnicodeType:
-			<td>$var['source'].upper()</td>
+			<td>$var['source']</td>
 #else
 			<td>Unknown</td>
 #end if
 #if $type($var['quality']) == UnicodeType:
-			<td>$var['quality'].upper()</td>
+			<td>$var['quality']</td>
 #else
 			<td>Unknown</td>
 #end if
 #if $type($var['codec']) == UnicodeType:
-			<td>$var['codec'].upper()</td>
+			<td>$var['codec']</td>
 #else
 			<td>Unknown</td>
 #end if
 #if $type($var['releasegrp']) == UnicodeType:
-			<td>$var['releasegrp'].upper()</td>
+			<td>$var['releasegrp']</td>
 #else
 			<td>Unknown</td>
 #end if
@@ -83,12 +85,12 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 			<img src="$autosub.WEBROOT/images/English.png" alt="$lang" title="$lang">
 #end if
 #end for
-			</td>
 #if $type($var['timestamp']) == UnicodeType:
 			<td>$ConvertTimestamp($var['timestamp'])</td>
 #else
 			<td>Unknown</td>
 #end if	
+			</td>
 			<td>
 #set $SE = "S" + $var['season'] + "E" + $var['episode']		
 			<div class="navbar-collapse skipshow">
@@ -112,6 +114,8 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 			<tfoot>
 				<tr>
 					<th class="center">Show name</th>
+					<th class="center">ImdbId</th>
+					<th class="center">AddicId</th>
 					<th class="center">Season</th>
 					<th class="center">Episode</th>
 					<th class="center">Source</th>
@@ -119,7 +123,6 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 					<th class="center">Codec</th>
 					<th class="center">Group</th>
 					<th class="center">Language</th>
-					<th class="center">Time</th>
 					<th class="center">&nbsp;</th>
 				</tr>
 			</tfoot>
@@ -164,26 +167,26 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 			<tbody>
 #for $var in $lastdownload
 			<tr>
-				<td align="left"><a data-placement="right" data-toggle="tooltip" data-original-title="$var['subtitle'].upper()">$var['show_name']</a></td>
+				<td align="left"><a data-placement="right" data-toggle="tooltip" data-original-title="$var['subtitle']">$var['show_name']</a></td>
 				<td>$var['season']</td>
 				<td>$var['episode']</td>
 #if $type($var['source']) == UnicodeType:
-				<td>$var['source'].upper()</td>
+				<td>$var['source']</td>
 #else
 				<td>Unknown</td>
 #end if
 #if $type($var['quality']) == UnicodeType:
-				<td>$var['quality'].upper()</td>
+				<td>$var['quality']</td>
 #else
 				<td>Unknown</td>
 #end if
 #if $type($var['codec']) == UnicodeType:
-				<td>$var['codec'].upper()</td>
+				<td>$var['codec']</td>
 #else
 				<td>Unknown</td>
 #end if
 #if $type($var['releasegrp']) == UnicodeType:
-				<td>$var['releasegrp'].upper()</td>
+				<td>$var['releasegrp']</td>
 #else
 				<td>Unknown</td>
 #end if

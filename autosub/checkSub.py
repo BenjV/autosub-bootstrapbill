@@ -27,47 +27,30 @@ class checkSub():
     """
     def run(self):
         StartTime = time.time()
-        count = 0
+        autosub.DBCONNECTION = sqlite3.connect(autosub.DBFILE)
+        autosub.DBIDCACHE = idCache()
         del autosub.WANTEDQUEUE[:]
         autosub.scanDisk.scanDisk().run()
         log.info("checkSub: Starting round of checkSub." )
-        autosub.DBCONNECTION = sqlite3.connect(autosub.DBFILE)
-        autosub.DBIDCACHE = idCache()
+
         toDelete_wantedQueue = []
         if not Helpers.checkAPICallsTvdb() or not Helpers.checkAPICallsSubSeeker():            
             log.warning("checkSub: out of api calls")
             autosub.SEARCHTIME = time.time() - StartTime
             return
                              
-        # Initiate the Addic7ed API and check the current number of downloads
-        UseAddic= False
-        if autosub.ADDIC7EDUSER and autosub.ADDIC7EDPASSWD and autosub.ADDIC7EDLANG != 'None':
-            try:
-                # Sets autosub.DOWNLOADS_A7 and autosub.DOWNLOADS_A7MAX
-                # and gives a True response if it's ok to download from a7
-                autosub.ADDIC7EDAPI = autosub.Addic7ed.Addic7edAPI()
-                UseAddic= autosub.ADDIC7EDAPI.checkCurrentDownloads(logout=False)
-            except:
-                log.debug("checkSub: Couldn't connect with Addic7ed.com")
         # Initiate a session to OpenSubtitles and log in if OpenSubtitles is choosen
         if autosub.OPENSUBTITLESLANG != 'None' and autosub.OPENSUBTITLESUSER and autosub.OPENSUBTITLESPASSWD:
-            UseOpensubtitles = OpenSubtitlesLogin()
-        else:
-            UseOpensubtitles = False
-
-        if (autosub.SUBSCENELANG != 'None' or autosub.PODNAPISILANG != 'None'):
-            UseSubseeker = True
-        else:
-            UseSubseeker = False
-
+            OpenSubtitlesLogin()
 
         for index, wantedItem in enumerate(autosub.WANTEDQUEUE):
-            title = wantedItem['title']
-            season = wantedItem['season']
-            episode = wantedItem['episode']
+            title        = wantedItem['title']
+            season       = wantedItem['season']
+            episode      = wantedItem['episode']
             originalfile = wantedItem['originalFileLocationOnDisk']
-            languages = wantedItem['lang']
-                        
+            languages    = wantedItem['lang']
+            showid       = wantedItem['ImdbId']
+            a7_id        = wantedItem['A7Id']          
             
             if not Helpers.checkAPICallsTvdb() or not Helpers.checkAPICallsSubSeeker():
                 #Make sure that we are allow to connect to SubtitleSeeker and TvDB
@@ -91,7 +74,7 @@ class checkSub():
 
             
             #lets try to find a showid; no showid? skip this item
-            showid,a7_id = Helpers.getShowid(title, UseAddic)
+            #showid,a7_id = Helpers.getShowid(title, autosub.ADDIC7EDLOGGED_IN)
 
             log.debug("checkSub: ID's - IMDB: %s, Addic7ed: %s" %(showid,a7_id))
             if not showid:
@@ -102,13 +85,13 @@ class checkSub():
                 downloadItem['downlang'] = lang
 
                 # Check if Addic7ed download limit has been reached
-                if UseAddic and autosub.DOWNLOADS_A7 >= autosub.DOWNLOADS_A7MAX:
-                    UseAddic= False            
+                if autosub.ADDIC7EDLOGGED_IN and autosub.DOWNLOADS_A7 >= autosub.DOWNLOADS_A7MAX:
+                    autosub.ADDIC7EDLOGGED_IN = False
                     log.debug("checkSub: You have reached your 24h limit of %s  Addic7ed downloads!" % autosub.DOWNLOADS_A7MAX)
 
                 log.debug("checkSub: trying to get a downloadlink for %s, language is %s" % (originalfile, lang))
                 # get all links higher than the minmatch as input for downloadSub
-                allResults = autosub.getSubLinks.getSubLinks(showid, a7_id, lang, wantedItem)
+                allResults = autosub.getSubLinks.getSubLinks(lang, wantedItem)
                 
                 if not allResults:
                     log.debug("checkSub: no suitable subtitles were found for %s based on your minmatchscore" % downloadItem['originalFileLocationOnDisk'])
@@ -124,7 +107,7 @@ class checkSub():
                     log.debug("checkSub: destination filename %s" % downloadItem['destinationFileLocationOnDisk'])    
                     DownloadSub(downloadItem, allResults)
                 else:
-                    log.info('checkSub: The episode %s - Season %s Episode %s has no matching %s subtitles!' % (title, season, episode,lang))
+                    log.info('checkSub: The episode %s - Season %s Episode %s has no matching %s subtitles!' % (title, season, episode, lang))
                 
                 #Remove downloaded language
                 languages.remove(lang)
@@ -166,4 +149,4 @@ class checkSub():
 
         log.info("checkSub: Finished round of checkSub")
         autosub.SEARCHTIME = time.time() - StartTime
-        return
+        return True

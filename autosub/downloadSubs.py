@@ -167,7 +167,7 @@ def WriteSubFile(SubData,SubFileOnDisk):
             try:
                 log.debug("downloadSubs: Saving the subtitle file %s to the filesystem." % SubFileOnDisk)
                 fp = io.open(SubFileOnDisk, 'wb')
-                fp.write(SubData.encode('utf-8'))
+                fp.write(SubData.encode(autosub.SYSENCODING))
                 fp.close()
                 return True
             except Exception as error:

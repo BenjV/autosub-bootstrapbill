@@ -13,13 +13,14 @@ from library.requests.packages.chardet import detect
 
 # Autosub specific modules
 import autosub
-import autosub.Helpers
+import autosub.Helpers as Helpers
 from autosub.ProcessFilename import ProcessFilename
 # Settings
 log = logging.getLogger('thelogger')
 
 def walkDir(path):
     for dirname, dirnames, filenames in os.walk(path):
+
         log.debug("scanDisk: directory name: %s" %dirname)
         if re.search('_unpack_', dirname, re.IGNORECASE):
             log.debug("scanDisk: found a unpack directory, skipping")
@@ -144,6 +145,10 @@ def walkDir(path):
                             filenameResults['timestamp'] = unicode(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(os.path.getctime(filenameResults['originalFileLocationOnDisk']))))
                             filenameResults['lang'] = lang
                             filenameResults['container'] = ext
+                            filenameResults['ImdbId'],filenameResults['A7Id'] = Helpers.getShowid(filenameResults['title'],autosub.ADDIC7EDLOGGED_IN)
+                            Dsp = str(filenameResults['ImdbId'])+' : ' if filenameResults['ImdbId'] else '???  : '
+                            Dsp = Dsp + filenameResults['A7Id'] if filenameResults['A7Id'] else Dsp + ' ???'
+                            filenameResults['DisplayIds'] = Dsp
                             autosub.WANTEDQUEUE.append(filenameResults)
 
                         else:
@@ -163,7 +168,16 @@ class scanDisk():
     """
     def run(self):
         log.info("scanDisk: Starting round of local disk checking at %s" % autosub.ROOTPATH)
-
+        UseAddic= False
+        if autosub.ADDIC7EDUSER and autosub.ADDIC7EDPASSWD and autosub.ADDIC7EDLANG != 'None':
+            try:
+                # Sets autosub.DOWNLOADS_A7 and autosub.DOWNLOADS_A7MAX
+                # and gives a True response if it's ok to download from a7
+                autosub.ADDIC7EDAPI = autosub.Addic7ed.Addic7edAPI()
+                autosub.ADDIC7EDLOGGED_IN = autosub.ADDIC7EDAPI.checkCurrentDownloads(logout=False)
+            except:
+                log.debug("checkSub: Couldn't connect with Addic7ed.com")
+        autosub.ADDIC7EDLOGGED_IN = True
         seriespaths = [x.strip() for x in autosub.ROOTPATH.split(',')]
         for seriespath in seriespaths:
 
