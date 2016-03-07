@@ -1,4 +1,4 @@
-# Autosub autosub/Scheduler.py - https://code.google.com/p/autosub-bootstrapbill/
+#
 #
 # The Autosub Scheduler module
 #
@@ -29,6 +29,7 @@ class Scheduler:
         while True:
             if time.time() - self.lastrun > self.interval:
                 try:
+                    print 'scheduler run'
                     self.command.run()
                     self.lastrun = time.time() 
                 except:
@@ -37,8 +38,9 @@ class Scheduler:
             
             if self.runnow:
                 try:
+                    print 'schedular runnow'
                     self.command.run()
-                    self.lastrun = time.time()
+                    self.lastrun = time.time() 
                     self.runnow = False
                 except:
                     print traceback.format_exc()

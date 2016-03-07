@@ -61,8 +61,8 @@ def walkDir(path):
 
                     try:
                         if not isinstance(filename, unicode):
-                            coding = detect(filename)
-                            filename = unicode(filename.decode(coding))
+                            coding = detect(filename)['encoding']
+                            filename = unicode(filename.decode(coding),errors='replace')
                         correctedFilename = ''.join((c for c in unicodedata.normalize('NFD', filename) if unicodedata.category(c) != 'Mn'))
                         if filename != correctedFilename:
                             os.rename(os.path.join(dirname, filename), os.path.join(dirname, correctedFilename))

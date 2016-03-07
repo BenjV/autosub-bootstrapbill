@@ -27,7 +27,7 @@ try:
 except:
     import xml.etree.ElementTree as ET
 import library.requests as requests
-import library.requests.packages.chardet as chardet
+from library.requests.packages.chardet import detect
 import xmlrpclib, io, gzip
 # Settings
 log = logging.getLogger('thelogger')
@@ -60,9 +60,8 @@ def unzip(Session, url):
         # sometimes .nfo files are in the zip container
         if name.lower().endswith('srt'):
             try:
-                Codec = chardet.detect(zip.read(name))['encoding']
-                Codec = Codec.rsplit('|')[0]
-                fpr = io.TextIOWrapper(zip.open(name),encoding = Codec,newline='')
+                Codec = detect(zip.read(name))['encoding']
+                fpr = io.TextIOWrapper(zip.open(name),errors='replace',encoding = Codec,newline='')
                 SubData = fpr.read()
                 fpr.close()
                 if SubData:
@@ -87,7 +86,11 @@ def openSubtitles(SubId, SubCodec):
         return None 
 
     if Result['status'] == '200 OK':
-        CompressedData = Result['data'][0]['data'].decode('base64')
+        try:
+            CompressedData = Result['data'][0]['data'].decode('base64')
+        except Exception as error:
+            log.error('downloadSubs: Error decompressing sub from opensubtitles. Message is: %s' % error) 
+            return None
         if not CompressedData:
             log.debug('DownloadSub: No data returned from DownloadSubtitles API call. Skipping this one.')
             return None
@@ -95,11 +98,16 @@ def openSubtitles(SubId, SubCodec):
         # Opensubtitles makes no difference in UTF-8 and UTF8-SIG so we check with chardet the correct encoding
         # also if Opensubtile does not know the encoding
         if SubCodec == 'UTF-8' or SubCodec == 'Unknown' or not SubCodec:
-            SubCodec = chardet.detect(SubDataBytes)['encoding']
+            SubCodec = detect(SubDataBytes)['encoding']
+        else:
             SubCodec = SubCodec.rsplit('|')[0]
         if SubCodec:
-            SubCodec = SubCodec.rsplit('|')[0]
-            SubData = SubDataBytes.decode(SubCodec)
+            try:
+                
+                SubData = SubDataBytes.decode(SubCodec,errors='replace')
+            except Exception as error:
+                log.error('downloadSubs: Error decoding sub from opensubtitles. Message is: %s' % error) 
+                return None
             return(SubData)
         else:
             log.debug('Opensubtitles: Could not determine the codec from the sub so skipping it.')
@@ -167,7 +175,7 @@ def WriteSubFile(SubData,SubFileOnDisk):
             try:
                 log.debug("downloadSubs: Saving the subtitle file %s to the filesystem." % SubFileOnDisk)
                 fp = io.open(SubFileOnDisk, 'wb')
-                fp.write(SubData.encode(autosub.SYSENCODING))
+                fp.write(SubData.encode(autosub.SYSENCODING,errors='replace'))
                 fp.close()
                 return True
             except Exception as error:

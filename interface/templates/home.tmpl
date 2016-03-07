@@ -5,7 +5,7 @@
 #import re
 #from types import *
 #from autosub.Db import lastDown
-#from autosub.Helpers import ConvertTimestamp
+#from autosub.Helpers import ConvertTimestampTable
 #from autosub.Helpers import getAttr
 #from autosub.Helpers import DisplaySubtitle
 
@@ -36,14 +36,14 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 				<tr>
 					<th class="center">Show name</th>
 					<th class="center">Imdb:A7 Id</th>
-					<th class="center">Se</th>
-					<th class="center">Ep</th>
+					<th class="center">Season</th>
+					<th class="center">Episode</th>
 					<th class="center">Source</th>
 					<th class="center">Quality</th>
 					<th class="center">Codec</th>
 					<th class="center">Group</th>
 					<th class="center">Lang</th>
-					<th class="center">File Date/Time</th>
+					<th class="center">File Date</th>
 					<th class="center">&nbsp;</th>
 				</tr>
 			</thead>
@@ -87,7 +87,7 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 #end for
 			</td>
 #if $type($var['timestamp']) == UnicodeType:
-			<td>$ConvertTimestamp($var['timestamp'])</td>
+			<td>$ConvertTimestampTable($var['timestamp'])</td>
 #else
 			<td>Unknown</td>
 #end if	
@@ -122,7 +122,7 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 					<th class="center">Codec</th>
 					<th class="center">Group</th>
 					<th class="center">Lang</th>
-					<th class="center">File Date/Time</th>
+					<th class="center">File Date</th>
 					<th class="center">&nbsp;</th>
 				</tr>
 			</tfoot>
@@ -162,7 +162,7 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 					<th class="center">Codec</th>
 					<th class="center">Group</th>
 					<th class="center">Language</th>
-					<th class="center">File Date/Time</th>
+					<th class="center">File Date</th>
 					<th class="center">&nbsp;</th>
 				</tr>
 			</thead>
@@ -200,7 +200,7 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 				</td>
 
 #if $type($var['timestamp']) == UnicodeType:
-			<td>$ConvertTimestamp($var['timestamp'])</td>
+			<td>$ConvertTimestampTable($var['timestamp'])</td>
 #else
 			<td>Unknown</td>
 #end if	
@@ -235,7 +235,7 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 					<th class="center">Codec</th>
 					<th class="center">Group</th>
 					<th class="center">Language</th>
-					<th class="center">File Date/Time</th>
+					<th class="center">File Date</th>
 					<th class="center">&nbsp;</th>
 				</tr>
 			</tfoot>
