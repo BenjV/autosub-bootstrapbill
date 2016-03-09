@@ -414,7 +414,7 @@ def DisplaySubtitle(subtitlefile):
 def ConvertTimestamp(datestring):
     try:
         date_object = time.strptime(datestring, "%Y-%m-%d %H:%M:%S")
-        message = "%02i-%02i-%s %02i:%02i" %(date_object[2], date_object[1], str(date_object[0])[-2:], date_object[3], date_object[4])
+        message = "%02i-%02i-%04i %02i:%02i" %(date_object[2], date_object[1], date_object[0], date_object[3], date_object[4])
     except ValueError:
         message = "Timestamp error"
     return message

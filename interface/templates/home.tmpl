@@ -5,7 +5,7 @@
 #import re
 #from types import *
 #from autosub.Db import lastDown
-#from autosub.Helpers import ConvertTimestampTable
+#from autosub.Helpers import ConvertTimestamp
 #from autosub.Helpers import getAttr
 #from autosub.Helpers import DisplaySubtitle
 
@@ -35,7 +35,6 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 			<thead>
 				<tr>
 					<th class="center">Show name</th>
-					<th class="center">Imdb:A7 Id</th>
 					<th class="center">Season</th>
 					<th class="center">Episode</th>
 					<th class="center">Source</th>
@@ -43,6 +42,7 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 					<th class="center">Codec</th>
 					<th class="center">Group</th>
 					<th class="center">Lang</th>
+					<th class="center">Imdb:A7 Id</th>
 					<th class="center">File Date</th>
 					<th class="center">&nbsp;</th>
 				</tr>
@@ -53,7 +53,6 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 #set $title_escaped = $cgi.escape($var['title'], True)
 		<tr>
 			<td align="left"><a data-placement="right" data-toggle="tooltip" data-original-title="$var['originalFileLocationOnDisk']">$var['title']</a></td>
-                     <td>$var['DisplayIds']</td>
 			<td>$var['season']</td>
 			<td>$var['episode']</td>
 #if $type($var['source']) == UnicodeType:
@@ -86,8 +85,10 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 #end if
 #end for
 			</td>
+            <td>$var['DisplayIds']	
+
 #if $type($var['timestamp']) == UnicodeType:
-			<td>$ConvertTimestampTable($var['timestamp'])</td>
+			<td>$ConvertTimestamp($var['timestamp'])</td>
 #else
 			<td>Unknown</td>
 #end if	
@@ -114,7 +115,6 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 			<tfoot>
 				<tr>
 					<th class="center">Show name</th>
-					<th class="center">Imdb:A7 Id</th>
 					<th class="center">Season</th>
 					<th class="center">Episode</th>
 					<th class="center">Source</th>
@@ -122,6 +122,7 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 					<th class="center">Codec</th>
 					<th class="center">Group</th>
 					<th class="center">Lang</th>
+					<th class="center">Imdb:A7 Id</th>
 					<th class="center">File Date</th>
 					<th class="center">&nbsp;</th>
 				</tr>
@@ -154,14 +155,13 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 			<thead>
 				<tr>
 					<th class="center">Show name</th>
-					<th class="center">#</th>
 					<th class="center">Season</th>
 					<th class="center">Episode</th>
 					<th class="center">Source</th>
 					<th class="center">Quality</th>
 					<th class="center">Codec</th>
 					<th class="center">Group</th>
-					<th class="center">Language</th>
+					<th class="center">Lang</th>
 					<th class="center">File Date</th>
 					<th class="center">&nbsp;</th>
 				</tr>
@@ -170,7 +170,6 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 #for $var in $lastdownload
 			<tr>
 				<td align="left"><a data-placement="right" data-toggle="tooltip" data-original-title="$var['subtitle'].upper()">$var['show_name']</a></td>
-				<td>$var['id']</td>
 				<td>$var['season']</td>
 				<td>$var['episode']</td>
 #if $type($var['source']) == UnicodeType:
@@ -198,9 +197,8 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 					#set $imageurl = $autosub.WEBROOT + "/images/" + $var['language'] + ".png"
 					<img src="$imageurl" alt="$var['language']" title="$var['language']">
 				</td>
-
 #if $type($var['timestamp']) == UnicodeType:
-			<td>$ConvertTimestampTable($var['timestamp'])</td>
+			<td>$ConvertTimestamp($var['timestamp'])</td>
 #else
 			<td>Unknown</td>
 #end if	
@@ -227,14 +225,13 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 			<tfoot>
 				<tr>
 					<th class="center">Show name</th>
-					<th class="center">#</th>
 					<th class="center">Season</th>
 					<th class="center">Episode</th>
 					<th class="center">Source</th>
 					<th class="center">Quality</th>
 					<th class="center">Codec</th>
 					<th class="center">Group</th>
-					<th class="center">Language</th>
+					<th class="center">Lang</th>
 					<th class="center">File Date</th>
 					<th class="center">&nbsp;</th>
 				</tr>

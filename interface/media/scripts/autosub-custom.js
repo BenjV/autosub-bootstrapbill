@@ -5,7 +5,7 @@ jQuery.fn.dataTableExt.oSort['euro-date-pre']  = function(a,b) {
             var frDatea = $.trim(a).split(' ');
             var frTimea = frDatea[1].split(':');
             var frDatea2 = frDatea[0].split('-');
-            var x = (frDatea2[2] + frDatea2[1] + frDatea2[0] + frTimea[0] + frTimea[1] + frTimea[2]) * 1;
+            var x = (frDatea2[2] + frDatea2[1] + frDatea2[0] + frTimea[0] + frTimea[1]) * 1;
         } else {
             var x = 10000000000000; // = l'an 1000 ...
         } 
@@ -31,7 +31,7 @@ $(document).ready(function () {
 		"bPaginate": true,
 		"aLengthMenu": [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ],
 		"aaSorting": [ [ 0, "asc"], [ 1, "asc"], [ 2, "asc"] ],
-		"aoColumnDefs": [ { "aDataSort": [ 0, 1, 2 ], "aTargets": [ 0 ] }, { "sType": "euro-date", "aTargets": [ 8 ] }, { "bSortable": false, "aTargets": [ 9 ] } ]
+		"aoColumnDefs": [ { "aDataSort": [ 0, 1, 2 ], "aTargets": [ 0 ] }, { "sType": "euro-date", "aTargets": [ 9 ] }, { "bSortable": false, "aTargets": [ 7, 10 ] } ]
 	});
 
 	$('#downloaded').dataTable({ 
@@ -41,9 +41,9 @@ $(document).ready(function () {
 		"iCookieDuration": 60*60*24*365,
 		"bLengthChange": true,
 		"bPaginate": true,
-		"aLengthMenu": [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ],
+		"aLengthMenu": [ [5, 10, 25, 50, 100, -1], [5, 10, 25, 50, 100, "All"] ],
 		"aaSorting": [ [ 8, "desc" ] ],
-		"aoColumnDefs": [ { "aDataSort": [ 0, 1, 2 ], "aTargets": [ 0 ] }, { "sType": "euro-date", "aTargets": [ 8 ] }, { "bSortable": false, "aTargets": [ 9 ] } ]
+		"aoColumnDefs": [ { "aDataSort": [ 0, 1, 2 ], "aTargets": [ 0 ] }, { "sType": "euro-date", "aTargets": [ 8 ] }, { "bSortable": false, "aTargets": [ 7, 9 ] } ]
 	});
 	
     $('#testMail').click(function () {
