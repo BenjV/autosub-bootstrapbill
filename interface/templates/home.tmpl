@@ -85,7 +85,7 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 #end if
 #end for
 			</td>
-            <td>$var['DisplayIds']	
+            <td>$var['DisplayIds']</td>
 
 #if $type($var['timestamp']) == UnicodeType:
 			<td>$ConvertTimestamp($var['timestamp'])</td>
@@ -245,22 +245,12 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 		<hr>
 	</div>
 </div>
-		<div class="well well-sm center well-header"><b>Next Run</b></div>
+		<div class="well well-sm center well-header"><b>Next Search at:</b></div>
 		<div class="well well-sm center">
 		
 		<table class="table-nextrun">
+
 			<tr>
-				<td class="td-nextrun">ScanDisk</td>
-				<td class="td-nextrun">CheckSub</td>
-			</tr>
-			<tr>
-				<td class="td-nextrun">
-					#try
-					  $time.strftime('%H:%M:%S', $time.gmtime(($autosub.SCANDISK.interval - ($time.time() - $autosub.SCANDISK.lastrun) ))) <br>
-					#except
-					  Please wait...
-					#end try
-				</td>
 				<td class="td-nextrun">
 					#try
 					  $time.strftime('%H:%M:%S', $time.gmtime(($autosub.CHECKSUB.interval - ($time.time() - $autosub.CHECKSUB.lastrun) ))) <br>
