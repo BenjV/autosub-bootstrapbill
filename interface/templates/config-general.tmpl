@@ -130,6 +130,16 @@
 			<input type="text" class="form-control" name="logfile" value="$autosub.LOGFILE" placeholder="">
 			</div>
 		</div>
+
+		<div class="form-group">
+			<label for="SubCodec" class="col-sm-2 control-label">Codec for subfile <a data-placement="bottom" data-toggle="tooltip" data-original-title="Choose the codec for the subtitlefile. Windows or UTF-8(for linux mediaplayers)."><span class="glyphicon glyphicon-info-sign"></span></a></label>
+			<div class="col-sm-10">
+			<select name="subcodec" class="form-control">
+				<option value="windows-1252" #if $autosub.SUBCODEC == "windows-1252" then 'selected="selected"' else ""#>windows-1252</option>
+				<option value="utf-8" #if $autosub.SUBCODEC == "utf-8" then 'selected="selected"' else ""#>utf-8</option>
+			</select>
+			</div>
+		</div>	
 		
 		<div class="form-group">
 			<label for="Launchbrowser" class="col-sm-2 control-label">Launch Browser <a data-placement="bottom" data-toggle="tooltip" data-original-title="Should we start a browser every time Auto-Sub starts? This overwrites the commandline parameters."><span class="glyphicon glyphicon-info-sign"></span></a></label>

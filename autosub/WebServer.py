@@ -122,7 +122,7 @@ class Config:
 
     @cherrypy.expose  
     def saveConfig(self, subeng, checksub, skiphiddendirs, webdl, subnl, postprocesscmd, 
-                   path, logfile, rootpath, launchbrowser, fallbacktoeng, downloadeng, englishsubdelete, username, 
+                   path, logfile, rootpath, subcodec, launchbrowser, fallbacktoeng, downloadeng, englishsubdelete, username, 
                    password, webroot, skipshow, lognum, loglevelconsole, logsize, loglevel, 
                    webserverip, webserverport, usernamemapping, useraddic7edmapping, notifyen, notifynl, homelayoutfirst,
                    podnapisilang, subscenelang, opensubtitleslang, opensubtitlesuser, opensubtitlespasswd,
@@ -141,6 +141,7 @@ class Config:
         autosub.NOTIFYEN = notifyen
         autosub.NOTIFYNL = notifynl
         autosub.POSTPROCESSCMD = postprocesscmd
+        autosub.SUBCODEC = subcodec
         autosub.LAUNCHBROWSER = launchbrowser
         autosub.SKIPHIDDENDIRS = skiphiddendirs
         autosub.HOMELAYOUTFIRST = homelayoutfirst

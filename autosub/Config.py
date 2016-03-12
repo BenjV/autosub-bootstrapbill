@@ -120,6 +120,16 @@ def ReadConfig(configfile):
             print "Config ERROR: Variable LOGFILE is missing. This is required! Using 'AutoSubService.log' instead."
             autosub.LOGFILE = u"AutoSubService.log"
 
+        if cfg.has_option("config", "subcodec"):
+            autosub.SUBCODEC = cfg.get("config", "subcodec")
+        else:
+            autosub.SUBCODEC = u'windows-1252'
+        
+        if cfg.has_option("config", "configversion"):
+            autosub.CONFIGVERSION = int(cfg.get("config", "configversion"))
+        else:
+            autosub.CONFIGVERSION = 1
+
         if cfg.has_option("config", "postprocesscmd"):
             autosub.POSTPROCESSCMD = cfg.get("config", "postprocesscmd")
         
@@ -223,6 +233,7 @@ def ReadConfig(configfile):
         autosub.ADDIC7EDUSER = u""
         autosub.ADDIC7EDPASSWD = u""
         autosub.WEBDL = u"Both"
+        autosub.SUBCODEC = u'windows=1252'
 
     if cfg.has_section('logfile'):
         if cfg.has_option("logfile", "loglevel"):
@@ -949,6 +960,7 @@ def saveConfigSection():
     cfg.set(section, "launchbrowser", str(autosub.LAUNCHBROWSER))
     cfg.set(section, "skiphiddendirs", str(autosub.SKIPHIDDENDIRS))
     cfg.set(section, "webdl", autosub.WEBDL)
+    cfg.set(section, "subcodec", autosub.SUBCODEC)
     cfg.set(section, "homelayoutfirst", autosub.HOMELAYOUTFIRST)
     cfg.set(section, "englishsubdelete", str(autosub.ENGLISHSUBDELETE))
     cfg.set(section, "podnapisilang", autosub.PODNAPISILANG)

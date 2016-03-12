@@ -61,6 +61,8 @@ def unzip(Session, url):
         if name.lower().endswith('srt'):
             try:
                 Codec = detect(zip.read(name))['encoding']
+                if not 'UTF' in Codec.upper():
+                    Codec = u'windows-1252'
                 fpr = io.TextIOWrapper(zip.open(name),errors='replace',encoding = Codec,newline='')
                 SubData = fpr.read()
                 fpr.close()
@@ -99,19 +101,16 @@ def openSubtitles(SubId, SubCodec):
         # also if Opensubtile does not know the encoding
         if SubCodec == 'UTF-8' or SubCodec == 'Unknown' or not SubCodec:
             SubCodec = detect(SubDataBytes)['encoding']
+            if not 'UTF' in SubCodec.upper():
+                SubCodec = u'windows-1252'
         else:
-            SubCodec = SubCodec.rsplit('|')[0]
-        if SubCodec:
-            try:
-                
-                SubData = SubDataBytes.decode(SubCodec,errors='replace')
-            except Exception as error:
-                log.error('downloadSubs: Error decoding sub from opensubtitles. Message is: %s' % error) 
-                return None
-            return(SubData)
-        else:
-            log.debug('Opensubtitles: Could not determine the codec from the sub so skipping it.')
+            SubCodec = u'windows-1252'
+        try:
+            SubData = SubDataBytes.decode(u'windows-1252',errors='replace')
+        except Exception as error:
+            log.error('downloadSubs: Error decoding sub from opensubtitles. Message is: %s' % error) 
             return None
+        return(SubData)
     else:
         log.debug('Opensubtitles: Error from Opensubtitles downloadsubs API. Message : %s' % Result['status'])
         return None
@@ -175,7 +174,7 @@ def WriteSubFile(SubData,SubFileOnDisk):
             try:
                 log.debug("downloadSubs: Saving the subtitle file %s to the filesystem." % SubFileOnDisk)
                 fp = io.open(SubFileOnDisk, 'wb')
-                fp.write(SubData.encode(autosub.SYSENCODING,errors='replace'))
+                fp.write(SubData.encode(autosub.SUBCODEC,errors='replace'))
                 fp.close()
                 return True
             except Exception as error:

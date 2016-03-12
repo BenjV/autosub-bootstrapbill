@@ -567,8 +567,10 @@ class Addic7edAPI():
             log.error('Addic7edAPI: Expected srt file but got HTML; report this!')
             log.debug("Addic7edAPI: Response content: %s" % r.content)
             return None
-        r.encoding = r.apparent_encoding
-
+        if 'UTF' in r.apparent_encoding.upper():
+            r.encoding = r.apparent_encoding
+        else:
+            r.encoding = u'windows-1252'
         return r.text
     
     def checkCurrentDownloads(self, logout=True):      
@@ -599,8 +601,7 @@ class Addic7edAPI():
     
     def geta7ID(self,TvdbShowName, localShowName):
         # lookup official name and try to match with a7 show list
-        log.debug("Addic7edAPI: Resting for 30 seconds to prevent a ban")
-        time.sleep(30)
+
         try:
             fp   = urllib.urlopen('http://www.addic7ed.com/shows.php')
             html = fp.read()
