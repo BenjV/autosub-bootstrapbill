@@ -106,7 +106,7 @@ def openSubtitles(SubId, SubCodec):
         else:
             SubCodec = u'windows-1252'
         try:
-            SubData = SubDataBytes.decode(u'windows-1252',errors='replace')
+            SubData = SubDataBytes.decode(SubCodec,errors='replace')
         except Exception as error:
             log.error('downloadSubs: Error decoding sub from opensubtitles. Message is: %s' % error) 
             return None
