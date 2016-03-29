@@ -246,11 +246,12 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 	</div>
 </div>
 </div>
-		<div class="well well-sm center well-header"><font size="3"><b>Next run over 
+		<div class="well well-sm center well-header"><font size="3"><b>Time until next run: 
 			#try
-			  $time.strftime('%H', $time.gmtime(($autosub.CHECKSUB.interval - ($time.time() - $autosub.CHECKSUB.lastrun) )))lstrip('0') hours and 
-              $time.strftime('%M', $time.gmtime(($autosub.CHECKSUB.interval - ($time.time() - $autosub.CHECKSUB.lastrun) )))lstrip('0') minutes
+			  $int($time.strftime('%H', $time.gmtime(($autosub.CHECKSUB.interval - ($time.time() - $autosub.CHECKSUB.lastrun) )))) hours and 
+              $int($time.strftime('%M', $time.gmtime(($autosub.CHECKSUB.interval - ($time.time() - $autosub.CHECKSUB.lastrun) )))) minutes
 			#except
+            </b>
 			  Please wait...
 			#end try
              </b></font><br>
