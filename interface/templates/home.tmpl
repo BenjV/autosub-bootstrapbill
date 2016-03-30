@@ -34,15 +34,15 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 		<table id="wanted" class="table table-condensed table-hover table-striped">
 			<thead>
 				<tr>
-					<th class="center">Show name</th>
+					<th class="center col-sm-3">Show name</th>
 					<th class="center">Se</th>
 					<th class="center">Ep</th>
-					<th class="center">Source</th>
-					<th class="center">Qual</th>
+					<th class="center">Src</th>
+					<th class="center">Quality</th>
 					<th class="center">Codec</th>
 					<th class="center">Group</th>
-					<th class="center">Ln</th>
-					<th class="center">Imdb:A7 Id</th>
+					<th class="center">Lang</th>
+					<th class="center">Imdb : A7 Id</th>
 					<th class="center">File Date</th>
 					<th class="center">&nbsp;</th>
 				</tr>
@@ -85,7 +85,9 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 #end if
 #end for
 			</td>
-            <td>$var['DisplayIds']</td>
+#set $ImdbLink = "http://www.imdb.com/title/tt" + $var['ImdbId']
+#set $A7Link   = "http://www.addic7ed.com/show/" + $var['A7Id']
+            <td><a href=$ImdbLink target="_blank">$var['ImdbId']</a> : <a href=$A7Link target="_blank">$var['A7Id']</a></td>
 
 #if $type($var['timestamp']) == UnicodeType:
 			<td>$ConvertTimestamp($var['timestamp'])</td>
@@ -114,14 +116,14 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 		</tbody>
 			<tfoot>
 				<tr>
-					<th class="center">Show name</th>
+					<th class="center">show name</th>
 					<th class="center">Se</th>
 					<th class="center">Ep</th>
-					<th class="center">Source</th>
-					<th class="center">Qual</th>
+					<th class="center">Src</th>
+					<th class="center">Quality</th>
 					<th class="center">Codec</th>
 					<th class="center">Group</th>
-					<th class="center">Ln</th>
+					<th class="center">Lang</th>
 					<th class="center">Imdb:A7 Id</th>
 					<th class="center">File Date</th>
 					<th class="center">&nbsp;</th>
