@@ -34,7 +34,7 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 		<table id="wanted" class="table table-condensed table-hover table-striped">
 			<thead>
 				<tr>
-					<th class="center col-sm-3">Show name</th>
+					<th class="center">Show name</th>
 					<th class="center">Se</th>
 					<th class="center">Ep</th>
 					<th class="center">Src</th>
@@ -85,9 +85,21 @@ $autosub.WANTEDQUEUE.sort(key=$getAttr('title'))
 #end if
 #end for
 			</td>
-#set $ImdbLink = "http://www.imdb.com/title/tt" + $var['ImdbId']
-#set $A7Link   = "http://www.addic7ed.com/show/" + $var['A7Id']
-            <td><a href=$ImdbLink target="_blank">$var['ImdbId']</a> : <a href=$A7Link target="_blank">$var['A7Id']</a></td>
+#if $var['ImdbId']:
+	#set $ImdbLink = "http://www.imdb.com/title/tt" + $var['ImdbId']
+	#set $ImdbId = $var['ImdbId']
+#else
+	#set $ImdbLink ='http://www.imdb.com/'
+	#set $ImdbId = '---'
+#end if
+#if $var['A7Id']:
+	#set $A7Link   = "http://www.addic7ed.com/show/" + $var['A7Id']
+	#set $A7Id = $var['A7Id']
+#else
+	#set $A7Link   = "http://www.addic7ed.com/"
+	#set $A7Id = '---'
+#end if
+            <td><a href=$ImdbLink target="_blank">$ImdbId</a> : <a href=$A7Link target="_blank">$A7Id</a></td>
 
 #if $type($var['timestamp']) == UnicodeType:
 			<td>$ConvertTimestamp($var['timestamp'])</td>
