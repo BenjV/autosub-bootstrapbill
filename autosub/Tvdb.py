@@ -6,7 +6,8 @@
 
 import logging
 
-import urllib
+import urllib,requests
+from difflib import SequenceMatcher as SM
 try:
     import xml.etree.cElementTree as ET
 except:
@@ -19,68 +20,84 @@ import autosub.Helpers
 log = logging.getLogger('thelogger')
 
 
+
+def FindName(Url,Root,Tag):
+    Session = requests.Session()
+    try:
+        Result = Session.get(Url)
+    except:
+        return None
+    root = ET.fromstring(Result.content)
+    try:
+        for node in root.findall(Root):
+            try:
+                Found = node.find(Tag).text
+            except:
+                log.error("FindName: Could not find %s in %s on Tvdb URL: " % (Root,Tag,Url))
+                log.error("FindName: message is: " % error)
+                return None
+            if Found:
+                return Found
+            else:
+                log.error("Tvdb: Could not find %s in %s on Tvdb URL: " % (Root,Tag,Url))
+                return None
+    except Exception as error:
+        log.error("FindName: Could not find %s in %s on Tvdb URL: " % (Root,Tag,Url))
+        log.error("FindName: message is: " % error)
+        return None
+
 def getShowidApi(showName):
     """
     Search for the IMDB ID by using the TvDB API and the name of the show.
     Keyword arguments:
     showName -- Name of the show to search the showid for
     """
-    
-    api = autosub.IMDBAPI
-    
-    getShowIdUrl = "%sGetSeries.php?seriesname=%s" % (api, urllib.quote(showName.encode('utf8')))
-    log.debug("getShowidApi: TvDB API request for %s: %s" % (showName, getShowIdUrl))
-    if autosub.Helpers.checkAPICallsTvdb(use=True):
-        try:
-            tvdbapi = autosub.Helpers.API(getShowIdUrl)
-            dom = minidom.parse(tvdbapi.resp)
-            tvdbapi.resp.close()
-        except:
-            log.error("getShowidApi: The server returned an error for request %s" % getShowIdUrl)
-            return None, None, None
-        try:
-            Result = dom.getElementsByTagName('SeriesName')
-            Name = Result[0].firstChild.data if Result else u''
-            Result = dom.getElementsByTagName('IMDB_ID')
-            ImdbId = Result[0].firstChild.data[2:] if Result else u''
-        except:
-            return None,None
-        return ImdbId,Name
-    else:
-        log.error("API: out of api calls for TvDB API")
-        return None, None
+    Url = "%sGetSeries.php?seriesname=%s" % (autosub.IMDBAPI, urllib.quote(showName.encode('utf8')))
+    Session = requests.Session()
+    try:
+        Result = Session.get(Url)
+    except:
+        return None
+    root = ET.fromstring(Result.content)
+    ImdbId = None
+    HighName = None
+    HighScore = 0
+    try:
+        for node in root.findall('Series'):
+            try:
+                FoundName = node.find('SeriesName').text
+                Score = SM(None, FoundName, showName).ratio()
+                if Score > HighScore:
+                    ImdbId = None
+                    try:
+                        ImdbId = node.find('IMDB_ID').text[2:]
+                    except:
+                        ImdbId = None
+                    if ImdbId:
+                        HighScore = Score
+                        HighName = FoundName
+            except:
+                pass
+    except Exception as error:
+            log.error("getShowidApi: Could not find %s in %s on Tvdb URL: " % (Root,Tag,Url))
+            log.error("getShowidApi: message is: " % error)
+    return ImdbId,HighName
 
-def getShowName(imdbID):
+
+def getShowName(ImdbId):
     """
     Search for the official TV show name using the IMDB ID
     """
     
-    api = autosub.IMDBAPI
+    Url = autosub.IMDBAPI + 'GetSeriesByRemoteID.php?imdbid=' + ImdbId
+    return FindName(Url, 'Series', 'SeriesName')
+
     
-    getShowIdUrl = "%sGetSeriesByRemoteID.php?imdbid=%s" % (api, imdbID)
-    log.debug("getShowName: TvDB API request for imdbID %s %s" % (imdbID, getShowIdUrl))
-    if autosub.Helpers.checkAPICallsTvdb(use=True):
-        try:
-            tvdbapi = autosub.Helpers.API(getShowIdUrl)
-            dom = minidom.parse(tvdbapi.resp)
-            tvdbapi.resp.close()
-        except:
-            log.error("getShowName: The server returned an error for request %s" % getShowIdUrl)
-            return None
-        
-        if not dom or len(dom.getElementsByTagName('Series')) == 0:
-            return None
-        
-        for sub in dom.getElementsByTagName('Series'):
-            # Assume that first match is best, maybe adapt this in future
-            try:
-                TVShowName = sub.getElementsByTagName('SeriesName')[0].firstChild.data
-            except:
-                log.error("getShowName: Error while retrieving the official release name for %s." % imdbID)
-                #log.error("getShowName: Recommend to add the IMDB ID for %s manually for the time being." % imdbID)
-                return None    
-            return TVShowName
-    else:
-        log.error("API: out of api calls for TvDB API")
-        return None
     
+def GetEpisodeName(ImdbId,SeasonNum, EpisodeNum):
+    Session = requests.Session()
+    Url = autosub.IMDBAPI + 'GetSeriesByRemoteID.php?imdbid=' + ImdbId
+    SerieId = FindName(Url, 'Series', 'seriesid')
+
+    Url = "%sDECE3B6B5464C552/series/%s/default/%s/%s" % (autosub.IMDBAPI,SerieId,SeasonNum.lstrip('0'),EpisodeNum.lstrip('0'))
+    return FindName(Url,'Episode','EpisodeName')
