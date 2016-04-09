@@ -31,6 +31,7 @@ class checkSub():
         autosub.DBIDCACHE = idCache()
         del autosub.WANTEDQUEUE[:]
         autosub.scanDisk.scanDisk().run()
+        time.sleep(1)
         log.info("checkSub: Starting round of checkSub." )
 
         toDelete_wantedQueue = []
@@ -101,19 +102,20 @@ class checkSub():
                     downloadItem['destinationFileLocationOnDisk'] = nlsrtfile
                 elif lang == autosub.ENGLISH:
                     downloadItem['destinationFileLocationOnDisk'] = engsrtfile
-                    
+                DownLoaded = False  
                 if allResults:                   
                     log.info("checkSub: The episode %s - Season %s Episode %s has 1 or more matching subtitles, downloading it!" % (title, season, episode))
                     log.debug("checkSub: destination filename %s" % downloadItem['destinationFileLocationOnDisk'])    
-                    DownloadSub(downloadItem, allResults)
+                    DownLoaded = DownloadSub(downloadItem, allResults)
                 else:
                     log.info('checkSub: The episode %s - Season %s Episode %s has no matching %s subtitles!' % (title, season, episode, lang))
                 
-                #Remove downloaded language
-                languages.remove(lang)
+                #Remove downloaded language if downloaded
+                if DownLoaded:
+                    languages.remove(lang)
                 
-                if lang == autosub.DUTCH:
-                    if (autosub.FALLBACKTOENG and not autosub.DOWNLOADENG) and autosub.ENGLISH in languages:
+                if lang == autosub.DUTCH and DownLoaded:
+                    if autosub.FALLBACKTOENG and not autosub.DOWNLOADENG and autosub.ENGLISH in languages:
                         log.debug('checkSub: We found a Dutch subtitle and fallback is true. Removing the English subtitle from the wantedlist.')
                         languages.remove(autosub.ENGLISH)
                 
