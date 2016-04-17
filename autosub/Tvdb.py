@@ -1,5 +1,5 @@
 #
-# Autosub Tvdb.py -  https://github.com/Donny87/autosub-bootstrapbill
+# Autosub Tvdb.py 
 #
 # The Tvdb API module
 #
@@ -45,6 +45,7 @@ def FindName(Url,Root,Tag):
         log.error("FindName: Could not find %s in %s on Tvdb URL: " % (Root,Tag,Url))
         log.error("FindName: message is: " % error)
         return None
+    return None
 
 def getShowidApi(showName):
     """
@@ -62,6 +63,7 @@ def getShowidApi(showName):
     ImdbId = None
     HighName = None
     HighScore = 0
+    # Here we walk through al matches and try to find the best match.
     try:
         for node in root.findall('Series'):
             try:
@@ -81,6 +83,9 @@ def getShowidApi(showName):
     except Exception as error:
             log.error("getShowidApi: Could not find %s in %s on Tvdb URL: " % (Root,Tag,Url))
             log.error("getShowidApi: message is: " % error)
+    if ImdbId == u'1489904':
+        log.debug('getShowidAPI: Found a serie that is forbidden by Tvdb (1489904) so skipping it.')
+        return None, None
     return ImdbId,HighName
 
 

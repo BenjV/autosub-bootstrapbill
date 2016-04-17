@@ -30,7 +30,7 @@ $(document).ready(function () {
 		"bLengthChange": true,
 		"bPaginate": true,
 		"aLengthMenu": [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ],
-		"aaSorting": [ [ 0, "asc"], [ 1, "asc"], [ 2, "asc"] ],
+		"aaSorting": [ [ 9, "desc"] ],
 		"aoColumnDefs": [ { "aDataSort": [ 0, 1, 2 ], "aTargets": [ 0 ] }, { "sType": "euro-date", "aTargets": [ 9 ] }, { "bSortable": false, "aTargets": [ 4, 5, 7, 8, 10 ] } ]
 	});
 

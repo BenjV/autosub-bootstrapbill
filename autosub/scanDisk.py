@@ -1,4 +1,3 @@
-# Autosub Db.py - https://code.google.com/p/autosub-bootstrapbill/
 #
 # The Autosub scanDisk module
 #
@@ -123,6 +122,7 @@ def walkDir(path):
 
                 log.debug("scanDir: File %s is missing subtitle(s): %s" % (filename, ', '.join(map(str,lang))))
                 filenameResults = ProcessFilename(os.path.splitext(filename)[0], ext)
+
                 if 'title' in filenameResults.keys():
                     if 'season' in filenameResults.keys():
                         if 'episode' in filenameResults.keys():
@@ -145,10 +145,7 @@ def walkDir(path):
                             filenameResults['timestamp'] = unicode(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(os.path.getctime(filenameResults['originalFileLocationOnDisk']))))
                             filenameResults['lang'] = lang
                             filenameResults['container'] = ext
-                            filenameResults['ImdbId'],filenameResults['A7Id'] = Helpers.getShowid(filenameResults['title'],autosub.ADDIC7EDLOGGED_IN)
-                            Dsp = str(filenameResults['ImdbId'])+' : ' if filenameResults['ImdbId'] else '???  : '
-                            Dsp = Dsp + filenameResults['A7Id'] if filenameResults['A7Id'] else Dsp + ' ???'
-                            filenameResults['DisplayIds'] = Dsp
+                            filenameResults['ImdbId'],filenameResults['A7Id'], filenameResults['title'] = Helpers.getShowid(filenameResults['title'],autosub.ADDIC7EDLOGGED_IN)
                             autosub.WANTEDQUEUE.append(filenameResults)
 
                         else:

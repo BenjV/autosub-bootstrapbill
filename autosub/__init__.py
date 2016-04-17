@@ -3,6 +3,7 @@ import logging.handlers
 import time
 from autosub.version import autosubversion
 
+BOOTSTRAPVERSION='3.3.5'
 ROOTPATH=None
 FALLBACKTOENG=None
 DOWNLOADENG=None

@@ -1,4 +1,3 @@
-# Autosub Helpers.py - https://github.com/Donny87/autosub-bootstrapbill
 #
 # The Autosub helper functions
 #
@@ -158,73 +157,43 @@ def matchQuality(quality, item):
         return 1
 
 
-def scoreMatch(releasedict, release, quality, releasegrp, source, codec):
+def scoreMatch(release, wanted):
     """
     Return how high the match is. Currently 15 is the best match
     This function give the flexibility to change the most important attribute for matching or even give the user the possibility to set his own preference
-    release is the filename as it is in the result from subtitleseeker
-    If quality is matched, score increased with 4
-    If releasegrp is matched, score is increased with 1
+    release is the filename as it is in the result from used websites
     If source is matched, score is increased with 8
-    If releasegroup is matched, score is increased with 4
+    If quality is matched, score increased with 4
+    If codec is matched, score is increased with 2
+    If releasegroup is matched, score is increased with 1
     """
     score = 0
-    log.debug("scoreMatch: Giving a matchscore for: %r. Try to match it with Q: %r GRP: %r S: %r" % (releasedict, quality, releasegrp, source))
-    
-    releasesource = None
-    releasequality = None
-    releasereleasegrp = None
-    releasecodec = None
-    
-    if 'source' in releasedict.keys(): releasesource = releasedict['source']
-    if 'quality' in releasedict.keys(): releasequality = releasedict['quality']
-    if 'releasegrp' in releasedict.keys(): releasereleasegrp = releasedict['releasegrp']
-    if 'codec' in releasedict.keys(): releasecodec = releasedict['codec']
-    
-    if releasegrp and releasereleasegrp:
-        if releasereleasegrp == releasegrp:
-            score += 1
-    if source and releasesource:
-        if releasesource == source:
-            score += 8
-    if quality and releasequality:
-        if quality == releasequality:
+    if release['source']   and wanted['source']  and release['source']  == wanted['source']           :     score += 8
+    if release['quality'] and wanted['quality'] :
+        if release['quality'] == wanted['quality']: 
             score += 4
-    if codec and releasecodec:
-        if codec == releasecodec:
-            score += 2
-    
-    if not releasedict:
-        log.warning("scoreMatch: Something went wrong, ProcessFileName could not process the file, %s, please report this!" %release)
-        log.info("scoreMatch: Falling back to old matching system, to make sure you get your subtitle!")
-        if releasegrp:
-            if (re.search(re.escape(releasegrp), release, re.IGNORECASE)):
-                score += 1
-        if source:
-            if (re.search(re.escape(source), release, re.IGNORECASE)):
-                score += 8
-        if quality:
-            if (matchQuality(re.escape(quality), release)):
-                score += 4
-        if codec:
-            if (re.search(re.escape(codec), release, re.IGNORECASE)):
-                score += 2
-         
-    log.debug("scoreMatch: MatchScore is %s" % str(score))
+        elif wanted['quality'] == '720p' and  release['quality'] == '1080p':
+            score += 4
+        elif wanted['quality'] == '1080p'  and release['quality'] == '720p'  :
+            score += 4
+    if release['codec'] and wanted['codec'] and release['codec'] == wanted['codec']                    : score += 2
+    if release['releasegrp'] and wanted['releasegrp'] and release['releasegrp'] == wanted['releasegrp']: score += 1
     return score
-
 
 def Addic7edMapping(imdb_id):
     if imdb_id in autosub.USERADDIC7EDMAPPINGUPPER.keys():
         log.debug("nameMapping: found match in user's addic7edmapping for %s" % imdb_id)
         return autosub.USERADDIC7EDMAPPINGUPPER[imdb_id]
+    elif imdb_id in a7IdDict.keys():
+        log.debug("nameMapping: found match in system Addic7edIdmapping for %s" % imdb_id)
+        return a7IdDict[imdb_id]
 
 def nameMapping(showName):
     if showName.upper() in autosub.USERNAMEMAPPINGUPPER.keys():
         log.debug("nameMapping: found match in user's namemapping for %s" % showName)
         return autosub.USERNAMEMAPPINGUPPER[showName.upper()]
     elif showName.upper() in autosub.NAMEMAPPINGUPPER.keys():
-        log.debug("nameMapping: found match for %s" % showName)
+        log.debug("nameMapping: found match in system namemapping for %s" % showName)
         return autosub.NAMEMAPPINGUPPER[showName.upper()]
 
 def SkipShow(showName, season, episode):
@@ -283,7 +252,7 @@ def checkAPICallsSubSeeker(use=False):
 def checkAPICallsTvdb(use=False):
     """
     Checks if there are still API calls left
-    Set true if a API call is being made.
+    Set true if a API call can be made.
     """
     currentime = time.time()
     lastrun = autosub.APICALLSLASTRESET_TVDB
@@ -299,42 +268,49 @@ def checkAPICallsTvdb(use=False):
             autosub.APICALLS_TVDB-=1
         return True
     else:
+        log.debug('checkAPICallsTvdb: Out of API calls for Tvdb')
         return False
 
 def getShowid(ShowName, UseAddic):
-    AddicId = ImdbId = OsId = AddicIdMapping = ImdbNameMappingId = None
+    AddicId = ImdbId = OsId = AddicIdMapping = ImdbNameMappingId = TvdbShowName = None
     UpdateCache = False
     log.debug('getShowid: Trying to get IMDB, Addic7ed and OpenSubtitles ID for %s' %ShowName)
 
     # First we try the Namemapping
     ImdbNameMappingId = nameMapping(ShowName)
     # second we try the cache
-    ImdbId, AddicId, OsId = idCache().getId(ShowName)
     #Namemapping prevails over the cache info
     if ImdbNameMappingId:
-        # Check whether the Namemapping is an existing Imdb Id and if so find the official showname
-        TvdbShowName = Tvdb.getShowName(ImdbNameMappingId)
-        ImdbId = ImdbNameMappingId
+        #Try to other info in the cache
+        AddicId, TvdbShowName = idCache().getInfo(ImdbNameMappingId)
+        #Not in the cache, so we try Tvdb to find the formal showname
+        if not TvdbShowName and checkAPICallsTvdb():
+            TvdbShowName = Tvdb.getShowName(ImdbNameMappingId)
     else:
-        TvdbShowName = ShowName
-    if not ImdbId:
-        # Now we try Tvdb
+        # No mapping then we try the cache
+        ImdbId, AddicId, OsId = idCache().getId(ShowName)
+
+    if not (ImdbId or ImdbNameMappingId):
+    # still no ImdbId then we try Tvdb
         log.debug('getShowid: Trying TvdbID to find info')
-        ImdbId, TvdbShowName = Tvdb.getShowidApi(ShowName)
+        if checkAPICallsTvdb():
+            ImdbId, TvdbShowName = Tvdb.getShowidApi(ShowName)
         if ImdbId:
+            #Found a ImdbId on Tvdb try the cache for the other info.
             AddicId,CacheName = idCache().getInfo(ImdbId)
             if not CacheName:
                 UpdateCache = True
         else:
             log.debug('getShowid: No ImdbId found on Tvdb for %s.' % ShowName)
-            return None, None
+            return None, None, ShowName
 
     if UseAddic:
-        # check the namemapping
-        AddicNameMappingId = Addic7edMapping(ImdbId)
+        if ImdbNameMappingId:
+            AddicNameMappingId = Addic7edMapping(ImdbNameMappingId)
+        else:
+            AddicNameMappingId = Addic7edMapping(ImdbId)
         if AddicNameMappingId:
-            AddicId = AddicNameMappingId
-            log.debug('getShowid: Addic7ed ID found in Namemapping: %s' %AddicId)
+            log.debug('getShowid: Addic7ed ID found in Namemapping: %s' %AddicNameMappingId)
         else:
             if not AddicId:
                 #Try to find the Addice7ed Id on the show page of the Addic7ed website
@@ -344,12 +320,14 @@ def getShowid(ShowName, UseAddic):
                     UpdateCache = True
                 else:
                     log.debug('getShowid: Addic7ed ID not found.')
-
-
     if UpdateCache:
         idCache().setId(ImdbId, AddicId, OsId, TvdbShowName)
-    log.debug("getShowid: Returned ID's - IMDB: %s, Addic7ed: %s, OpenSubtitles: %s" %(ImdbId,AddicId,OsId))
-    return ImdbId, AddicId
+    
+    if ImdbNameMappingId: ImdbId = ImdbNameMappingId
+    if AddicNameMappingId: AddicId = AddicNameMappingId
+    if not TvdbShowName: TvdbShowName = ShowName
+    log.debug("getShowid: Returned ID's - IMDB: %s, Addic7ed: %s, ShowName: %s" %(ImdbId,AddicId,TvdbShowName))
+    return ImdbId, AddicId, TvdbShowName
 
 
 def DisplayLogFile(loglevel):

@@ -35,10 +35,6 @@ class checkSub():
         log.info("checkSub: Starting round of checkSub." )
 
         toDelete_wantedQueue = []
-        if not Helpers.checkAPICallsTvdb() or not Helpers.checkAPICallsSubSeeker():            
-            log.warning("checkSub: out of api calls")
-            autosub.SEARCHTIME = time.time() - StartTime
-            return
                              
         # Initiate a session to OpenSubtitles and log in if OpenSubtitles is choosen
         if autosub.OPENSUBTITLESLANG != 'None' and autosub.OPENSUBTITLESUSER and autosub.OPENSUBTITLESPASSWD:
@@ -51,13 +47,20 @@ class checkSub():
             originalfile = wantedItem['originalFileLocationOnDisk']
             languages    = wantedItem['lang']
             showid       = wantedItem['ImdbId']
-            a7_id        = wantedItem['A7Id']          
-            
-            if not Helpers.checkAPICallsTvdb() or not Helpers.checkAPICallsSubSeeker():
-                #Make sure that we are allow to connect to SubtitleSeeker and TvDB
-                log.warning("checkSub: out of api calls")
-                break
-            
+            a7_id        = wantedItem['A7Id']
+
+            #First we check we have enough info to try to find a sub else we skip this one
+            Skip = False
+            if   autosub.MINMATCHSCORE & 8 and not wantedItem['source']    : Skip = True
+            elif autosub.MINMATCHSCORE & 4 and not wantedItem['quality']   : Skip = True
+            elif autosub.MINMATCHSCORE & 2 and not wantedItem['codec']     : Skip = True
+            elif autosub.MINMATCHSCORE & 1 and not wantedItem['releasegrp']: Skip = True
+            elif not showid : Skip = True
+            if Skip:
+                log.debug('checkSub: Skipped for not meeting the minmatch score. File is: %s' % originalfile )
+                continue
+
+
             if autosub.SUBNL != "":
                 nlsrtfile = os.path.splitext(originalfile)[0] + u"." + autosub.SUBNL + u".srt"
             else:

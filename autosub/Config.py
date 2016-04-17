@@ -233,7 +233,7 @@ def ReadConfig(configfile):
         autosub.ADDIC7EDUSER = u""
         autosub.ADDIC7EDPASSWD = u""
         autosub.WEBDL = u"Both"
-        autosub.SUBCODEC = u'windows=1252'
+        autosub.SUBCODEC = u'windows-1252'
 
     if cfg.has_section('logfile'):
         if cfg.has_option("logfile", "loglevel"):
@@ -589,6 +589,7 @@ def ReadConfig(configfile):
             "chicago fire" : "2261391",
             "chicago fire (2012)" : "2261391",
             "chicago pd" : "2805096",
+            "chicago p.d" : "2805096",
             "Common Law 2012" :"1771072",
             "continuum" : "1954347",
             "covert affairs" :"1495708",

@@ -5,6 +5,8 @@
 #import sys
 #import os
 #import time
+#import library.requests as requests
+#import cherrypy
 #from autosub.version import autosubversion
 #from autosub.Addic7ed import Addic7edAPI
 
@@ -22,6 +24,10 @@
 		<div class="well well-sm">
 		<strong>GENERAL</strong>
 		<table cellpadding="0" cellspacing="0" border="0" width="100%">
+			<tr>
+				<td width="200px">Installation Location</td>
+				<td>$autosub.PATH</td>
+			</tr>
 			<tr>
 				<td width="200px">Config file</td>
 				<td>
@@ -60,6 +66,18 @@
 			<tr>
 				<td width="200px">Python location</td>
 				<td>$os.path.dirname($sys.executable)</td>
+			</tr>
+			<tr>
+				<td width="200px">Requests library version</td>
+				<td>$requests.__version__</td>
+			</tr>
+			<tr>
+				<td width="200px">CherryPy version</td>
+				<td>$cherrypy.__version__</td>
+			</tr>
+			<tr>
+				<td width="200px">Bootstrap version</td>
+				<td>$autosub.BOOTSTRAPVERSION</td>
 			</tr>
 		</table>
 		<hr>

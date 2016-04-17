@@ -7,17 +7,16 @@
 import autosub
 import logging
 from autosub.OpenSubtitles import OpenSubtitlesNoOp
+import library.requests as requests
 from bs4 import BeautifulSoup
 import zipfile
 from StringIO import StringIO
 import re 
 from urlparse import urljoin
 
-import os
+import os, shutil, errno, subprocess
 import time
-import tempfile
-import autosub
-
+from autosub.Tvdb import GetEpisodeName
 from autosub.Db import lastDown
 import autosub.notify as notify
 import autosub.Helpers
@@ -184,11 +183,113 @@ def WriteSubFile(SubData,SubFileOnDisk):
             log.debug('WriteSubFile: File is not a valid subtitle format. skipping it.')
     return False  
 
+def MyPostProcess(Wanted):
+    SubSpecs   = Wanted['destinationFileLocationOnDisk']
+    VideoSpecs = Wanted["originalFileLocationOnDisk"]
+    Language   = Wanted["downlang"]
+    SerieName  = Wanted["title"]
+    SeasonNum  = Wanted["season"]
+    EpisodeNum = Wanted["episode"]
+    ImdbId     = Wanted["ImdbId"]
+    DstRoot    = os.path.normpath('/volume1/video/Alleen Series')
+    ffmpegLoc  = os.path.normpath('ffmpeg')
+
+
+    log.debug('PostProcess: Starting Postprocess')
+    SeasonDir = 'Season ' + SeasonNum
+    EpisodeName = GetEpisodeName(ImdbId, SeasonNum, EpisodeNum).translate(None,'\0/:*?"<>|\\')
+    Head,VideoExt  = os.path.splitext(VideoSpecs)
+    Head,SubExt    = os.path.splitext(SubSpecs)
+    log.debug('PostProcess: EpisodeName is %s' % EpisodeName)
+
+    # Here we create the various file specifications
+    DstDir        = os.path.join(DstRoot, SerieName, SeasonDir)
+    DstVidSpecs   = os.path.join(DstDir, EpisodeNum + ' ' + EpisodeName + VideoExt)
+    TempFileSpecs = os.path.join(DstDir, EpisodeNum + ' ' + EpisodeName + '.tmp')
+    DstSubSpecs   = os.path.join(DstDir, EpisodeNum + ' ' + EpisodeName + SubExt)
+    Muxing = True
+
+    # Now we check whether the "Season" directory already exists
+    # if not we create it.
+    try:
+        os.makedirs(DstDir)
+    except OSError as exception:
+        if exception.errno != errno.EEXIST:
+            log.debug('PostProcess: Could not create destination folder')
+            return
+    log.debug('PostProcess: Destination Dir is %s' % DstDir)
+    # muxing is not possible for all containers only .mkv and .mp3 are supported
+    # if muxing is off, the video and the sub will be copied to the desitnation.
+    if VideoExt.lower() != '.mkv' and  VideoExt.lower() != '.mp4':
+        Muxing = False
+
+    # Here we set the language identifier for the sub during muxing
+    if Language == 'English':
+        LangId = 'language=eng'
+    else:
+        LangId = 'language=dut'
+
+    # Here we check whether the video file already exits and create the ffmpeg commandline.
+    # If this videofile already exists we conclude that this is a second subtitle and we mux the the video + audio + sub from that file + this sub into a temp file.
+    # afterwards we remove the origional file and rename this temp file with the original filename.
+    if os.path.isfile(DstVidSpecs):
+        SecondSub = True
+        ffmpegCmd = [ffmpegLoc,'-loglevel','error','-n','-i',DstVidSpecs,'-i',SubSpecs,'-c', 'copy' ,'-map','0:v', '-map','0:a', '-map','0:s', '-map','1:s','-metadata:s:s:1',LangId,TempFileSpecs]
+    else:
+        SecondSub = False
+        ffmpegCmd = [ffmpegLoc,'-loglevel','error','-n','-i',VideoSpecs,'-i',SubSpecs,'-c', 'copy' ,'-map','0:v', '-map','0:a', '-map','1:s','-metadata:s:s:0',LangId,DstVidSpecs]
+    log.debug('PostProcess: ffmpegCmd is %s' % ffmpegCmd)
+    if Muxing:
+        Merge = subprocess.Popen(ffmpegCmd, stderr = subprocess.PIPE)
+        output,error = Merge.communicate()
+        if error:
+            log.error("PostProcess: Error message from ffmpeg is: %s" % error)
+            # Remove possible leftovers from failed muxing.
+            RemoveFile = TempFileSpecs if SecondSub else DstVidSpecs
+            try:
+                os.remove(RemoveFile)
+            except:
+                pass
+        else:
+            if SecondSub and os.path.isfile(TempFileSpecs):
+                try:
+                    os.remove(DstVidSpecs)
+                    try:
+                        os.rename(TempFileSpecs, DstVidSpecs)
+                    except:
+                        log.debug("PostProcess:Problem renaming temp videofile after adding second sub.")
+                except:
+                    log.debug("PostProcess:Problem removing videofile after adding second sub.")
+            # remove the original file if the muxed one is in place
+            if os.path.isfile(DstVidSpecs) :
+                try:
+                    os.remove(VideoSpecs)       
+                except:
+                    log.debug("PostProcess:Error while removing the original videofile")
+    if not Muxing or error:
+        # If it is the second sub we only copy the sub to the destination
+        if SecondSub:
+            try:
+                shutil.copy2(SubSpecs,DstSubSpecs)
+            except Exception as error:
+                log.error("PostProcess: Problem moving subfile. Message is: %s" % error)
+                return
+        else:
+        # If it is the first sub we move the video to the destination and create an empty videofile on the source location
+        # also we copy the subfile to the destination 
+            try:
+                shutil.move(VideoSpecs,DstVidSpecs)
+                shutil.copy2(SubSpecs,DstSubSpecs)
+            except Exception as error:
+                    log.error("PostProcess: Problem moving files. Message is: %s" % error)
+                    return
+    return
+
 def DownloadSub(Wanted,SubList):    
     
     log.debug("downloadSubs: Starting DownloadSub function")    
    
-    log.debug("downloadSubs: Download dict seems OK. Dumping it for debug: %r" % Wanted) 
+    log.debug("downloadSubs: Download dict: %r" % Wanted) 
     destsrt = Wanted['destinationFileLocationOnDisk']
     destdir = os.path.split(destsrt)[0]
     if not os.path.exists(destdir):
@@ -237,6 +338,6 @@ def DownloadSub(Wanted,SubList):
         if postprocesserr:
             log.error("downloadSubs: PostProcess: %s" % postprocesserr)
             #log.debug("downloadSubs: PostProcess Output:% s" % postprocessoutput)
-    
+    #MyPostProcess(Wanted)
     log.debug('downloadSubs: Finished for %s' % Wanted["originalFileLocationOnDisk"])
     return True

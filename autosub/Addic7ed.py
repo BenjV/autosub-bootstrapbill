@@ -151,6 +151,7 @@ _rlsgrps_h264 = ['TLA',
 _rlsgrps_webdl=['BS',
                 'Coo7',
                 'CtrlHD',
+                'DEFLATE ',
                 'DRACULA',
                 'ECI',
                 'FiRE',
@@ -158,6 +159,7 @@ _rlsgrps_webdl=['BS',
                 'FUM',
                 'HWD',
                 'KiNGS',
+                'MAoS ',
                 'NFHD',
                 'NTb',
                 'Oosh',
@@ -531,17 +533,14 @@ class Addic7edAPI():
         time.sleep(30)
         try:
             r = self.session.get(self.server + url, timeout=15)
-        except requests.Timeout:
-            log.error('Addic7edAPI: Timeout after 15 seconds')
-            return None
-        except:
-            log.error('Addic7edAPI: Unexpected error: %s' % sys.exc_info()[0])
-            return None
+        except Exception as error:
+            log.error('Addic7edAPI: Unexpected error: %s' % error)
+            return None    
         
         if r.status_code > 399:
             log.error('Addic7edAPI: Request failed with status code %d' % r.status_code)
 
-        return r.text
+        return r.content
 
     def download(self, downloadlink):
         if not self.logged_in:
@@ -616,10 +615,10 @@ class Addic7edAPI():
         show_ids={}
         AddicName = u''
         for url in re.findall(r'<a href=[\'"]/show/?([^<]+)', html, flags=re.IGNORECASE):
-            AddicId = url.split("\">")[0].decode('utf-8')
+            AddicId = url.split("\">")[0]
             if AddicId.isdigit():
                 try:
-                    AddicName = url.split("\">")[1].decode('utf-8').replace('&amp;','&')
+                    AddicName = url.split("\">")[1].replace('&amp;','&').lower()
                     show_ids[AddicName] = AddicId
                 except:
                     pass
@@ -627,16 +626,16 @@ class Addic7edAPI():
         # here we make a list of possible combinations of names and suffixes
         SearchList = []
         #First the Tvdb show name from the parameterlist 
-        SearchList.append(TvdbShowName)
-
-        # If there is a suffix add the combinations of suffixes e.g. with and without ()
-        SearchName, Suffix = _getShow(TvdbShowName)
-        if Suffix:
-            SearchList.append(SearchName)
-            if '(' + Suffix +')' in TvdbShowName:
-                SearchList.append(SearchName + ' ' + Suffix)
-            else:
-                SearchList.append(SearchName + '(' + Suffix + ')')
+        if TvdbShowName:
+            SearchList.append(TvdbShowName)
+            # If there is a suffix add the combinations of suffixes e.g. with and without ()
+            SearchName, Suffix = _getShow(TvdbShowName)
+            if Suffix:
+                SearchList.append(SearchName)
+                if '(' + Suffix +')' in TvdbShowName:
+                    SearchList.append(SearchName + ' ' + Suffix)
+                else:
+                    SearchList.append(SearchName + '(' + Suffix + ')')
 
         # If the local show name is different then we do the same for that name
         if TvdbShowName != localShowName:
@@ -653,9 +652,9 @@ class Addic7edAPI():
 
         # Try all the combinations untill we find one
         for Name in SearchList:
-            if Name in show_ids:
-                log.debug("geta7IDApi: Addic7ed ID %s found using filename show name %s" % (show_ids[Name], localShowName))
-                return show_ids[Name]
+            if Name.lower() in show_ids:
+                log.debug("geta7IDApi: Addic7ed ID %s found using filename show name %s" % (show_ids[Name.lower()], localShowName))
+                return show_ids[Name.lower()]
 
         log.info('geta7ID: The show %s could not be found on the Addic7ed website. Please make an Addi7ed map!' % localShowName)
         return None
