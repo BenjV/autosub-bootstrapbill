@@ -167,17 +167,24 @@ def scoreMatch(release, wanted):
     If codec is matched, score is increased with 2
     If releasegroup is matched, score is increased with 1
     """
-    score = 0
-    if release['source']   and wanted['source']  and release['source']  == wanted['source']           :     score += 8
-    if release['quality'] and wanted['quality'] :
+
+    score = int(0)
+    if 'source' in release.keys() and 'source' in wanted.keys():
+        if release['source']  == wanted['source']:
+            score += 8
+    if 'quality' in release.keys() and 'quality' in wanted.keys():
         if release['quality'] == wanted['quality']: 
             score += 4
         elif wanted['quality'] == '720p' and  release['quality'] == '1080p':
             score += 4
         elif wanted['quality'] == '1080p'  and release['quality'] == '720p'  :
             score += 4
-    if release['codec'] and wanted['codec'] and release['codec'] == wanted['codec']                    : score += 2
-    if release['releasegrp'] and wanted['releasegrp'] and release['releasegrp'] == wanted['releasegrp']: score += 1
+    if 'codec' in release.keys() and 'codec' in wanted.keys():
+        if release['codec']  == wanted['codec']:
+            score += 2
+    if 'releasegrp' in release.keys() and 'releasegrp' in wanted.keys():
+        if release['releasegrp']  == wanted['releasegrp']:
+            score += 1
     return score
 
 def Addic7edMapping(imdb_id):
@@ -272,7 +279,7 @@ def checkAPICallsTvdb(use=False):
         return False
 
 def getShowid(ShowName, UseAddic):
-    AddicId = ImdbId = OsId = AddicIdMapping = ImdbNameMappingId = TvdbShowName = None
+    AddicId = ImdbId = OsId = AddicIdMapping = ImdbNameMappingId = TvdbShowName = AddicNameMappingId = None
     UpdateCache = False
     log.debug('getShowid: Trying to get IMDB, Addic7ed and OpenSubtitles ID for %s' %ShowName)
 
