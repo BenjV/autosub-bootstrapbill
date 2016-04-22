@@ -22,7 +22,7 @@ log = logging.getLogger('thelogger')
 
 def SubtitleSeeker(lang, Wanted, sourceWebsites):
     # Get the scored list for all SubtitleSeeker hits
-
+    scoreList = []
     SearchUrl = "%s&imdb=%s&season=%s&episode=%s&language=%s&return_type=json" % (autosub.API, Wanted['ImdbId'], Wanted['season'], Wanted['episode'], lang)
     log.debug('getSubLinks: SubtitleSeeker request URL: %s' % SearchUrl)
     if autosub.Helpers.checkAPICallsSubSeeker(use=True):
@@ -32,13 +32,14 @@ def SubtitleSeeker(lang, Wanted, sourceWebsites):
             SubseekerSession.close()
         except Exception as error:
             log.error("getSubLink: The server returned an error for request %s. Message is %s" % (SearchUrl,error))
-            return None
+            return scoreListscoreList
     else:
         log.error("API: out of api calls for SubtitleSeeker.com")
-        return None
-    scoreList = []
+        return scoreList
+    if not 'total_matches' in Result['results'].keys():
+        return scorelist
     if int(Result['results']['total_matches']) == 0:
-        return None
+        return scoreList
 
     for Item in Result['results']['items']:
         if (Item['site'].lower() == u'podnapisi.net' and (autosub.PODNAPISILANG == lang or autosub.PODNAPISILANG == 'Both')) or \
@@ -48,16 +49,19 @@ def SubtitleSeeker(lang, Wanted, sourceWebsites):
             score = autosub.Helpers.scoreMatch(NameDict,Wanted)
             if score >= autosub.MINMATCHSCORE:
                 scoreList.append({'score':score, 'url':Item['url'] , 'website':Item['site'].lower(), 'releaseName':Item['release'],'SubCodec':''})
+    log.debug('SubSeeker: Scorelist: %r' % scoreList)
     return scoreList
 
 
 def Addic7ed(language, Wanted):
 
+    scoreList = []
     langs = u''
     if 'English' in language:
         langs = '|1|'
     else:
         langs = '|17|'
+
     SearchUrl = '/ajax_loadShow.php?show=' + Wanted['A7Id'] + '&season=' + Wanted['season'].lstrip('0') + '&langs=' + langs + '&hd=0&hi=0'
     log.debug('getSubLinks: Addic7ed search URL: %s' % u'http://www.addic7ed.com' + SearchUrl)
 
@@ -67,47 +71,58 @@ def Addic7ed(language, Wanted):
             soup = BeautifulSoup(Result)
         except:
             log.debug("getSubLinks: Addic7ed no soup exception.")
-            return None
+            return scoreList
     else:
        return None
 
-    scoreList = []
-
     for row in soup('tr', class_='epeven completed'):
-        cells = row('td')
-        #Check if line is intact
-        if not len(cells) == 11:
-            continue
-        # filter on Completed, wanted language and episode
-        if int(cells[1].string) != int(Wanted['episode']):
-            continue
-        if cells[5].string != u'Completed':
-            continue
-        if cells[3].string.upper() != language.upper():
-            continue
-        details = cells[4].string.lower()
-        HD = True if cells[8].text else False
-        downloadUrl = cells[9].a['href']
-        hearingImpaired = True if cells[6].text else False
-        releasename = autosub.Addic7ed.makeReleaseName(details, Wanted['title'], Wanted['season'] , Wanted['episode'], hearingImpaired)
+        try:
+            cells = row('td')
+            #Check if line is intact
+            if not len(cells) == 11:
+                continue
+            # check on downloadlink, Completed, wanted language and episode
+            if int(cells[1].string) != int(Wanted['episode']):
+                continue
+            if cells[5].string != u'Completed':
+                continue
+            if not cells[3].string:
+                continue
+            elif cells[3].string.upper() != language.upper():
+                continue
+            if not cells[9].a['href']:
+                continue
+            else:
+                downloadUrl = cells[9].a['href']
+            if not cells[4].string:
+                continue
+            else:
+                details = cells[4].string.lower()
+            HD = True if cells[8].text else False
+            hearingImpaired = True if cells[6].text else False
+            releasename = autosub.Addic7ed.makeReleaseName(details, Wanted['title'], Wanted['season'] , Wanted['episode'], hearingImpaired)
 
-        # Return is a list of possible releases that match
-        versionDicts = autosub.Addic7ed.ReconstructRelease(details, HD)
-        if not versionDicts:
-            continue
-        for version in versionDicts:
-            score = autosub.Helpers.scoreMatch(version, Wanted)
-            if score >= autosub.MINMATCHSCORE:
-                releaseDict = {'score':score , 'releaseName':releasename, 'website':'addic7ed.com' , 'url':downloadUrl , 'HI':hearingImpaired}
-                scoreList.append(releaseDict)
-    log.debug('getSubLinks: Scorelist: %r' % scoreList)
+            # Return is a list of possible releases that match
+            versionDicts = autosub.Addic7ed.ReconstructRelease(details, HD)
+            if not versionDicts:
+                continue
+            for version in versionDicts:
+                score = autosub.Helpers.scoreMatch(version, Wanted)
+                if score >= autosub.MINMATCHSCORE:
+                    releaseDict = {'score':score , 'releaseName':releasename, 'website':'addic7ed.com' , 'url':downloadUrl , 'HI':hearingImpaired}
+                    scoreList.append(releaseDict)
+        except:
+            log.debug('getSubLinks: Exception from analysing episode page.')
+    log.debug('Addic7ed: Scorelist: %r' % scoreList)
     return scoreList
 
 
 def Opensubtitles(language, Wanted):
+    scoreList = []
     if not Wanted:
-        return None
+        return scoreList
     Data = {}
+    scoreList = []
     if 'English' in language:
         Data['sublanguageid'] = 'eng'
     else: 
@@ -117,17 +132,17 @@ def Opensubtitles(language, Wanted):
     Data['episode'] = Wanted['episode']
     time.sleep(6)
     if not OpenSubtitlesNoOp():
-        return None
+        return scoreList
     try:
         Subs = autosub.OPENSUBTITLESSERVER.SearchSubtitles(autosub.OPENSUBTITLESTOKEN, [Data])
     except:
         autosub.OPENSUBTITLESTOKEN = None
         log.error('Opensubtitles: Error from Opensubtitles search API')
-        return None
+        return scoreList
     if Subs['status'] != '200 OK':
         log.debug('Opensubtitles: No subs found for %s on Opensubtitles.' % Wanted['releaseName'])
-        return None
-    scoreList = []
+        return scoreList
+
     for Sub in Subs['data']:
         if int(Sub['SubBad']) > 0 or int(Sub['SubHearingImpaired']) > 0 or not Sub['MovieReleaseName'] or not Sub['IDSubtitleFile']:
             continue

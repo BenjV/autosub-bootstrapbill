@@ -183,7 +183,7 @@ def _returnHits(regex, version_info):
     # Should have been filter out beforehand
     results=[]
     if not version_info:
-        results.append(-1)        
+        results.append(u'')        
         return results
     
     for reg in regex:
@@ -539,7 +539,7 @@ class Addic7edAPI():
         
         if r.status_code > 399:
             log.error('Addic7edAPI: Request failed with status code %d' % r.status_code)
-
+            return None
         return r.content
 
     def download(self, downloadlink):
