@@ -20,81 +20,53 @@ def dict_factory(cursor, row):
 
 class idCache():
     def __init__(self):
-        self.query_getId    = "SELECT imdb_id, a7_id, os_id FROM show_id_cache WHERE show_name = ?"
-        self.query_getInfo  = "SELECT a7_id, show_name FROM show_id_cache WHERE imdb_id = ?"
+        self.query_getId    = "SELECT imdb_id, a7_id, tvdb_id, tvdb_name FROM show_id_cache WHERE show_name = ?"
+        self.query_getInfo  = "SELECT a7_id, tvdb_id,tvdb_name FROM show_id_cache WHERE imdb_id = ?"
         self.query_checkId  = "SELECT * FROM show_id_cache WHERE imdb_id = ?"
-        self.query_updateId = "UPDATE show_id_cache SET  a7_id = ?, os_id = ? WHERE imdb_id = ?"
-        self.query_setId    = "INSERT INTO show_id_cache VALUES (?,?,?,?)"
+        self.query_updateId = "UPDATE show_id_cache SET imdb_id =?, a7_id = ?, tvdb_id = ? tvdb_name =? WHERE show_name = ?"
+        self.query_setId    = "INSERT INTO show_id_cache VALUES (?,?,?,?,?)"
         self.cursor         = autosub.DBCONNECTION.cursor()
 
     def getId(self, ShowName):
         try:
-            Result = self.cursor.execute(self.query_getId, [ShowName.upper()]).fetchone()
+            Result = self.cursor.execute(self.query_getId, [ShowName]).fetchone()
             if Result:
-                return Result[0],Result[1],Result[2]
+                return Result[0],Result[1],Result[2], Result[3]
             else:
-                return None, None, None
+                return None, None, None, None
         except Exception as error:
             log.error('getId: Database error: %s' % error)
-            return None, None, None
+            return None, None, None, None
 
     def getInfo(self, ImdbId):
         try:
             Result = self.cursor.execute(self.query_getInfo, [ImdbId]).fetchone()
             if Result:
-                return Result[0],Result[1]
+                return Result[0],Result[1], Result[2]
             else:
-                return None, None
+                return None, None, None
         except Exception as error:
             log.error('getInfo: Database error: %s' % error)
-            return None, None
+            return None, None, None
 
-    def setId(self, ImdbId, AddicId, OsId, ShowName):
+    def setId(self, ShowName, ImdbId, AddicId, TvdbId, TvdbName):
         try:
-            Result = self.cursor.execute(self.query_checkId,[ImdbId]).fetchone()
+            Result = self.cursor.execute(self.query_checkId,[ShowName]).fetchone()
             if Result:
-                if AddicId and AddicId != Result[1] or OsId and OsId != Result[2]:
-                    self.cursor.execute(self.query_updateId,[AddicId, OsId, ImdbId])
+                if AddicId != Result[1]:
+                    self.cursor.execute(self.query_updateId,[ImdbId, AddicId, TvdbId, TvdbName, ShowName])
                     autosub.DBCONNECTION.commit()
             else:
-                self.cursor.execute(self.query_setId,[ImdbId, AddicId, OsId, ShowName.upper()])
+                self.cursor.execute(self.query_setId,[ShowName, ImdbId, AddicId, TvdbId, TvdbName])
                 autosub.DBCONNECTION.commit()
         except Exception as error:
             log.error('setId: Database error: %s' % error)
         return
 
-class EpisodeIdCache():
-    def __init__(self):
-        self.query_getId    = "SELECT episode_imdb_id FROM episode_cache WHERE serie_os_id =? AND season = ? AND episode =?"
-        self.query_setId    = "INSERT INTO episode_cache values (?,?,?,?)"
-        self.cursor         = autosub.DBCONNECTION.cursor()
-
-    def getId(self, SerieId, Season, Episode):
-        try:
-            Result =  self.cursor.execute(self.query_getId, [SerieId, Season, Episode]).fetchone()
-            if Result:
-                return Result[0]
-            else:
-                return None
-        except:
-            return None
-
-    def setId(self, EpisodeId, SerieId, Season, Episode):
-        try:
-            self.cursor.execute(self.query_setId,[EpisodeId, SerieId, Season, Episode])
-        except:
-            pass
-        return
-
-    def commit(self):
-        autosub.DBCONNECTION.commit()
-
 def flushcache():
     connection=sqlite3.connect(autosub.DBFILE)
     cursor=connection.cursor()
     cursor.execute("DELETE FROM show_id_cache")
-    connection.commit()
-    cursor.execute("DELETE FROM episode_cache")
     connection.commit()
     connection.close()
 
@@ -214,6 +186,14 @@ def upgradeDb(from_version, to_version):
             cursor.execute("DROP TABLE IF EXISTS a7id_cache;")
             cursor.execute("DROP TABLE IF EXISTS info;")
             cursor.execute("PRAGMA user_version = 8")
+        if from_version == 8 and to_version == 9:
+            # Drop Episode chache because we went from screenscraping to API for Opensubtitles
+            cursor.execute("DROP TABLE IF EXISTS episode_cache;")
+            # Drop this table because we need another layout
+            cursor.execute("DROP TABLE IF EXISTS show_id_cache;")
+            # Create this table again with the new layout.
+            cursor.execute("CREATE TABLE IF NOT EXISTS show_id_cache (show_name TEXT UNIQUE PRIMARY KEY, imdb_id TEXT, a7_id TEXT, tvdb_id TEXT, tvdb_name TEXT);")
+            cursor.execute("PRAGMA user_version = 9")
         connection.commit()
         connection.close()
         autosub.DBVERSION = version.dbversion

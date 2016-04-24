@@ -132,14 +132,14 @@ def ReadConfig(configfile):
 
         if cfg.has_option("config", "postprocesscmd"):
             autosub.POSTPROCESSCMD = cfg.get("config", "postprocesscmd")
-        
-        if cfg.has_option("config", "configversion"):
-            autosub.CONFIGVERSION = int(cfg.get("config", "configversion"))
-        else:
-            autosub.CONFIGVERSION = 1
             
         if cfg.has_option("config", "launchbrowser"):
             autosub.LAUNCHBROWSER = cfg.getboolean("config", "launchbrowser")
+
+        if cfg.has_option("config", "browserrefresh"):
+            autosub.BROWSERREFRESH = int(cfg.get("config", "browserrefresh"))
+        else:
+            autosub.BROWSERREFRESH = 1
         
         if cfg.has_option("config", "skiphiddendirs"):
             autosub.SKIPHIDDENDIRS = cfg.getboolean("config", "skiphiddendirs")
@@ -234,6 +234,7 @@ def ReadConfig(configfile):
         autosub.ADDIC7EDPASSWD = u""
         autosub.WEBDL = u"Both"
         autosub.SUBCODEC = u'windows-1252'
+        autosub.BROWSERREFRESH = 1
 
     if cfg.has_section('logfile'):
         if cfg.has_option("logfile", "loglevel"):
@@ -959,6 +960,7 @@ def saveConfigSection():
     cfg.set(section, "postprocesscmd", autosub.POSTPROCESSCMD)
     cfg.set(section, "configversion", str(autosub.CONFIGVERSION))
     cfg.set(section, "launchbrowser", str(autosub.LAUNCHBROWSER))
+    cfg.set(section, "browserrefresh", autosub.BROWSERREFRESH)
     cfg.set(section, "skiphiddendirs", str(autosub.SKIPHIDDENDIRS))
     cfg.set(section, "webdl", autosub.WEBDL)
     cfg.set(section, "subcodec", autosub.SUBCODEC)

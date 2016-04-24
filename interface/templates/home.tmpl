@@ -10,12 +10,12 @@
 
 #include $os.path.join($autosub.PATH.encode(), "interface/templates/header.tmpl")
 
-
-#set $RefreshCmd= "60;URL=" + $autosub.WEBROOT + "/home"
-<head>
-	<meta http-equiv="refresh" content=$RefreshCmd />
-</head>
-
+#if $autosub.BROWSERREFRESH != 0:
+	#set $RefreshCmd= str(autosub.BROWSERREFRESH*60) + ";URL=" + $autosub.WEBROOT + "/home"
+	<head>
+		<meta http-equiv="refresh" content=$RefreshCmd />
+	</head>
+#end if
 
 <div class="overview">
 #if $autosub.HOMELAYOUTFIRST == "Downloaded":

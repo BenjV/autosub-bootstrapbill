@@ -191,15 +191,16 @@ def MyPostProcess(Wanted):
     SeasonNum  = Wanted["season"]
     EpisodeNum = Wanted["episode"]
     ImdbId     = Wanted["ImdbId"]
+    TvdbId     = Wanted["TvdbId"]
     DstRoot    = os.path.normpath('/volume1/video/Alleen Series')
     ffmpegLoc  = os.path.normpath('ffmpeg')
 
 
     log.debug('PostProcess: Starting Postprocess')
-    SeasonDir = 'Season ' + SeasonNum
-    EpisodeName = GetEpisodeName(ImdbId, SeasonNum, EpisodeNum).translate(None,'\0/:*?"<>|\\')
-    Head,VideoExt  = os.path.splitext(VideoSpecs)
-    Head,SubExt    = os.path.splitext(SubSpecs)
+    SeasonDir     = 'Season ' + SeasonNum
+    EpisodeName   = GetEpisodeName(ImdbId,TvdbId,SeasonNum, EpisodeNum).translate(None,'\0/:*?"<>|\\')
+    Head,VideoExt = os.path.splitext(VideoSpecs)
+    Head,SubExt   = os.path.splitext(SubSpecs)
     log.debug('PostProcess: EpisodeName is %s' % EpisodeName)
 
     # Here we create the various file specifications

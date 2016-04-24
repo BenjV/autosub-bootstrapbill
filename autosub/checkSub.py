@@ -76,10 +76,6 @@ class checkSub():
             else:
                 engsrtfile = os.path.splitext(originalfile)[0] + u"." + autosub.SUBENG + u".srt"
 
-            
-            #lets try to find a showid; no showid? skip this item
-            #showid,a7_id = Helpers.getShowid(title, autosub.ADDIC7EDLOGGED_IN)
-
             log.debug("checkSub: ID's - IMDB: %s, Addic7ed: %s" %(showid,a7_id))
             if not showid:
                 continue

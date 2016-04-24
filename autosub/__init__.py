@@ -5,6 +5,8 @@ from autosub.version import autosubversion
 
 BOOTSTRAPVERSION='3.3.5'
 ROOTPATH=None
+BROWSERREFRESH = int(1)
+REFRESHSTRING = None
 FALLBACKTOENG=None
 DOWNLOADENG=None
 DOWNLOADDUTCH=None

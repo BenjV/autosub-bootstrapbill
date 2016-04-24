@@ -8,11 +8,11 @@
 import re
 
 #List with all the possible seperators used in filenaming
-seperator = u' ._-()[]{}'
+seperator = u', ._-()[]{}'
 
 show_regex = [re.compile("^((?P<title>.+?)[. _-]+)?s(?P<season>\d+)[x. _-]*e(?P<episode>\d+)[x. _-]*(?P<extra_info>.+)*", re.IGNORECASE),
-        re.compile("^((?P<title>.+?)[. _-]+)?(?P<season>\d+)x(?P<episode>\d+)[x. _-]*(?P<extra_info>.+)*", re.IGNORECASE),
-        re.compile("^((?P<title>.+?)[. _-]+)?(?P<season>\d{1,2})(?P<episode>\d{2})[x. _-]*(?P<extra_info>.+)*", re.IGNORECASE)]
+              re.compile("^((?P<title>.+?)[. _-]+)?(?P<season>\d+)x(?P<episode>\d+)[x. _-]*(?P<extra_info>.+)*", re.IGNORECASE),
+              re.compile("^((?P<title>.+?)[. _-]+)?(?P<season>\d{1,2})(?P<episode>\d{2})[x. _-]*(?P<extra_info>.+)*", re.IGNORECASE)]
 
 episode_regex = [re.compile("(s\d+[x. _-]*e\d+|\d+x\d+)", re.IGNORECASE)]
 
@@ -78,6 +78,7 @@ _releasegrps = ['0TV',
                 'CP',
                 'CtrlHD',
                 'CTU',
+                'DEFLATE',
                 'DEMAND',
                 'DIMENSION',
                 'DNR',
@@ -105,6 +106,7 @@ _releasegrps = ['0TV',
                 'LFF',
                 'LOL',
                 'LP',
+                'MAoS',
                 'Micromkv',
                 'MMI',
                 'MOMENTUM',

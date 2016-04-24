@@ -22,6 +22,8 @@ log = logging.getLogger('thelogger')
 
 
 def FindName(Url,Root,Tag):
+
+    Found = TvdbId = None
     Session = requests.Session()
     try:
         Result = Session.get(Url)
@@ -37,15 +39,19 @@ def FindName(Url,Root,Tag):
                 log.error("FindName: message is: " % error)
                 return None
             if Found:
-                return Found
+                try:
+                    TvdbId = node.find('seriesid').text
+                except:
+                    pass
+                return Found, TvdbId
             else:
                 log.error("Tvdb: Could not find %s in %s on Tvdb URL: " % (Root,Tag,Url))
-                return None
+                return None, None
     except Exception as error:
         log.error("FindName: Could not find %s in %s on Tvdb URL: " % (Root,Tag,Url))
         log.error("FindName: message is: " % error)
-        return None
-    return None
+        return None, None
+    return None, None
 
 def getShowidApi(showName):
     """
@@ -61,6 +67,7 @@ def getShowidApi(showName):
         return None
     root = ET.fromstring(Result.content)
     ImdbId = None
+    TvdbId = None
     HighName = None
     HighScore = 0
     # Here we walk through al matches and try to find the best match.
@@ -73,6 +80,7 @@ def getShowidApi(showName):
                     ImdbId = None
                     try:
                         ImdbId = node.find('IMDB_ID').text[2:]
+                        TvdbId = node.find('seriesid').text
                     except:
                         ImdbId = None
                     if ImdbId:
@@ -85,8 +93,8 @@ def getShowidApi(showName):
             log.error("getShowidApi: message is: " % error)
     if ImdbId == u'1489904':
         log.debug('getShowidAPI: Found a serie that is forbidden by Tvdb (1489904) so skipping it.')
-        return None, None
-    return ImdbId,HighName
+        return None, None, None
+    return ImdbId,TvdbId, HighName
 
 
 def getShowName(ImdbId):
@@ -99,10 +107,12 @@ def getShowName(ImdbId):
 
     
     
-def GetEpisodeName(ImdbId,SeasonNum, EpisodeNum):
+def GetEpisodeName(ImdbId,TvdbId, SeasonNum, EpisodeNum):
     Session = requests.Session()
-    Url = autosub.IMDBAPI + 'GetSeriesByRemoteID.php?imdbid=' + ImdbId
-    SerieId = FindName(Url, 'Series', 'seriesid')
+    if not TvdbId:
+        Url = autosub.IMDBAPI + 'GetSeriesByRemoteID.php?imdbid=' + ImdbId
+        SerieName, TvdbId = FindName(Url, 'Series', 'seriesid')
 
-    Url = "%sDECE3B6B5464C552/series/%s/default/%s/%s" % (autosub.IMDBAPI,SerieId,SeasonNum.lstrip('0'),EpisodeNum.lstrip('0'))
-    return FindName(Url,'Episode','EpisodeName')
+    Url = "%sDECE3B6B5464C552/series/%s/default/%s/%s" % (autosub.IMDBAPI,TvdbId,SeasonNum.lstrip('0'),EpisodeNum.lstrip('0'))
+    EpisodeName, TvdbId = FindName(Url,'Episode','EpisodeName')
+    return EpisodeName

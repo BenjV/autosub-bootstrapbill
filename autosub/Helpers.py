@@ -92,6 +92,14 @@ def CheckVersion():
         if versionnumber > running_versionnumber: #0.5.6 > 0.5.5
             return 3        
 
+def UpdateAutoSub():
+    '''
+    Update Autosub.
+    return message for user.
+    '''
+    Message = 'Autosub is goining to update itself now...'
+    return Message
+
 def CleanSerieName(series_name):
     """Clean up series name by removing any . and _
     characters, along with any trailing hyphens.
@@ -279,7 +287,7 @@ def checkAPICallsTvdb(use=False):
         return False
 
 def getShowid(ShowName, UseAddic):
-    AddicId = ImdbId = OsId = AddicIdMapping = ImdbNameMappingId = TvdbShowName = AddicNameMappingId = None
+    AddicId = ImdbId = TvdbId = AddicIdMapping = ImdbNameMappingId = TvdbShowName = AddicNameMappingId = None
     UpdateCache = False
     log.debug('getShowid: Trying to get IMDB, Addic7ed and OpenSubtitles ID for %s' %ShowName)
 
@@ -288,28 +296,28 @@ def getShowid(ShowName, UseAddic):
     # second we try the cache
     #Namemapping prevails over the cache info
     if ImdbNameMappingId:
-        #Try to other info in the cache
-        AddicId, TvdbShowName = idCache().getInfo(ImdbNameMappingId)
+        #Try to find other info in the cache
+        AddicId, TvdbId, TvdbShowName = idCache().getInfo(ImdbNameMappingId)
         #Not in the cache, so we try Tvdb to find the formal showname
         if not TvdbShowName and checkAPICallsTvdb():
-            TvdbShowName = Tvdb.getShowName(ImdbNameMappingId)
+            TvdbShowName, TvdbId = Tvdb.getShowName(ImdbNameMappingId)
     else:
         # No mapping then we try the cache
-        ImdbId, AddicId, OsId = idCache().getId(ShowName)
+        ImdbId, AddicId, TvdbId, TvdbShowName = idCache().getId(ShowName.upper())
 
     if not (ImdbId or ImdbNameMappingId):
     # still no ImdbId then we try Tvdb
         log.debug('getShowid: Trying TvdbID to find info')
         if checkAPICallsTvdb():
-            ImdbId, TvdbShowName = Tvdb.getShowidApi(ShowName)
+            ImdbId, TvdbId, TvdbShowName = Tvdb.getShowidApi(ShowName)
         if ImdbId:
             #Found a ImdbId on Tvdb try the cache for the other info.
-            AddicId,CacheName = idCache().getInfo(ImdbId)
+            AddicId,CacheTvdbId, CacheName = idCache().getInfo(ImdbId)
             if not CacheName:
                 UpdateCache = True
         else:
             log.debug('getShowid: No ImdbId found on Tvdb for %s.' % ShowName)
-            return None, None, ShowName
+            return None, None, None, ShowName
 
     if UseAddic:
         if ImdbNameMappingId:
@@ -328,13 +336,12 @@ def getShowid(ShowName, UseAddic):
                 else:
                     log.debug('getShowid: Addic7ed ID not found.')
     if UpdateCache:
-        idCache().setId(ImdbId, AddicId, OsId, TvdbShowName)
-    
+        idCache().setId(TvdbShowName.upper(), ImdbId, AddicId, TvdbId, TvdbShowName)
     if ImdbNameMappingId: ImdbId = ImdbNameMappingId
     if AddicNameMappingId: AddicId = AddicNameMappingId
     if not TvdbShowName: TvdbShowName = ShowName
     log.debug("getShowid: Returned ID's - IMDB: %s, Addic7ed: %s, ShowName: %s" %(ImdbId,AddicId,TvdbShowName))
-    return ImdbId, AddicId, TvdbShowName
+    return ImdbId, AddicId, TvdbId, TvdbShowName
 
 
 def DisplayLogFile(loglevel):

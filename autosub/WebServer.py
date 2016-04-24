@@ -121,7 +121,7 @@ class Config:
         return str(tmpl)
 
     @cherrypy.expose  
-    def saveConfig(self, subeng, checksub, skiphiddendirs, webdl, subnl, postprocesscmd, 
+    def saveConfig(self, subeng, checksub, browserrefresh, skiphiddendirs, webdl, subnl, postprocesscmd, 
                    path, logfile, rootpath, subcodec, launchbrowser, fallbacktoeng, downloadeng, englishsubdelete, username, 
                    password, webroot, skipshow, lognum, loglevelconsole, logsize, loglevel, 
                    webserverip, webserverport, usernamemapping, useraddic7edmapping, notifyen, notifynl, homelayoutfirst,
@@ -155,7 +155,7 @@ class Config:
         autosub.ADDIC7EDUSER = addic7eduser
         autosub.ADDIC7EDPASSWD = addic7edpasswd.replace("%","%%")
         autosub.WEBDL = webdl
-        
+        autosub.BROWSERREFRESH = browserrefresh
         autosub.MINMATCHSCORE = 0
         if mmssource:
             autosub.MINMATCHSCORE += 8
@@ -275,7 +275,7 @@ class Config:
         elif checkversion == 4:
             message = 'What are you doing here??? It is time to upgrade!'
         else:
-            message = 'Something went wrong there, is Google-Project reachable?<br> Or are you running a really old release?'
+            message = 'Something went wrong there, is the git-hub reachable?<br> Or are you running a really old release?'
 
         tmpl = PageTemplate(file="interface/templates/home.tmpl")
         tmpl.message = message
@@ -284,6 +284,16 @@ class Config:
         
         return str(tmpl)   
     
+    @cherrypy.expose
+    def UpdateAutoSub(self):
+        message = autosub.Helpers.UpdateAutoSub()    
+
+        tmpl = PageTemplate(file="interface/templates/home.tmpl")
+        tmpl.message = message
+        tmpl.displaymessage = "Yes"
+        tmpl.modalheader = "Information"
+        return str(tmpl)
+
     @cherrypy.expose
     def testPushalot(self, pushalotapi):
         

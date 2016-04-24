@@ -145,7 +145,7 @@ def walkDir(path):
                             filenameResults['timestamp'] = unicode(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(os.path.getctime(filenameResults['originalFileLocationOnDisk']))))
                             filenameResults['lang'] = lang
                             filenameResults['container'] = ext
-                            filenameResults['ImdbId'],filenameResults['A7Id'], filenameResults['title'] = Helpers.getShowid(filenameResults['title'],autosub.ADDIC7EDLOGGED_IN)
+                            filenameResults['ImdbId'],filenameResults['A7Id'], filenameResults['TvdbId'], filenameResults['title'] = Helpers.getShowid(filenameResults['title'],autosub.ADDIC7EDLOGGED_IN)
                             autosub.WANTEDQUEUE.append(filenameResults)
 
                         else:
@@ -174,7 +174,8 @@ class scanDisk():
                 autosub.ADDIC7EDLOGGED_IN = autosub.ADDIC7EDAPI.checkCurrentDownloads(logout=False)
             except:
                 log.debug("checkSub: Couldn't connect with Addic7ed.com")
-        autosub.ADDIC7EDLOGGED_IN = True
+        else:
+            autosub.ADDIC7EDLOGGED_IN = False
         seriespaths = [x.strip() for x in autosub.ROOTPATH.split(',')]
         for seriespath in seriespaths:
 
