@@ -22,7 +22,7 @@ class idCache():
     def __init__(self):
         self.query_getId    = "SELECT imdb_id, a7_id, tvdb_id, tvdb_name FROM show_id_cache WHERE show_name = ?"
         self.query_getInfo  = "SELECT a7_id, tvdb_id,tvdb_name FROM show_id_cache WHERE imdb_id = ?"
-        self.query_checkId  = "SELECT * FROM show_id_cache WHERE imdb_id = ?"
+        self.query_checkId  = "SELECT * FROM show_id_cache WHERE show_name = ?"
         self.query_updateId = "UPDATE show_id_cache SET imdb_id =?, a7_id = ?, tvdb_id = ? tvdb_name =? WHERE show_name = ?"
         self.query_setId    = "INSERT INTO show_id_cache VALUES (?,?,?,?,?)"
         self.cursor         = autosub.DBCONNECTION.cursor()
@@ -53,9 +53,8 @@ class idCache():
         try:
             Result = self.cursor.execute(self.query_checkId,[ShowName]).fetchone()
             if Result:
-                if AddicId != Result[1]:
-                    self.cursor.execute(self.query_updateId,[ImdbId, AddicId, TvdbId, TvdbName, ShowName])
-                    autosub.DBCONNECTION.commit()
+                self.cursor.execute(self.query_updateId,[ImdbId, AddicId, TvdbId, TvdbName, ShowName])
+                autosub.DBCONNECTION.commit()
             else:
                 self.cursor.execute(self.query_setId,[ShowName, ImdbId, AddicId, TvdbId, TvdbName])
                 autosub.DBCONNECTION.commit()

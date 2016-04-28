@@ -97,7 +97,8 @@ def UpdateAutoSub():
     Update Autosub.
     return message for user.
     '''
-    Message = 'Autosub is goining to update itself now...'
+    Message = 'Not yet implemented!!!'
+    #Message = 'Autosub is goining to update itself now...'
     return Message
 
 def CleanSerieName(series_name):
