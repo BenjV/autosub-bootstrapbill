@@ -98,9 +98,10 @@ def openSubtitles(SubId, SubCodec):
         SubDataBytes = gzip.GzipFile(fileobj=io.BytesIO(CompressedData)).read()
         # Opensubtitles makes no difference in UTF-8 and UTF8-SIG so we check with chardet the correct encoding
         # also if Opensubtile does not know the encoding
-        if SubCodec == 'UTF-8' or SubCodec == 'Unknown' or not SubCodec:
-            SubCodec = detect(SubDataBytes)['encoding']
-            if not 'UTF' in SubCodec.upper():
+        if SubCodec:
+            if 'UTF' in SubCodec.upper() or SubCodec == 'Unknown':
+                SubCodec = detect(SubDataBytes)['encoding']
+            if not SubCodec:
                 SubCodec = u'windows-1252'
         else:
             SubCodec = u'windows-1252'
