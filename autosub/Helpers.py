@@ -84,17 +84,16 @@ def UpdateAutoSub():
         return message
 
     # Piece of Code to let you test the reboot of autosub after an update, without actually updating anything
-    RestartTest = False
+    RestartTest = True
     if RestartTest:
         log.debug('UpdateAutoSub: Module is in restart Test mode')
+        args = []
         args = sys.argv[:]
         args.insert(0, sys.executable)
-        if sys.platform == 'win32':
-            args = ['"%s"' % arg for arg in args]
-        args.append('-l')
-        args.append('-u1')
-        log.debug('C: Python exec arguments are %s,  %s' %(sys.executable,args))
-        time.sleep(90)
+        #if sys.platform == 'win32':
+        #    args = ['"%s"' % arg for arg in args]
+        args.append('-u')
+        log.debug('UpdateAutoSub: Python exec arguments are %s' %(args))
         os.execv(sys.executable, args)
     # Get the version number from github
     GithubVersion = CheckVersion()
@@ -141,12 +140,12 @@ def UpdateAutoSub():
         except Exception as error:
             log.error('UpdateAutoSub: Problem removing old release folder. Error is: %s' % error)
             return error   
-
+    args =[]
     args = sys.argv[:]
     args.insert(0, sys.executable)
-    if sys.platform == 'win32':
-        args = ['"%s"' % arg for arg in args]
-    args.append('-u1')
+    #if sys.platform == 'win32':
+    #    args = ['"%s"' % arg for arg in args]
+    args.append('-u')
     log.info('UpdateAutoSub: Update to version %s. Now restarting autosub...' % GithubVersion)
     log.debug('UpdateAutoSub: Python exec arguments are %s,  %s' %(sys.executable,args))
     os.execv(sys.executable, args)

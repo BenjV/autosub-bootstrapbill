@@ -122,7 +122,7 @@ def start():
 
     cherrypy.server.wait()
     
-    if autosub.LAUNCHBROWSER and not autosub.UPDATED:
+    if autosub.LAUNCHBROWSER or autosub.UPDATED:
         launchBrowser()
         autosub.UPDATED = False
 

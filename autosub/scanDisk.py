@@ -101,6 +101,7 @@ def walkDir(path):
                     else:
                         # If the Dutch subtitle not skipped and doesn't exist, then add it to the wanted list
                         lang.append(autosub.DUTCH)
+
                 if autosub.DOWNLOADENG or (autosub.FALLBACKTOENG and autosub.DOWNLOADDUTCH):
                     Skipped = False
                     for SkipItem in SkipListEN:
@@ -114,8 +115,9 @@ def walkDir(path):
                         log.debug("scanDir: %s skipped because the English subtitle already exists" % filename) 
                     else:
                         # If the Dutch subtitle not skipped and doesn't exist, then add it to the wanted list
-                        if autosub.DOWNLOADENG or ( autosub.FALLBACKTOENG and autosub.DOWNLOADDUTCH and not os.path.exists(os.path.join(dirname, srtfilenl))):
-                            lang.append(autosub.ENGLISH)
+                        if not os.path.exists(os.path.join(dirname, srtfileeng)):
+                            if autosub.DOWNLOADENG or ( autosub.FALLBACKTOENG and autosub.DOWNLOADDUTCH ):
+                                lang.append(autosub.ENGLISH)
                 if not lang:
                     # nothing to do for this file
                     continue

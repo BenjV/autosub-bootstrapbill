@@ -4,6 +4,7 @@ import os
 import signal
 import time
 import locale
+import platform
 
 # Root path
 base_path = os.path.dirname(os.path.abspath(__file__))
@@ -52,11 +53,12 @@ def main(argv=None):
     if not autosub.SYSENCODING or autosub.SYSENCODING in ('ANSI_X3.4-1968', 'US-ASCII', 'ASCII'):
         autosub.SYSENCODING = 'UTF-8'
     
+    Update = False
     if argv is None:
         argv = sys.argv
     try:
         try:
-            opts, args= getopt.getopt(argv[1:], "hc:dl", ["help","config=","daemon","nolaunch"])
+            opts, args= getopt.getopt(argv[1:], "hc:dlu", ["help","config=","daemon","nolaunch","updated="])
         except getopt.error, msg:
             raise Usage(msg)
     
@@ -78,6 +80,8 @@ def main(argv=None):
                     # TODO: Service support for Windows
                 else:
                     autosub.DAEMON = True
+            if option in ("-u"):
+                autosub.UPDATED = True
     
     except Usage, err:
         print >> sys.stderr, sys.argv[0].split("/")[-1] + ": " + str(err.msg)
@@ -115,6 +119,9 @@ def main(argv=None):
     log.debug("AutoSub: Configversion is: %d" %autosub.CONFIGVERSION)
     log.debug("AutoSub: Dbversion is: %d" %autosub.DBVERSION)
     
+
+
+
     log.info("AutoSub: Starting threads")
     autosub.AutoSub.start()
     
