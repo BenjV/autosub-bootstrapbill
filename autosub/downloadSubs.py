@@ -135,7 +135,7 @@ def subseeker(subSeekerLink,website):
     try:
         Result= Session.get(SubLink,verify=autosub.CERTIFICATEPATH)
     except Exception as error:
-        log.error("subseeker: Failed to get the downloadpage. Message : %s" % error) 
+        log.error("subseeker: Failed to get the downloadpage from %s. Message : %s" % (website,error)) 
         return None
 
     if Result.status_code > 399 or not Result.text:
@@ -322,7 +322,7 @@ def DownloadSub(Wanted,SubList):
     if Downloaded:
         log.info("downloadSubs: Subtitle %s is downloaded from %s" % (Sub['releaseName'],Sub['website']))
     else:
-        log.error("downloadSubs: Could not download any correct subtitle file for %s" % Wanted['originalFileLocationOnDisk'])
+        log.debug("downloadSubs: Could not download any correct subtitle file for %s" % Wanted['originalFileLocationOnDisk'])
         return False   
     Wanted['subtitle'] = "%s downloaded from %s" % (Sub['releaseName'],Sub['website'])
     Wanted['timestamp'] = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(os.path.getmtime(destsrt)))

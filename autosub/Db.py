@@ -91,21 +91,24 @@ class lastDown():
         
         if not 'source' in Ldict.keys():
             Ldict['source'] = None
-        
-        cursor.execute(self.query_set,[ 
-                       Ldict['title'],
-                       Ldict['season'],
-                       Ldict['episode'],
-                       Ldict['quality'],
-                       Ldict['source'],
-                       Ldict['downlang'],
-                       Ldict['codec'],
-                       Ldict['timestamp'],
-                       Ldict['releasegrp'],
-                       Ldict['subtitle'],
-                       Ldict['destinationFileLocationOnDisk']])
-        connection.commit()
-        connection.close()
+
+        try:
+            cursor.execute(self.query_set,[ 
+                           Ldict['title'],
+                           Ldict['season'],
+                           Ldict['episode'],
+                           Ldict['quality'],
+                           Ldict['source'],
+                           Ldict['downlang'],
+                           Ldict['codec'],
+                           Ldict['timestamp'],
+                           Ldict['releasegrp'],
+                           Ldict['subtitle'],
+                           Ldict['destinationFileLocationOnDisk']])
+            connection.commit()
+            connection.close()
+        except Exception as error:
+            log.error('setlastDown: Database error: %s' % error)
     
     def flushLastdown(self):
         connection=sqlite3.connect(autosub.DBFILE)
@@ -221,5 +224,5 @@ def initDatabase():
     if autosub.DBVERSION < version.dbversion:
         upgradeDb(autosub.DBVERSION, version.dbversion)
     elif autosub.DBVERSION > version.dbversion:
-        print "initDatabase: Database version higher than this version of AutoSub supports. Update!!!"
+        print "initDatabase: Database version higher than this version of AutoSub supports. Update or remove database!!!"
         os._exit(1)

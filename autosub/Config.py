@@ -155,7 +155,7 @@ def ReadConfig(configfile):
             autosub.ENGLISHSUBDELETE = cfg.getboolean("config", "englishsubdelete")
         else:
             autosub.ENGLISHSUBDELETE = False
-            
+
         if cfg.has_option("config", "podnapisilang"):
             autosub.PODNAPISILANG = cfg.get("config", "podnapisilang")
         else:
@@ -195,12 +195,29 @@ def ReadConfig(configfile):
             autosub.ADDIC7EDPASSWD = cfg.get("config", "addic7edpasswd")
         else:
             autosub.ADDIC7EDPASSWD = u""
-            
-        if cfg.has_option("config", "webdl"):
-            autosub.WEBDL = cfg.get("config", "webdl")
+
+        if cfg.has_option("config", "skipstringnl"):
+            autosub.SKIPSTRINGNL = cfg.get("config", "skipstringnl")
         else:
-            autosub.WEBDL = u"Both"
-        
+            autosub.SKIPSTRINGNL = u""
+
+        if cfg.has_option("config", "skipstringen"):
+            autosub.SKIPSTRINGEN = cfg.get("config", "skipstringen")
+        else:
+            autosub.SKIPSTRINGNL = u""  
+           
+ # Here we change the old "webdl" entry if it still exists for the more versatile "skipstring" entries for both languages
+        if cfg.has_option("config", "webdl"):
+            Webdl = cfg.get("config", "webdl")
+            if Webdl == u"DutchOnly":
+                autosub.SKIPSTRINGEN = "Web-dl"
+            elif Webdl == "None":
+                autosub.SKIPSTRINGNL = autosub.SKIPSTRINGEN= u"Web-dl"
+            cfg.remove_option("config","webdl")
+            cfg.set("config","skipstringnl",autosub.SKIPSTRINGNL)
+            cfg.set("config","skipstringen",autosub.SKIPSTRINGEN)
+            with codecs.open(autosub.CONFIGFILE, 'wb', encoding=autosub.SYSENCODING) as cfile:
+                cfg.write(cfile)        
         
     else:
         # config section is missing
@@ -232,7 +249,8 @@ def ReadConfig(configfile):
         autosub.ADDIC7EDLANG = u"None"
         autosub.ADDIC7EDUSER = u""
         autosub.ADDIC7EDPASSWD = u""
-        autosub.WEBDL = u"Both"
+        autosub.SKIPSTRINGNL = u""
+        autosub.SKIPSTRINGEN = u""
         autosub.SUBCODEC = u'windows-1252'
         autosub.BROWSERREFRESH = 1
 
@@ -591,6 +609,7 @@ def ReadConfig(configfile):
             "chicago fire (2012)" : "2261391",
             "chicago pd" : "2805096",
             "chicago p.d" : "2805096",
+            "chicago p.d." : "2805096",
             "Common Law 2012" :"1771072",
             "continuum" : "1954347",
             "covert affairs" :"1495708",
@@ -962,7 +981,6 @@ def saveConfigSection():
     cfg.set(section, "launchbrowser", str(autosub.LAUNCHBROWSER))
     cfg.set(section, "browserrefresh", autosub.BROWSERREFRESH)
     cfg.set(section, "skiphiddendirs", str(autosub.SKIPHIDDENDIRS))
-    cfg.set(section, "webdl", autosub.WEBDL)
     cfg.set(section, "subcodec", autosub.SUBCODEC)
     cfg.set(section, "homelayoutfirst", autosub.HOMELAYOUTFIRST)
     cfg.set(section, "englishsubdelete", str(autosub.ENGLISHSUBDELETE))
@@ -974,6 +992,8 @@ def saveConfigSection():
     cfg.set(section, "addic7edlang", autosub.ADDIC7EDLANG)
     cfg.set(section, "addic7eduser", autosub.ADDIC7EDUSER)
     cfg.set(section, "addic7edpasswd", autosub.ADDIC7EDPASSWD)
+    cfg.set("config","skipstringnl",autosub.SKIPSTRINGNL)
+    cfg.set("config","skipstringen",autosub.SKIPSTRINGEN)
     
     with codecs.open(autosub.CONFIGFILE, 'wb', encoding=autosub.SYSENCODING) as cfile:
         cfg.write(cfile)

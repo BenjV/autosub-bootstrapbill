@@ -1,3 +1,3 @@
-autosubversion='Alpha 0.6.33'
+autosubversion='0.7.0'
 configversion=3
 dbversion=9

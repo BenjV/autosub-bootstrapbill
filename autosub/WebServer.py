@@ -20,7 +20,7 @@ import threading
 import time
 import autosub.Config
 from autosub.Db import lastDown, flushcache
-
+from autosub.version import autosubversion
 import autosub.notify as notify
 
 import autosub.Helpers
@@ -121,7 +121,7 @@ class Config:
         return str(tmpl)
 
     @cherrypy.expose  
-    def saveConfig(self, subeng, checksub, browserrefresh, skiphiddendirs, webdl, subnl, postprocesscmd, 
+    def saveConfig(self, subeng, checksub, browserrefresh, skiphiddendirs, skipstringnl, skipstringen, subnl, postprocesscmd, 
                    path, logfile, rootpath, subcodec, launchbrowser, fallbacktoeng, downloadeng, englishsubdelete, username, 
                    password, webroot, skipshow, lognum, loglevelconsole, logsize, loglevel, 
                    webserverip, webserverport, usernamemapping, useraddic7edmapping, notifyen, notifynl, homelayoutfirst,
@@ -154,8 +154,10 @@ class Config:
         autosub.ADDIC7EDLANG = addic7edlang
         autosub.ADDIC7EDUSER = addic7eduser
         autosub.ADDIC7EDPASSWD = addic7edpasswd.replace("%","%%")
-        autosub.WEBDL = webdl
         autosub.BROWSERREFRESH = browserrefresh
+        autosub.SKIPSTRINGNL = skipstringnl
+        autosub.SKIPSTRINGEN = skipstringen
+
         autosub.MINMATCHSCORE = 0
         if mmssource:
             autosub.MINMATCHSCORE += 8
@@ -262,21 +264,7 @@ class Config:
     
     @cherrypy.expose
     def checkVersion(self):
-        checkversion = autosub.Helpers.CheckVersion()
-        
-        if checkversion == 0:
-            message = 'You are running the latest version!'
-        elif checkversion == 1:
-            message = 'There is a new version available!'
-        elif checkversion == 2:
-            message = 'There is a new major release available for your version.<br> For example, you are running an Alpha version and there is a Beta version available.'
-        elif checkversion == 3:
-            message = 'There is a newer testing version available. Only the risk-takers should upgrade!'
-        elif checkversion == 4:
-            message = 'What are you doing here??? It is time to upgrade!'
-        else:
-            message = 'Something went wrong there, is the git-hub reachable?<br> Or are you running a really old release?'
-
+        message = 'Current version: ' + autosubversion + '.   GitHub version: ' + autosub.Helpers.CheckVersion()
         tmpl = PageTemplate(file="interface/templates/home.tmpl")
         tmpl.message = message
         tmpl.displaymessage = "Yes"
@@ -287,7 +275,6 @@ class Config:
     @cherrypy.expose
     def UpdateAutoSub(self):
         message = autosub.Helpers.UpdateAutoSub()    
-
         tmpl = PageTemplate(file="interface/templates/home.tmpl")
         tmpl.message = message
         tmpl.displaymessage = "Yes"

@@ -122,8 +122,9 @@ def start():
 
     cherrypy.server.wait()
     
-    if autosub.LAUNCHBROWSER:
+    if autosub.LAUNCHBROWSER and not autosub.UPDATED:
         launchBrowser()
+        autosub.UPDATED = False
 
     autosub.CERTIFICATEPATH = os.path.normpath(autosub.PATH +'/library/requests\cacert.pem')
     log.info("AutoSub: Starting checkSub thread")

@@ -3,7 +3,7 @@
 #
 
 import logging
-import time
+import time,sys
 from xml.dom import minidom
 try:
     import xml.etree.cElementTree as ET
@@ -176,8 +176,9 @@ def getSubLinks(lang, Wanted):
     if autosub.SUBSCENELANG == lang or autosub.SUBSCENELANG == 'Both':
         sourceWebsites.append('subscene.com')
 
-    # If one of his websites is choosen call subtitleseeker
-    if len(sourceWebsites) > 0:
+    # If one of his websites is choosen call subtitleseeker and the python version is high enough to support https websites
+
+    if len(sourceWebsites) > 0 and sys.version_info >= autosub.SSLVERSION:
         scoreListSubSeeker = SubtitleSeeker(lang, Wanted, sourceWebsites)
         log.debug("getSubLinks: dump scorelist: %s" % scoreListSubSeeker)
 

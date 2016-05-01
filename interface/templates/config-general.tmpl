@@ -101,18 +101,22 @@
 			</select>
 			</div>
 		</div>
-		
-		<div class="form-group">
-			<label for="WebDl" class="col-sm-2 control-label">WEB-DL <a data-placement="bottom" data-toggle="tooltip" data-original-title="Which subtitles do you want to download for WEB-DL episodes?"><span class="glyphicon glyphicon-info-sign"></span></a></label>
-			<div class="col-sm-10">
-			<select name="webdl" class="form-control">
-				<option value="None" #if $autosub.WEBDL == "None" then 'selected="selected"' else ""#>None</option>
-				<option value="DutchOnly" #if $autosub.WEBDL == "DutchOnly" then 'selected="selected"' else ""#>Dutch Only</option>
-				<option value="Both" #if $autosub.WEBDL == "Both" then 'selected="selected"' else ""#>Both</option>
-			</select>
+
+		<div>		
+			<div class="form-group">
+				<label for="SkipSearch" class="col-sm-2 control-label">Skip Search Dutch  <a data-toggle="tooltip" data-original-title="Skip search for Dutch subtitle if string in file name. Multiple strings seperated with a comma are allowed."><span class="glyphicon glyphicon-info-sign"></span></a></label>
+				<div class="col-sm-10">
+					<input type="text" class="form-control" name="skipstringnl" value="$autosub.SKIPSTRINGNL" placeholder="If this string is found in the video name, the search for Dutch subtitles will be skipped for that video.">
+				</div>
 			</div>
-		</div>	
-					
+			<div class="form-group">
+				<label for="SkipSearchEN" class="col-sm-2 control-label">Skip Search English <a data-toggle="tooltip" data-original-title="Skip search for English subtitle if string in file name. Multiple strings seperated with a comma are allowed."><span class="glyphicon glyphicon-info-sign"></span></a></label>
+				<div class="col-sm-10">
+					<input type="text" class="form-control" name="skipstringen" value="$autosub.SKIPSTRINGEN" placeholder="If this string is found in the video name, the search for English subtitles will be skipped for that video.">
+				</div>
+			</div>
+		</div>
+				
 		<hr>
 		
 		<h4 align="center">Advanced settings</h4><br>

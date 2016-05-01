@@ -1,5 +1,6 @@
 #import autosub
 #import autosub.Helpers
+#from autosub.version import autosubversion
 #import cherrypy
 #set useragent = cherrypy.request.headers.get("User-Agent", '')
 <!DOCTYPE html>
@@ -31,7 +32,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="$autosub.WEBROOT/home">Auto-Sub</a>
+          <a class="navbar-brand" href="$autosub.WEBROOT/home">Auto-Sub ($autosubversion)</a>
         </div>
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav">

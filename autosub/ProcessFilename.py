@@ -132,8 +132,7 @@ def ProcessFilename(filename, fileext):
     quality = None
     codec = None
     releasegrp = None
-    if not fileext:
-        fileext = None
+
     global _noextrainfo
     _noextrainfo = 0
 

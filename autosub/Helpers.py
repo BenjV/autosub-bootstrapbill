@@ -5,18 +5,21 @@
 import logging
 import re
 import subprocess
+import zipfile, StringIO, urllib,filecmp
+
 from string import capwords
 import time
-import urllib2
+import urllib
 import codecs
-import os
+import os,sys
 from ast import literal_eval
-
+import library.requests as requests
 from library import version
 from autosub.version import autosubversion
 import autosub
 import Tvdb
-
+from distutils.dir_util import copy_tree
+from distutils.dir_util import remove_tree
 from autosub.Db import idCache
 from autosub.ID_lookup import a7IdDict
 from autosub.Addic7ed import Addic7edAPI
@@ -47,59 +50,108 @@ def RunCmd(cmd):
 def CheckVersion():
     '''
     CheckVersion
-    
     Return values:
-    0 Same version
-    1 New version
-    2 New (higher) release, same version
-    3 New lower release, higher version
-    4 Release lower, version lower
+    Current Release Number
+    GitHub Release number
     '''
-    
-    # Check this because it's faulty
+
+    GithubVersion = None
     try:
-        req = urllib2.Request(autosub.VERSIONURL)
-        req.add_header("User-agent", autosub.USERAGENT) 
-        resp = urllib2.urlopen(req,None,autosub.TIMEOUT)
-        response = resp.read()
-        resp.close()
-    except:
-        log.error("checkVersion: The server returned an error for request %s" % autosub.VERSIONURL)
-        return None
-    try:
-        version_online = response.split("'")[1]
-    except:
-        return None
-    
-    release = version_online.split(' ')[0]
-    versionnumber = version_online.split(' ')[1]
-    
-    running_release = autosubversion.split(' ')[0]
-    running_versionnumber = autosubversion.split(' ')[1]
-    log.info("checkVersion: %s %s vs. %s %s" %(running_release, running_versionnumber, release, versionnumber))
-    
-    if release == running_release: #Alpha = Alpha
-        if versionnumber > running_versionnumber: #0.5.6 > 0.5.5
-            return 1
-        else: #0.5.6 = 0.5.6
-            return 0
-    elif release > running_release: #Beta > Alpha
-        if versionnumber == running_versionnumber: #0.5.5 = 0.5.5
-            return 2
-        elif versionnumber > running_versionnumber: #0.5.6 > 0.5.5
-            return 4
-    elif release < running_release: #Alpha < Beta
-        if versionnumber > running_versionnumber: #0.5.6 > 0.5.5
-            return 3        
+        response = requests.get(autosub.VERSIONURL)
+        Temp = response.text.split("'")
+        if 'Alpha' in Temp[1]:
+            GithubVersion = Temp[1].split(' ')[1]
+        else:
+            GithubVersion = Temp[1]
+    except Exception as error:
+        log.error('CheckVersion: Problem getting the version form github. Error is: %s' % error)
+        GithubVersion ='0.0.0'
+
+    return GithubVersion
+
 
 def UpdateAutoSub():
     '''
     Update Autosub.
     return message for user.
     '''
-    Message = 'Not yet implemented!!!'
-    #Message = 'Autosub is goining to update itself now...'
-    return Message
+
+    log.debug('UpdateAutoSub: Update started')
+
+    if sys.version_info < autosub.SSLVERSION:
+        message = "The minimal Python version to use AutoUpate is 2.7.10 this version is: "+ sys.version
+        log.info('UpdateAutoSub: %s' % message)
+        return message
+
+    # Piece of Code to let you test the reboot of autosub after an update, without actually updating anything
+    RestartTest = True
+    if RestartTest:
+        log.debug('UpdateAutoSub: Module is in restart Test mode')
+        args = sys.argv[:]
+        args.insert(0, sys.executable)
+        if sys.platform == 'win32':
+            args = ['"%s"' % arg for arg in args]
+        args.append('-l')
+        args.append('-u1')
+        log.debug('C: Python exec arguments are %s,  %s' %(sys.executable,args))
+        time.sleep(90)
+        os.execv(sys.executable, args)
+    # Get the version number from github
+    GithubVersion = CheckVersion()
+    if autosubversion >= GithubVersion:
+        message = 'No update available. Current version: ' + autosubversion + '. GitHub version: ' + GithubVersion
+        log.info('UpdateAutoSub: %s' % message)
+        return message
+
+    #First we make a connection to github to get the zipfile with the release
+    log.info('Starting upgrade.')
+    try:
+        Result = requests.get(autosub.ZIPURL,verify=autosub.CERTIFICATEPATH)
+        ZipData = urllib.urlopen(autosub.ZIPURL).read()
+    except Exception as error:
+        log.error('UpdateAutoSub: Could not connect to github. Error is %s' % error)
+        return error
+
+    # exstract the zipfile to the autosub root directory
+    try:
+        zf  = zipfile.ZipFile(StringIO.StringIO(Result.content))
+        ZipRoot = zf.namelist()[0][:-1]
+        if ZipRoot:
+            ReleasePath = os.path.join(autosub.PATH,ZipRoot)
+            if os.path.isdir(ReleasePath):
+                try:
+                    remove_tree(ReleasePath)
+                except Exception as error:
+                    log.debug('UpdateAutoSub: Problem removing old release folder. Error is: %s' %error)
+                    return error
+        else:
+            return 'No zipfile from github received.'
+        Result = zf.extractall(autosub.PATH)
+    except Exception as error:
+        log.error('UpdateAutoSub: Problem extracting zipfile from github. Error is %s' % error)
+        return error
+
+    # copy the release 
+    copy_tree(ReleasePath,autosub.PATH)
+
+    # remove the release folder after the update
+    if os.path.isdir(ReleasePath):
+        try:
+            remove_tree(ReleasePath)
+        except Exception as error:
+            log.error('UpdateAutoSub: Problem removing old release folder. Error is: %s' % error)
+            return error   
+
+    args = sys.argv[:]
+    args.insert(0, sys.executable)
+    if sys.platform == 'win32':
+        args = ['"%s"' % arg for arg in args]
+    args.append('-u1')
+    log.info('UpdateAutoSub: Update to version %s. Now restarting autosub...' % GithubVersion)
+    log.debug('UpdateAutoSub: Python exec arguments are %s,  %s' %(sys.executable,args))
+    os.execv(sys.executable, args)
+
+
 
 def CleanSerieName(series_name):
     """Clean up series name by removing any . and _
@@ -290,26 +342,32 @@ def checkAPICallsTvdb(use=False):
 def getShowid(ShowName, UseAddic):
     AddicId = ImdbId = TvdbId = AddicIdMapping = ImdbNameMappingId = TvdbShowName = AddicNameMappingId = None
     UpdateCache = False
-    log.debug('getShowid: Trying to get IMDB, Addic7ed and OpenSubtitles ID for %s' %ShowName)
+    log.debug('getShowid: Trying to get info for %s' %ShowName)
 
-    # First we try the Namemapping
-    ImdbNameMappingId = nameMapping(ShowName)
-    # second we try the cache
-    #Namemapping prevails over the cache info
-    if ImdbNameMappingId:
-        #Try to find other info in the cache
-        AddicId, TvdbId, TvdbShowName = idCache().getInfo(ImdbNameMappingId)
-        #Not in the cache, so we try Tvdb to find the formal showname
-        if not TvdbShowName and checkAPICallsTvdb():
-            TvdbShowName, TvdbId = Tvdb.getShowName(ImdbNameMappingId)
-    else:
-        # No mapping then we try the cache
-        ImdbId, AddicId, TvdbId, TvdbShowName = idCache().getId(ShowName.upper())
+    # First we try the User Namemapping and the System Namemapping
+    if ShowName.upper() in autosub.USERNAMEMAPPINGUPPER.keys():
+        ImdbNameMappingId = autosub.USERNAMEMAPPINGUPPER[ShowName.upper()]
+        if ImdbNameMappingId:
+             AddicId, TvdbId, TvdbShowName = idCache().getInfo(ImdbNameMappingId)
+             if not TvdbShowName and checkAPICallsTvdb():
+                TvdbShowName, TvdbId = Tvdb.getShowName(ImdbNameMappingId)
+    elif ShowName.upper() in autosub.NAMEMAPPINGUPPER.keys():
+        ImdbId = autosub.NAMEMAPPINGUPPER[ShowName.upper()]
+        # If found, we try to add info from the cache
+        if ImdbId:
+            AddicId, TvdbId, TvdbShowName = idCache().getInfo(ImdbId)
+            # No info in the cache we try Tvdb
+            if not TvdbShowName and checkAPICallsTvdb():
+                TvdbShowName, TvdbId = Tvdb.getShowName(ImdbId)
+                if TvdbShowName:
+                    UpdateCache = True
+
+    # Namemapping prevails over the cache info
 
     if not (ImdbId or ImdbNameMappingId):
-    # still no ImdbId then we try Tvdb
-        log.debug('getShowid: Trying TvdbID to find info')
-        if checkAPICallsTvdb():
+        ImdbId, AddicId, TvdbId, TvdbShowName = idCache().getId(ShowName.upper())
+            # still no ImdbId then we try Tvdb
+        if not ImdbId and checkAPICallsTvdb():
             ImdbId, TvdbId, TvdbShowName = Tvdb.getShowidApi(ShowName)
         if ImdbId:
             #Found a ImdbId on Tvdb try the cache for the other info.
@@ -320,7 +378,7 @@ def getShowid(ShowName, UseAddic):
             log.debug('getShowid: No ImdbId found on Tvdb for %s.' % ShowName)
             return None, None, None, ShowName
 
-    if UseAddic:
+    if UseAddic and not AddicId:
         if ImdbNameMappingId:
             AddicNameMappingId = Addic7edMapping(ImdbNameMappingId)
         else:
@@ -328,14 +386,12 @@ def getShowid(ShowName, UseAddic):
         if AddicNameMappingId:
             log.debug('getShowid: Addic7ed ID found in Namemapping: %s' %AddicNameMappingId)
         else:
-            if not AddicId:
-                #Try to find the Addice7ed Id on the show page of the Addic7ed website
-                AddicId = Addic7edAPI().geta7ID(TvdbShowName, ShowName)
-                if AddicId:
-                    log.debug('getShowid: Addic7ed ID found on Website: %s' %AddicId)
-                    UpdateCache = True
-                else:
-                    log.debug('getShowid: Addic7ed ID not found.')
+            #Try to find the Addice7ed Id on the show page of the Addic7ed website
+            AddicId = Addic7edAPI().geta7ID(TvdbShowName, ShowName)
+            if AddicId:
+                log.debug('getShowid: Addic7ed ID found on Website: %s' %AddicId)
+                UpdateCache = True
+
     if UpdateCache:
         idCache().setId(TvdbShowName.upper(), ImdbId, AddicId, TvdbId, TvdbShowName)
     if ImdbNameMappingId: ImdbId = ImdbNameMappingId
