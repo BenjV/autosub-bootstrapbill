@@ -84,7 +84,7 @@ def UpdateAutoSub():
         return message
 
     # Piece of Code to let you test the reboot of autosub after an update, without actually updating anything
-    RestartTest = True
+    RestartTest = False
     if RestartTest:
         log.debug('UpdateAutoSub: Module is in restart Test mode')
         args = sys.argv[:]
