@@ -23,7 +23,7 @@ class idCache():
         self.query_getId    = "SELECT imdb_id, a7_id, tvdb_id, tvdb_name FROM show_id_cache WHERE show_name = ?"
         self.query_getInfo  = "SELECT a7_id, tvdb_id,tvdb_name FROM show_id_cache WHERE imdb_id = ?"
         self.query_checkId  = "SELECT * FROM show_id_cache WHERE show_name = ?"
-        self.query_updateId = "UPDATE show_id_cache SET imdb_id =?, a7_id = ?, tvdb_id = ? tvdb_name =? WHERE show_name = ?"
+        self.query_updateId = "UPDATE show_id_cache SET imdb_id =?, a7_id = ?, tvdb_id = ?, tvdb_name =? WHERE show_name = ?"
         self.query_setId    = "INSERT INTO show_id_cache VALUES (?,?,?,?,?)"
         self.cursor         = autosub.DBCONNECTION.cursor()
 

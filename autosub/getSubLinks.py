@@ -32,7 +32,7 @@ def SubtitleSeeker(lang, Wanted, sourceWebsites):
             SubseekerSession.close()
         except Exception as error:
             log.error("getSubLink: The server returned an error for request %s. Message is %s" % (SearchUrl,error))
-            return scoreListscoreList
+            return scoreList
     else:
         log.error("API: out of api calls for SubtitleSeeker.com")
         return scoreList
