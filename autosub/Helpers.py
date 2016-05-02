@@ -78,13 +78,8 @@ def UpdateAutoSub():
 
     log.debug('UpdateAutoSub: Update started')
 
-    if sys.version_info < autosub.SSLVERSION:
-        message = "The minimal Python version to use AutoUpate is 2.7.10 this version is: "+ sys.version
-        log.info('UpdateAutoSub: %s' % message)
-        return message
-
     # Piece of Code to let you test the reboot of autosub after an update, without actually updating anything
-    RestartTest = True
+    RestartTest = False
     if RestartTest:
         log.debug('UpdateAutoSub: Module is in restart Test mode')
         args = []
