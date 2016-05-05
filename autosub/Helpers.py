@@ -73,15 +73,9 @@ def CheckVersion():
 def UpdateAutoSub():
     '''
     Update Autosub.
-    return message for user.
     '''
 
     log.debug('UpdateAutoSub: Update started')
-
-    #if sys.version_info < autosub.SSLVERSION:
-    #    message = "The minimal Python version to use AutoUpate is 2.7.10 this version is: "+ sys.version
-    #    log.info('UpdateAutoSub: %s' % message)
-    #    return message
 
     # Piece of Code to let you test the reboot of autosub after an update, without actually updating anything
     RestartTest = False
@@ -100,7 +94,7 @@ def UpdateAutoSub():
     if autosubversion >= GithubVersion:
         message = 'No update available. Current version: ' + autosubversion + '. GitHub version: ' + GithubVersion
         log.info('UpdateAutoSub: %s' % message)
-        return message
+        return
 
     #First we make a connection to github to get the zipfile with the release
     log.info('Starting upgrade.')
@@ -111,7 +105,8 @@ def UpdateAutoSub():
         #ZipData = urllib.urlopen(autosub.ZIPURL).read()
     except Exception as error:
         log.error('UpdateAutoSub: Could not connect to github. Error is %s' % error)
-        return error
+        return
+    log.debug('UpdateAutoSub: Zipfile located on Github')
 
     # exstract the zipfile to the autosub root directory
     try:
@@ -124,16 +119,22 @@ def UpdateAutoSub():
                     remove_tree(ReleasePath)
                 except Exception as error:
                     log.debug('UpdateAutoSub: Problem removing old release folder. Error is: %s' %error)
-                    return error
+                    return
         else:
-            return 'No zipfile from github received.'
+            return
         Result = zf.extractall(autosub.PATH)
+        log.debug('UpdateAutoSub: Zipfile extracted')
     except Exception as error:
         log.error('UpdateAutoSub: Problem extracting zipfile from github. Error is %s' % error)
-        return error
+        return
 
     # copy the release 
-    copy_tree(ReleasePath,autosub.PATH)
+    try:
+    	copy_tree(ReleasePath,autosub.PATH)
+    except Exception as error:
+        log.error('UpdateAutoSub: Could not(fully) copy the updated tree. Error is %s' % error)
+        return
+    log.debug('UpdateAutoSub: updated tree copied.')
 
     # remove the release folder after the update
     if os.path.isdir(ReleasePath):
@@ -141,12 +142,10 @@ def UpdateAutoSub():
             remove_tree(ReleasePath)
         except Exception as error:
             log.error('UpdateAutoSub: Problem removing old release folder. Error is: %s' % error)
-            return error   
+            return
     args =[]
     args = sys.argv[:]
     args.insert(0, sys.executable)
-    #if sys.platform == 'win32':
-    #    args = ['"%s"' % arg for arg in args]
     args.append('-u')
     log.info('UpdateAutoSub: Update to version %s. Now restarting autosub...' % GithubVersion)
     log.debug('UpdateAutoSub: Python exec arguments are %s,  %s' %(sys.executable,args))

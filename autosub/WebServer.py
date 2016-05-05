@@ -471,7 +471,8 @@ class Home:
     @cherrypy.expose
     def UpdateAutoSub(self):
         useragent = cherrypy.request.headers.get("User-Agent", '')
-        threading.Timer(2, autosub.Helpers.UpdateAutoSub).start()
+        log.debug('Webserver: User started the update.')
+        threading.Timer(5, autosub.Helpers.UpdateAutoSub).start()
         if autosub.Helpers.CheckMobileDevice(useragent) and autosub.MOBILEAUTOSUB:
             redirect("/mobile/home")
             return str(tmpl)
