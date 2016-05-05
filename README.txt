@@ -1,16 +1,12 @@
 README 
 
-Important info.
-Due to changes in the Website of Opensubtitle the scraper for Opensubtitles does not work anymore.
-Until this is fixed it is no longer possible to use Opensubtitles
-
 +--- Auto-Sub Bootstrap Bill
      |
      +--- Uses SubtitleSeeker API, supporting the following website:
      |    +--- Podnapisi
      |    +--- Subscene
-     |    +--- OpenSubtitles
-     |    \--- Undertexter
+     |
+     +---Uses the Opensubtitles API
      |
      +--- Addic7ed support.
      |    +--- Requires account.
@@ -34,12 +30,17 @@ Until this is fixed it is no longer possible to use Opensubtitles
      |         \--- Plex Media Server
      |
      \--- Features
+          +--- Skip filter for English and Dutch subtitles
+          +--- Configure auto-refresh rate on home page (0 is no refresh)
+          +--- Choose the default codepage for subtitles (default is windows-1252)
+          +--- Choose to skip hidden directories from being searchedz
+          +--- Choose to launch browser after startup
           +--- Mobile template, automatically detected.
           +--- Multiple folder support, separate folders with a comma. Example: D:\Series1,D:\Series2
           +--- Select which languages you want to allow per website.
           |    \--- If you set this to 'None', then the site will be disabled.
           +--- Remove English subtitle when the Dutch subtitle has been downloaded.
-          +--- Configure a custom post-process script.
+          +--- Calls a custom post-process script.
           \--- Home tables.
                +--- Both
                |    +--- Select 10, 25, 50, 100, All items to display. Options are stored using localStorage.
@@ -51,6 +52,16 @@ Until this is fixed it is no longer possible to use Opensubtitles
                     \--- Display original subtitle and website by hovering over the show name
 
 To use:
+
+Windows:
+Download the zipfile and run the pythonscript from the directory you're unzipped it to
+Use pythonw autosub.py tot start it as a process
+Start you're brouwser with http://localhost:8083/home/
+
+Synology:
+Use the package from http://packages.mdevries.org/
+Add this location to the package centre and don't forget to check "Any Publisher" ( Settings, Trust Level)
+
 
 Ubuntu
 Make sure you have python installed. Also you need the python-cheetah package:
@@ -66,11 +77,18 @@ Enjoy your subtitles!
 
 Requirements for running Auto-Sub Bootstrap Bill:
 - Install Cheetah : https://pypi.python.org/pypi/Cheetah/2.4.4
-- Python2.7
+- Python2.7 preferable 2.7.9 or higher
 
 You can use a version lower than python2.7 but as an additional dependency, you have to install
 the python html5lib module: https://pypi.python.org/pypi/html5lib/1.0b3
 
+Release information:
+
+Version 0.7.4:
+- Fixed a bug that ssl websites (podnapisi,subscene and github) could not be reached (file not found error).
+- Fixed an issue that the skipstring for English in certain situations didn't function
+- Removed the message after start of the Update command so the browser would stay on the home page 
+- updated to Requests library version 2.10
 
 
 

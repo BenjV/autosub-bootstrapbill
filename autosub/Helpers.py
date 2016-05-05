@@ -78,6 +78,11 @@ def UpdateAutoSub():
 
     log.debug('UpdateAutoSub: Update started')
 
+    #if sys.version_info < autosub.SSLVERSION:
+    #    message = "The minimal Python version to use AutoUpate is 2.7.10 this version is: "+ sys.version
+    #    log.info('UpdateAutoSub: %s' % message)
+    #    return message
+
     # Piece of Code to let you test the reboot of autosub after an update, without actually updating anything
     RestartTest = False
     if RestartTest:
@@ -99,9 +104,11 @@ def UpdateAutoSub():
 
     #First we make a connection to github to get the zipfile with the release
     log.info('Starting upgrade.')
+    Session = requests.Session()
     try:
-        Result = requests.get(autosub.ZIPURL,verify=autosub.CERTIFICATEPATH)
-        ZipData = urllib.urlopen(autosub.ZIPURL).read()
+        Result = Session.get(autosub.ZIPURL,verify=autosub.CERTIFICATEPATH)
+        ZipData= Result.content
+        #ZipData = urllib.urlopen(autosub.ZIPURL).read()
     except Exception as error:
         log.error('UpdateAutoSub: Could not connect to github. Error is %s' % error)
         return error

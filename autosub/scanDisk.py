@@ -102,7 +102,7 @@ def walkDir(path):
                         # If the Dutch subtitle not skipped and doesn't exist, then add it to the wanted list
                         lang.append(autosub.DUTCH)
 
-                if autosub.DOWNLOADENG or (autosub.FALLBACKTOENG and autosub.DOWNLOADDUTCH):
+                if autosub.DOWNLOADENG or (autosub.FALLBACKTOENG and autosub.DOWNLOADDUTCH and not Skipped):
                     Skipped = False
                     for SkipItem in SkipListEN:
                         if not SkipItem: break

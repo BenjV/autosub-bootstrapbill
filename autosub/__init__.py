@@ -1,6 +1,6 @@
 import Config
 import logging.handlers
-import time
+import time,os
 from autosub.version import autosubversion
 
 BOOTSTRAPVERSION='3.3.5'
@@ -51,9 +51,7 @@ OPENSUBTITLESAPI=None
 OPENSUBTITLESURL=None
 OPENSUBTITLESTOKEN=None
 OPENSUBTTITLESSESSION=None
-OPENSUBTITLESDL=None
 OPENSUBTITLESTIME = float(0)
-CURRENTLOPENSUBTITLESDLANG=None
 
 ADDIC7EDAPI = None
 WANTEDQUEUE=None
@@ -165,7 +163,7 @@ def Initialize():
     PUSHBULLETAPI, NOTIFYPUSHBULLET, USERAGENT, VERSIONURL, TVDBURL, \
     ENGLISH, DUTCH, PODNAPISILANG, SUBSCENELANG, OPENSUBTITLESLANG, \
     ADDIC7EDLANG, ADDIC7EDUSER, ADDIC7EDPASSWD, NOTIFYBOXCAR2, BOXCAR2TOKEN, \
-    NOTIFYPLEX, PLEXSERVERHOST, PLEXSERVERPORT, OPENSUBTITLESDL,OPENSUBTITLESTIME,\
+    NOTIFYPLEX, PLEXSERVERHOST, PLEXSERVERPORT, OPENSUBTITLESTIME,\
     OPENSUBTTITLESSESSION, CURRENTLANG, OPENSUBTITLESUSER, OPENSUBTITLESPASSWD, OPENSUBTITLESURL, OPENSUBTITLESUSERAGENT,OPENSUBTITLESTOKEN,OPENSUBTITLESSERVER
 
     
@@ -178,7 +176,7 @@ def Initialize():
         versionnumber = autosubversion
     SSLVERSION = (2,7,10)
     VERSIONURL = 'https://raw.githubusercontent.com/BenjV/autosub-bootstrapbill/master/autosub/version.py'
-    ZIPURL =  u'https://github.com/BenjV/autosub-bootstrapbill/archive/master.zip'
+    ZIPURL =  'https://github.com/BenjV/autosub-bootstrapbill/archive/master.zip'
     USERAGENT = 'AutoSub/' + versionnumber
     OPENSUBTITLESUSERAGENT = 'PYAutosub V' + versionnumber
     WANTEDQUEUE = []
@@ -199,7 +197,6 @@ def Initialize():
     API = "http://api.subtitleseeker.com/get/title_subtitles/?api_key=%s" %APIKEY
     IMDBAPI = "http://thetvdb.com/api/"
     OPENSUBTITLESURL = 'http://api.opensubtitles.org/xml-rpc'
-    OPENSUBTITLESDL  = 'http://dl.opensubtitles.org/nl/download/file/'
     MOBILEUSERAGENTS = ["midp", "240x320", "blackberry", "netfront", "nokia", "panasonic", 
                         "portalmmm", "sharp", "sie-", "sonyericsson", "symbian", "windows ce", 
                         "benq", "mda", "mot-", "opera mini", "philips", "pocket pc", "sagem",

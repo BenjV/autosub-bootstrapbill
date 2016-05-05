@@ -1,6 +1,4 @@
 #
-# Autosub Webserver.py - https://github.com/Donny87/autosub-bootstrapbill
-#
 # The Webserver module
 #
 
@@ -241,46 +239,7 @@ class Config:
         tmpl.displaymessage = "Yes"
         tmpl.modalheader = "Information"
         return str(tmpl)
-
-    @cherrypy.expose
-    def flushCache(self):
-        flushcache()
-        message = 'Cache flushed'
-        tmpl = PageTemplate(file="interface/templates/home.tmpl")
-        tmpl.message = message
-        tmpl.displaymessage = "Yes"
-        tmpl.modalheader = "Information"
-        return str(tmpl)
-    
-    @cherrypy.expose
-    def flushLastdown(self):
-        lastDown().flushLastdown()
-        message = 'Downloaded subtitles database flushed'
-        tmpl = PageTemplate(file="interface/templates/home.tmpl")
-        tmpl.message = message
-        tmpl.displaymessage = "Yes"
-        tmpl.modalheader = "Information"
-        return str(tmpl)
-    
-    @cherrypy.expose
-    def checkVersion(self):
-        message = 'Current version: ' + autosubversion + '.   GitHub version: ' + autosub.Helpers.CheckVersion()
-        tmpl = PageTemplate(file="interface/templates/home.tmpl")
-        tmpl.message = message
-        tmpl.displaymessage = "Yes"
-        tmpl.modalheader = "Information"
-        
-        return str(tmpl)   
-    
-    @cherrypy.expose
-    def UpdateAutoSub(self):
-        message = autosub.Helpers.UpdateAutoSub()    
-        tmpl = PageTemplate(file="interface/templates/home.tmpl")
-        tmpl.message = message
-        tmpl.displaymessage = "Yes"
-        tmpl.modalheader = "Information"
-        return str(tmpl)
-
+     
     @cherrypy.expose
     def testPushalot(self, pushalotapi):
         
@@ -500,6 +459,26 @@ class Home:
         return str(tmpl)
 
     @cherrypy.expose
+    def checkVersion(self):
+        useragent = cherrypy.request.headers.get("User-Agent", '')
+        message = 'Current version: ' + autosubversion + '.   GitHub version: ' + autosub.Helpers.CheckVersion()
+        tmpl = PageTemplate(file="interface/templates/home.tmpl")
+        tmpl.message = message
+        tmpl.displaymessage = "Yes"
+        tmpl.modalheader = "Information"     
+        return str(tmpl)
+
+    @cherrypy.expose
+    def UpdateAutoSub(self):
+        useragent = cherrypy.request.headers.get("User-Agent", '')
+        threading.Timer(2, autosub.Helpers.UpdateAutoSub).start()
+        if autosub.Helpers.CheckMobileDevice(useragent) and autosub.MOBILEAUTOSUB:
+            redirect("/mobile/home")
+            return str(tmpl)
+        else:
+            redirect("/home")
+
+    @cherrypy.expose
     def exitMini(self):
         if autosub.MOBILEAUTOSUB:
             autosub.MOBILEAUTOSUB = False
@@ -517,9 +496,28 @@ class Home:
             tmpl.message = "Auto-Sub is still running CheckSub, you cannot shutdown at the moment.<br>Please wait a few minutes."
             tmpl.displaymessage = "Yes"
             tmpl.modalheader = "Information"
-            return str(tmpl)
-        
-        threading.Timer(2, autosub.AutoSub.stop).start()
+            return str(tmpl) 
+        threading.Timer(5, autosub.AutoSub.stop).start()
+        return str(tmpl)
+
+    @cherrypy.expose
+    def flushCache(self):
+        flushcache()
+        message = 'Cache flushed'
+        tmpl = PageTemplate(file="interface/templates/home.tmpl")
+        tmpl.message = message
+        tmpl.displaymessage = "Yes"
+        tmpl.modalheader = "Information"
+        return str(tmpl)
+    
+    @cherrypy.expose
+    def flushLastdown(self):
+        lastDown().flushLastdown()
+        message = 'Downloaded subtitles database flushed'
+        tmpl = PageTemplate(file="interface/templates/home.tmpl")
+        tmpl.message = message
+        tmpl.displaymessage = "Yes"
+        tmpl.modalheader = "Information"
         return str(tmpl)
 
 class Log:
