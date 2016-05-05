@@ -36,8 +36,12 @@ def SubtitleSeeker(lang, Wanted, sourceWebsites):
     else:
         log.error("API: out of api calls for SubtitleSeeker.com")
         return scoreList
-    if not 'total_matches' in Result['results'].keys():
-        return scorelist
+    try:
+        if not 'total_matches' in Result['results'].keys():
+            return scoreList
+    except Exception as error:
+        log.info('getSublink: No subtitle found on Subtitleseeker for this video : %s' % Wanted['originalFileLocationOnDisk'])
+        return scoreList
     if int(Result['results']['total_matches']) == 0:
         return scoreList
 
