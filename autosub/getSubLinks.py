@@ -24,14 +24,13 @@ def SubtitleSeeker(lang, Wanted, sourceWebsites):
     # Get the scored list for all SubtitleSeeker hits
     scoreList = []
     SearchUrl = "%s&imdb=%s&season=%s&episode=%s&language=%s&return_type=json" % (autosub.API, Wanted['ImdbId'], Wanted['season'], Wanted['episode'], lang)
-    log.debug('getSubLinks: SubtitleSeeker request URL: %s' % SearchUrl)
     if autosub.Helpers.checkAPICallsSubSeeker(use=True):
         try:
             SubseekerSession = requests.session()
             Result = SubseekerSession.get(SearchUrl).json()
             SubseekerSession.close()
         except Exception as error:
-            log.error("getSubLink: The server returned an error for request %s. Message is %s" % (SearchUrl,error))
+            log.error("getSubLink: The SubtitleSeeker server returned an error. Message is %s" % error)
             return scoreList
     else:
         log.error("API: out of api calls for SubtitleSeeker.com")
@@ -180,9 +179,9 @@ def getSubLinks(lang, Wanted):
     if autosub.SUBSCENELANG == lang or autosub.SUBSCENELANG == 'Both':
         sourceWebsites.append('subscene.com')
 
-    # If one of his websites is choosen call subtitleseeker and the python version is high enough to support https websites
+    # If one of his websites is choosen call subtitleseeker
 
-    if len(sourceWebsites) > 0 and sys.version_info >= autosub.SSLVERSION:
+    if len(sourceWebsites) > 0:
         scoreListSubSeeker = SubtitleSeeker(lang, Wanted, sourceWebsites)
         log.debug("getSubLinks: dump scorelist: %s" % scoreListSubSeeker)
 

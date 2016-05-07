@@ -151,7 +151,7 @@ def Initialize():
     SHOWID_CACHE, POSTPROCESSCMD, CONFIGFILE, WORKDIR, NOTIFYEN, NOTIFYNL, ENGLISHSUBDELETE, \
     MAILSRV, MAILFROMADDR, MAILTOADDR, MAILUSERNAME, CONFIGVERSION, CONFIGUPGRADED, HOMELAYOUTFIRST, \
     MAILPASSWORD, MAILSUBJECT, MAILENCRYPTION, SUBCODEC,UPDATED,\
-    GROWLHOST, GROWLPORT, GROWLPASS, CERTIFICATEPATH,SSLVERSION,\
+    GROWLHOST, GROWLPORT, GROWLPASS, CERTIFICATEPATH,\
     TWITTERKEY, TWITTERSECRET, NMAAPI, NOTIFYMAIL, NOTIFYGROWL, NOTIFYTWITTER, NOTIFYNMA, \
     WANTEDQUEUE, ADDIC7EDAPI, ADDIC7EDLOGGED_IN, ZIPURL,\
     APIKEY, API, IMDBAPI, TIMEOUT, SEARCHTIME,SKIPSTRINGNL,SKIPSTRINGEN,\
@@ -174,11 +174,10 @@ def Initialize():
         versionnumber = autosubversion.split(' ')[1]
     else:
         versionnumber = autosubversion
-    SSLVERSION = (2,7,10)
-    VERSIONURL = 'https://raw.githubusercontent.com/BenjV/autosub-bootstrapbill/master/autosub/version.py'
-    ZIPURL =  'https://github.com/BenjV/autosub-bootstrapbill/archive/master.zip'
-    USERAGENT = 'AutoSub/' + versionnumber
-    OPENSUBTITLESUSERAGENT = 'PYAutosub V' + versionnumber
+    VERSIONURL = u'https://raw.githubusercontent.com/BenjV/autosub-bootstrapbill/master/autosub/version.py'
+    ZIPURL =  u'https://github.com/BenjV/autosub-bootstrapbill/archive/master.zip'
+    USERAGENT = u'AutoSub/' + versionnumber
+    OPENSUBTITLESUSERAGENT = u'PYAutosub V' + versionnumber
     WANTEDQUEUE = []
 
     APIKEY = "24430affe80bea1edf0e8413c3abf372a64afff2"

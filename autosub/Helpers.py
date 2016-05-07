@@ -84,9 +84,8 @@ def UpdateAutoSub():
         args = []
         args = sys.argv[:]
         args.insert(0, sys.executable)
-        #if sys.platform == 'win32':
-        #    args = ['"%s"' % arg for arg in args]
         args.append('-u')
+        time.sleep(5)
         log.debug('UpdateAutoSub: Python exec arguments are %s' %(args))
         os.execv(sys.executable, args)
     # Get the version number from github
@@ -94,7 +93,9 @@ def UpdateAutoSub():
     if autosubversion >= GithubVersion:
         message = 'No update available. Current version: ' + autosubversion + '. GitHub version: ' + GithubVersion
         log.info('UpdateAutoSub: %s' % message)
-        return
+        return message
+    else:
+        autosub.UPDATED = False
 
     #First we make a connection to github to get the zipfile with the release
     log.info('Starting upgrade.')
@@ -105,7 +106,7 @@ def UpdateAutoSub():
         #ZipData = urllib.urlopen(autosub.ZIPURL).read()
     except Exception as error:
         log.error('UpdateAutoSub: Could not connect to github. Error is %s' % error)
-        return
+        return error
     log.debug('UpdateAutoSub: Zipfile located on Github')
 
     # exstract the zipfile to the autosub root directory
@@ -119,9 +120,9 @@ def UpdateAutoSub():
                     remove_tree(ReleasePath)
                 except Exception as error:
                     log.debug('UpdateAutoSub: Problem removing old release folder. Error is: %s' %error)
-                    return
+                    return error
         else:
-            return
+            return 'No correct zzipfiuel could be downloaded'
         Result = zf.extractall(autosub.PATH)
         log.debug('UpdateAutoSub: Zipfile extracted')
     except Exception as error:
@@ -133,7 +134,7 @@ def UpdateAutoSub():
     	copy_tree(ReleasePath,autosub.PATH)
     except Exception as error:
         log.error('UpdateAutoSub: Could not(fully) copy the updated tree. Error is %s' % error)
-        return
+        return error
     log.debug('UpdateAutoSub: updated tree copied.')
 
     # remove the release folder after the update
@@ -142,7 +143,7 @@ def UpdateAutoSub():
             remove_tree(ReleasePath)
         except Exception as error:
             log.error('UpdateAutoSub: Problem removing old release folder. Error is: %s' % error)
-            return
+            return error
     args =[]
     args = sys.argv[:]
     args.insert(0, sys.executable)

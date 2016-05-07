@@ -50,10 +50,13 @@ def launchBrowser():
 
     url = 'http://%s:%d' % (host, int(port))
     url = url + wr
+    print 'Launch browser', url 
     try:
-        webbrowser.open(url, 2, 1)
+        webbrowser.open(url, new=1, autoraise=True )
     except:
+        log.error('launchBrowser: Failed')
         try:
+            print 'retry launch browser'
             webbrowser.open(url, 1, 1)
         except:
             log.error('launchBrowser: Failed')
@@ -124,7 +127,6 @@ def start():
     
     if autosub.LAUNCHBROWSER and not autosub.UPDATED:
         launchBrowser()
-        autosub.UPDATED = False
 
     autosub.CERTIFICATEPATH = os.path.normpath(autosub.PATH +'/library/requests/cacert.pem')
     log.info("AutoSub: Starting checkSub thread")

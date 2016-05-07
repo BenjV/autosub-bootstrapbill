@@ -40,7 +40,8 @@ def OpenSubtitlesLogin(opensubtitlesusername=None,opensubtitlespasswd=None):
             if Result['status'] == '200 OK':
                 autosub.OPENSUBTITLESTIME = time.time()
                 autosub.OPENSUBTITLESTOKEN = Result['token']
-            else:            
+            else:
+                log.debug('OpenSubtitlesLogin: Could not establish a Session with the opensubtitle API server.')        
                 autosub.OPENSUBTITLESTOKEN = None
                 return False
         else:
@@ -69,9 +70,11 @@ def OpenSubtitlesNoOp():
         try:
             Result = autosub.OPENSUBTITLESSERVER.NoOperation(autosub.OPENSUBTITLESTOKEN)
             if Result['status'] != '200 OK':
-                log.debug('Opensubtitles: Error from Opensubtitles NoOp API. Message: %s' % Result['status'] )
+                log.debug('Opensubtitles: Error or token expired. Message: %s' % Result['status'] )
+                autosub.OPENSUBTITLESTOKEN = None
                 if OpenSubtitlesLogin():
                     log.info('Opensubtitles: Re-established connection')
+                    return True
                 else:
                     log.info('Opensubtitles: Could not Re-established connection. ')
                     autosub.OPENSUBTITLESTOKEN = None

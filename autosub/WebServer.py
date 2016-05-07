@@ -460,8 +460,7 @@ class Home:
 
     @cherrypy.expose
     def checkVersion(self):
-        useragent = cherrypy.request.headers.get("User-Agent", '')
-        message = 'Current version: ' + autosubversion + '.   GitHub version: ' + autosub.Helpers.CheckVersion()
+        message = 'Active version : ' + autosubversion + '<BR>Github version : ' + autosub.Helpers.CheckVersion()
         tmpl = PageTemplate(file="interface/templates/home.tmpl")
         tmpl.message = message
         tmpl.displaymessage = "Yes"
@@ -470,14 +469,8 @@ class Home:
 
     @cherrypy.expose
     def UpdateAutoSub(self):
-        useragent = cherrypy.request.headers.get("User-Agent", '')
-        log.debug('Webserver: User started the update.')
-        threading.Timer(5, autosub.Helpers.UpdateAutoSub).start()
-        if autosub.Helpers.CheckMobileDevice(useragent) and autosub.MOBILEAUTOSUB:
-            redirect("/mobile/home")
-            return str(tmpl)
-        else:
-            redirect("/home")
+        threading.Thread(target=autosub.Helpers.UpdateAutoSub).start()
+        redirect("/home")
 
     @cherrypy.expose
     def exitMini(self):
@@ -491,7 +484,6 @@ class Home:
     @cherrypy.expose
     def shutdown(self):
         tmpl = PageTemplate(file="interface/templates/stopped.tmpl")
-        
         if not hasattr(autosub.CHECKSUB, 'stop'):
             tmpl = PageTemplate(file="interface/templates/home.tmpl")
             tmpl.message = "Auto-Sub is still running CheckSub, you cannot shutdown at the moment.<br>Please wait a few minutes."
