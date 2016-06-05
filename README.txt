@@ -84,6 +84,23 @@ the python html5lib module: https://pypi.python.org/pypi/html5lib/1.0b3
 
 Release information:
 
+Version 0.8.1
+Maintenance release
+
+- Changed the layout of the config page.
+  Put the most important items on top.
+  Changed some input field in tick boxes
+  Changed some input field to easier quantities (bytes -> Kbytes, secs -> Hours)
+- It is now no longer possible to choose a sub language per website. That feature was quite useless and created a lot op confusion.
+  Language choice is now for all websites.
+- Add an option in de Config to include or exclude Hearing Impaired Subs
+- Added a reboot option to the menu
+- Added the possibility to add ImdbId's as Skipshow 
+- Fixed an issue with a skipshow if a semicolon was in the showname
+- Fixed an issue with the notifiers when a non-ascii charachter is found in the showname.
+- In the wanted list the attibutes which are set in the minmatchscore are now a different color, so it is easy to see on which criteria the subs are scored.
+- The pushover notifier is changed, now it does not use its own application key anymore, but the user has to supply both application key and user key.
+
 Version 0.7.4:
 - Fixed a bug that ssl websites (podnapisi,subscene and github) could not be reached (file not found error).
 - Fixed an issue that the skipstring for English in certain situations didn't function

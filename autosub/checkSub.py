@@ -1,4 +1,4 @@
-# Autosub checkSub.py - https://github.com/Donny87/autosub-bootstrapbill
+# Autosub checkSub.py
 #
 # The Autosub checkSub module
 #
@@ -31,107 +31,73 @@ class checkSub():
         autosub.DBIDCACHE = idCache()
         del autosub.WANTEDQUEUE[:]
         autosub.scanDisk.scanDisk().run()
-        time.sleep(1)
-        log.info("checkSub: Starting round of checkSub." )
 
-        toDelete_wantedQueue = []
+        log.info("checkSub: Starting round of subs searching." )
                              
         # Initiate a session to OpenSubtitles and log in if OpenSubtitles is choosen
-        if autosub.OPENSUBTITLESLANG != 'None' and autosub.OPENSUBTITLESUSER and autosub.OPENSUBTITLESPASSWD:
+        if autosub.OPENSUBTITLES and autosub.OPENSUBTITLESUSER and autosub.OPENSUBTITLESPASSWD:
             OpenSubtitlesLogin()
 
-        for index, wantedItem in enumerate(autosub.WANTEDQUEUE):
-            title        = wantedItem['title']
-            season       = wantedItem['season']
-            episode      = wantedItem['episode']
-            originalfile = wantedItem['originalFileLocationOnDisk']
-            languages    = wantedItem['lang']
-            showid       = wantedItem['ImdbId']
-            a7_id        = wantedItem['A7Id']
-
+        Index = 0
+        End = len(autosub.WANTEDQUEUE)
+        # loop through the wanted list and try to find subs for the video's
+        # because we remove a video from the list we cannot use the internal counter from a for loop
+        # so we track the position in the list with the variable 'Index'
+        while Index < End:
+            Wanted = {}
+            Wanted = autosub.WANTEDQUEUE[Index]
+            if not Wanted:
+                Index += 1
+                continue
             #First we check we have enough info to try to find a sub else we skip this one
             Skip = False
-            if   autosub.MINMATCHSCORE & 8 and not wantedItem['source']    : Skip = True
-            elif autosub.MINMATCHSCORE & 4 and not wantedItem['quality']   : Skip = True
-            elif autosub.MINMATCHSCORE & 2 and not wantedItem['codec']     : Skip = True
-            elif autosub.MINMATCHSCORE & 1 and not wantedItem['releasegrp']: Skip = True
-            elif not showid : Skip = True
+            if   autosub.MINMATCHSCORE & 8 and not Wanted['source']    : Skip = True
+            elif autosub.MINMATCHSCORE & 4 and not Wanted['quality']   : Skip = True
+            elif autosub.MINMATCHSCORE & 2 and not Wanted['codec']     : Skip = True
+            elif autosub.MINMATCHSCORE & 1 and not Wanted['releasegrp']: Skip = True
+            elif not Wanted['ImdbId'] : Skip = True
             if Skip:
-                log.debug('checkSub: Skipped for not meeting the minmatch score. File is: %s' % originalfile )
+                log.debug('checkSub: Skipped for not meeting the minmatch score. File is: %s' % Wanted['file'] )
+                Index += 1
                 continue
 
 
-            if autosub.SUBNL != "":
-                nlsrtfile = os.path.splitext(originalfile)[0] + u"." + autosub.SUBNL + u".srt"
-            else:
-                nlsrtfile = os.path.splitext(originalfile)[0] + u".srt"
-                        
-            if autosub.SUBENG == "":
-                # Check for overlapping names
-                if autosub.SUBNL != "" or not autosub.DOWNLOADDUTCH:
-                    engsrtfile = os.path.splitext(originalfile)[0] + u".srt"
-                # Hardcoded fallback
-                else:
-                    engsrtfile = os.path.splitext(originalfile)[0] + u".en.srt"
-            else:
-                engsrtfile = os.path.splitext(originalfile)[0] + u"." + autosub.SUBENG + u".srt"
-
-            log.debug("checkSub: ID's - IMDB: %s, Addic7ed: %s" %(showid,a7_id))
-            if not showid:
+            if not Wanted['ImdbId']:
+                Index += 1
                 continue
-            
-            for lang in languages[:]:
-                downloadItem = wantedItem.copy()
-                downloadItem['downlang'] = lang
 
-                # Check if Addic7ed download limit has been reached
-                if autosub.ADDIC7EDLOGGED_IN and autosub.DOWNLOADS_A7 >= autosub.DOWNLOADS_A7MAX:
-                    autosub.ADDIC7EDLOGGED_IN = False
-                    log.debug("checkSub: You have reached your 24h limit of %s  Addic7ed downloads!" % autosub.DOWNLOADS_A7MAX)
+            log.debug("checkSub: trying to get a downloadlink for %s, language is %s" % (Wanted['file'], Wanted['langs']))
+            log.debug("checkSub: ID's are. IMDB: %s, Addic7ed: %s" %(Wanted['ImdbId'],Wanted['A7Id']))
+            # get all links above the minimal match score as input for downloadSub
+            SubsNL,SubsEN = autosub.getSubLinks.getSubLinks(Wanted)
 
-                log.debug("checkSub: trying to get a downloadlink for %s, language is %s" % (originalfile, lang))
-                # get all links higher than the minmatch as input for downloadSub
-                allResults = autosub.getSubLinks.getSubLinks(lang, wantedItem)
-                
-                if not allResults:
-                    log.debug("checkSub: no suitable subtitles were found for %s based on your minmatchscore" % downloadItem['originalFileLocationOnDisk'])
-                    continue                                 
+            if not SubsNL and not SubsEN:
+                log.debug("checkSub: no suitable subs were found for %s based on your minimal match score" % Wanted['file'])
+                Index += 1
+                continue
+            if SubsNL:
+                log.debug('checkSub: Dutch Subtitle(s) found trying to download the highest scored.')
+                if DownloadSub(Wanted,SubsNL):
+                    Wanted['langs'].remove('Dutch')
+                    if not autosub.DOWNLOADENG and 'English' in Wanted['langs']:
+                        Wanted['langs'].remove('English')
+                        SubsEN =[]
+                    if autosub.ENGLISHSUBDELETE and os.path.exists(os.path.join(Wanted['folder'],Wanted['file'] + Wanted['ENext'])):
+                        try:
+                            os.unlink(os.path.join(Wanted['folder'],Wanted['file'] + Wanted['ENext']))
+                            log.info("checkSub: Removed English subtitle for : %s" % Wanted['file'])
+                        except Exception as error:
+                            log.error("checkSub: Error while trying to remove English subtitle message is:%s." % error)
+            if SubsEN:
+                log.debug('checkSub: English Subtitle(s) found trying to download the highest scored.')
+                if DownloadSub(Wanted,SubsEN):
+                    Wanted['langs'].remove('English')
+            if len(Wanted['langs']) == 0:
+                del autosub.WANTEDQUEUE[Index]
+                End -= 1
+            else:
+                Index += 1
 
-                if lang == autosub.DUTCH:
-                    downloadItem['destinationFileLocationOnDisk'] = nlsrtfile
-                elif lang == autosub.ENGLISH:
-                    downloadItem['destinationFileLocationOnDisk'] = engsrtfile
-                DownLoaded = False  
-                if allResults:                   
-                    log.info("checkSub: The episode %s - Season %s Episode %s has 1 or more matching subtitles, downloading it!" % (title, season, episode))
-                    log.debug("checkSub: destination filename %s" % downloadItem['destinationFileLocationOnDisk'])    
-                    DownLoaded = DownloadSub(downloadItem, allResults)
-                else:
-                    log.info('checkSub: The episode %s - Season %s Episode %s has no matching %s subtitles!' % (title, season, episode, lang))
-                
-                #Remove downloaded language if downloaded
-                if DownLoaded:
-                    languages.remove(lang)
-                
-                if lang == autosub.DUTCH and DownLoaded:
-                    if autosub.FALLBACKTOENG and not autosub.DOWNLOADENG and autosub.ENGLISH in languages:
-                        log.debug('checkSub: We found a Dutch subtitle and fallback is true. Removing the English subtitle from the wantedlist.')
-                        languages.remove(autosub.ENGLISH)
-                
-                    if autosub.ENGLISHSUBDELETE:
-                        if os.path.exists(engsrtfile):
-                            log.debug("checkSub: Trying to delete English subtitle: %s" % engsrtfile)
-                            try:
-                                os.unlink(engsrtfile)
-                                log.info("checkSub: Removed English subtitle: %s" % engsrtfile)
-                            except:
-                                log.error("checkSub: Error while trying to remove subtitle %s." % engsrtfile)
-                        else:
-                            log.debug("checkSub: English subtitle not found.")
-                
-                if len(languages) == 0:
-                    toDelete_wantedQueue.append(index)
-                    break
 
         autosub.DBCONNECTION.close()
         del autosub.DBCONNECTION
@@ -142,12 +108,6 @@ class checkSub():
         if autosub.OPENSUBTITLESTOKEN:
             OpenSubtitlesLogout()
                                         
-        i = len(toDelete_wantedQueue) - 1
-        while i >= 0:
-            log.debug("checkSub: Removed item from the wantedQueue at index %s" % toDelete_wantedQueue[i])
-            autosub.WANTEDQUEUE.pop(toDelete_wantedQueue[i])
-            i = i - 1
-
-        log.info("checkSub: Finished round of checkSub")
+        log.info("checkSub: Finished round of subs Search. Go to sleep until the next round.")
         autosub.SEARCHTIME = time.time() - StartTime
         return True

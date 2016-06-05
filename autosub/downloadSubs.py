@@ -59,9 +59,8 @@ def unzip(Session, url):
         # sometimes .nfo files are in the zip container
         if name.lower().endswith('srt'):
             try:
-                Codec = detect(zip.read(name))['encoding']
-                if not 'UTF' in Codec.upper():
-                    Codec = u'windows-1252'
+                Data = zip.read(name)
+                Codec = detect(Data)['encoding']
                 fpr = io.TextIOWrapper(zip.open(name),errors='replace',encoding = Codec,newline='')
                 SubData = fpr.read()
                 fpr.close()
@@ -83,7 +82,7 @@ def openSubtitles(SubId, SubCodec):
         Result = autosub.OPENSUBTITLESSERVER.DownloadSubtitles(autosub.OPENSUBTITLESTOKEN, [SubId])
     except:
         autosub.OPENSUBTITLESTOKEN = None
-        log.error('Opensubtitles: Error from Opensubtitles download API')
+        log.error('Opensubtitles: Error from Opensubtitles download API. DownloadId is: %s' %SubId)
         return None 
 
     if Result['status'] == '200 OK':
@@ -97,7 +96,7 @@ def openSubtitles(SubId, SubCodec):
             return None
         SubDataBytes = gzip.GzipFile(fileobj=io.BytesIO(CompressedData)).read()
         # Opensubtitles makes no difference in UTF-8 and UTF8-SIG so we check with chardet the correct encoding
-        # also if Opensubtile does not know the encoding
+        # if Opensubtile does not know the encoding we assume windows-1252 is used.
         if SubCodec:
             if 'UTF' in SubCodec.upper() or SubCodec == 'Unknown':
                 SubCodec = detect(SubDataBytes)['encoding']
@@ -112,10 +111,8 @@ def openSubtitles(SubId, SubCodec):
             return None
         return(SubData)
     else:
-        log.debug('Opensubtitles: Error from Opensubtitles downloadsubs API. Message : %s' % Result['status'])
+        log.error('Opensubtitles: Error from Opensubtitles downloadsubs API. Message : %s' % Result['status'])
         return None
-
-
 
 def subseeker(subSeekerLink,website):
 
@@ -184,15 +181,14 @@ def WriteSubFile(SubData,SubFileOnDisk):
             log.debug('WriteSubFile: File is not a valid subtitle format. skipping it.')
     return False  
 
-def MyPostProcess(Wanted):
-    SubSpecs   = Wanted['destinationFileLocationOnDisk']
-    VideoSpecs = Wanted["originalFileLocationOnDisk"]
-    Language   = Wanted["downlang"]
-    SerieName  = Wanted["title"]
-    SeasonNum  = Wanted["season"]
-    EpisodeNum = Wanted["episode"]
-    ImdbId     = Wanted["ImdbId"]
-    TvdbId     = Wanted["TvdbId"]
+def MyPostProcess(Wanted,SubSpecs,Language):
+
+    VideoSpecs = os.path.join(Wanted['folder'],Wanted ['file']+ Wanted['container'])
+    SerieName  = Wanted['title'][:-1].translate('\0/:*?"<>|\\') if  Wanted['title'].endswith('.') else Wanted['title'].translate('\0/:*?"<>|\\')
+    SeasonNum  = Wanted['season']
+    EpisodeNum = Wanted['episode']
+    ImdbId     = Wanted['ImdbId']
+    TvdbId     = Wanted['TvdbId']
     DstRoot    = os.path.normpath('/volume1/video/Alleen Series')
     ffmpegLoc  = os.path.normpath('ffmpeg')
 
@@ -200,13 +196,12 @@ def MyPostProcess(Wanted):
     log.debug('PostProcess: Starting Postprocess')
     SeasonDir     = 'Season ' + SeasonNum
     EpisodeName   = GetEpisodeName(ImdbId,TvdbId,SeasonNum, EpisodeNum).translate(None,'\0/:*?"<>|\\')
-    Head,VideoExt = os.path.splitext(VideoSpecs)
     Head,SubExt   = os.path.splitext(SubSpecs)
     log.debug('PostProcess: EpisodeName is %s' % EpisodeName)
 
     # Here we create the various file specifications
     DstDir        = os.path.join(DstRoot, SerieName, SeasonDir)
-    DstVidSpecs   = os.path.join(DstDir, EpisodeNum + ' ' + EpisodeName + VideoExt)
+    DstVidSpecs   = os.path.join(DstDir, EpisodeNum + ' ' + EpisodeName + Wanted['container'])
     TempFileSpecs = os.path.join(DstDir, EpisodeNum + ' ' + EpisodeName + '.tmp')
     DstSubSpecs   = os.path.join(DstDir, EpisodeNum + ' ' + EpisodeName + SubExt)
     Muxing = True
@@ -220,9 +215,9 @@ def MyPostProcess(Wanted):
             log.debug('PostProcess: Could not create destination folder')
             return
     log.debug('PostProcess: Destination Dir is %s' % DstDir)
-    # muxing is not possible for all containers only .mkv and .mp3 are supported
+    # muxing is not possible for all containers only .mkv and .mp4 are supported
     # if muxing is off, the video and the sub will be copied to the desitnation.
-    if VideoExt.lower() != '.mkv' and  VideoExt.lower() != '.mp4':
+    if Wanted['container'].lower() != '.mkv' and  Wanted['container'].lower() != '.mp4':
         Muxing = False
 
     # Here we set the language identifier for the sub during muxing
@@ -277,43 +272,41 @@ def MyPostProcess(Wanted):
                 log.error("PostProcess: Problem moving subfile. Message is: %s" % error)
                 return
         else:
-        # If it is the first sub we move the video to the destination and create an empty videofile on the source location
-        # also we copy the subfile to the destination 
+        # If it is the first sub we move the video to the destination 
+        # also we copy the subfile to the destination leaving a copy of the sub behind
             try:
                 shutil.move(VideoSpecs,DstVidSpecs)
                 shutil.copy2(SubSpecs,DstSubSpecs)
             except Exception as error:
-                    log.error("PostProcess: Problem moving files. Message is: %s" % error)
-                    return
+                log.error("PostProcess: Problem moving files. Message is: %s" % error)
+                return
     return
 
 def DownloadSub(Wanted,SubList):    
-    
-    log.debug("downloadSubs: Starting DownloadSub function")    
-   
-    log.debug("downloadSubs: Download dict: %r" % Wanted) 
-    destsrt = Wanted['destinationFileLocationOnDisk']
-    destdir = os.path.split(destsrt)[0]
-    if not os.path.exists(destdir):
-        log.debug("checkSubs: no destination directory %s" %destdir)
+      
+    log.debug("downloadSubs: Download dict: %r" % Wanted)
+    destdir = Wanted['folder']
+    destsrt = os.path.join(Wanted['folder'], Wanted['file'])
+    if u'Dutch' in SubList[0]['Lang'] :
+        destsrt += Wanted['NLext']
+    elif u'English' in SubList[0]['Lang'] :
+        destsrt += Wanted['ENext']
+    else:
         return False
-    elif not os.path.exists(destdir):
-        log.debug("checkSubs: no destination directory %s" %destdir)
-        return False        
 
     SubData = None
     Downloaded = False 
-    for Sub in SubList:   
-        log.debug("downloadSubs: Trying to download subtitle from %s using this link %s" % (Sub['website'],Sub['url']))      
+    for Sub in SubList:
+        log.debug("downloadSubs: Trying to download %s subtitle(s) from %s using this link %s" % (Wanted['langs'],Sub['website'],Sub['url']))      
 
         if Sub['website'] == 'opensubtitles.org':
-            log.debug("downloadSubs: Api for opensubtitles.org is chosen for subtitle %s" % destsrt)
+            log.debug("downloadSubs: Api for opensubtitles.org is chosen for subtitle %s" % Wanted['file'])
             SubData = openSubtitles(Sub['url'],Sub['SubCodec'])
         elif Sub['website'] == 'addic7ed.com':
-            log.debug("downloadSubs: Scraper for Addic7ed.com is chosen for subtitle %s" % destsrt)
+            log.debug("downloadSubs: Scraper for Addic7ed.com is chosen for subtitle %s" % Wanted['file'])
             SubData = autosub.ADDIC7EDAPI.download(Sub['url'])
         else:
-            log.debug("downloadSubs: Scraper for %s is chosen for subtitle %s" % (Sub['website'],destsrt))
+            log.debug("downloadSubs: Scraper for %s is chosen for subtitle %s" % (Sub['website'],Wanted['file']))
             SubData = subseeker(Sub['url'],Sub['website'])
         if SubData:
             if WriteSubFile(SubData,destsrt):
@@ -322,24 +315,28 @@ def DownloadSub(Wanted,SubList):
     if Downloaded:
         log.info("downloadSubs: Subtitle %s is downloaded from %s" % (Sub['releaseName'],Sub['website']))
     else:
-        log.debug("downloadSubs: Could not download any correct subtitle file for %s" % Wanted['originalFileLocationOnDisk'])
+        log.debug("downloadSubs: Could not download any correct subtitle file for %s" % Wanted['file'])
         return False   
-    Wanted['subtitle'] = "%s downloaded from %s" % (Sub['releaseName'],Sub['website'])
+    Wanted['subtitle'] = "%s downloaded from %s" % (Sub['releaseName'].strip(),Sub['website'])
     Wanted['timestamp'] = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(os.path.getmtime(destsrt)))
 
-    lastDown().setlastDown(dict = Wanted)
+    lastDown().setlastDown(Sub['Lang'],dict = Wanted)
     # Send notification 
 
-    notify.notify(Wanted['downlang'], destsrt, Wanted["originalFileLocationOnDisk"], Sub['website'])
+    VideoFile = Wanted['folder'] + Wanted['file'] + Wanted['container']
+    if (autosub.NOTIFYNL and Sub['Lang'] == 'Dutch') or (autosub.NOTIFYEN and Sub['Lang'] == 'English') :
+        notify.notify(Sub['Lang'], destsrt.encode('ascii','replace'), VideoFile.encode('ascii','replace'), Sub['website'])
+
     if autosub.POSTPROCESSCMD:
-        postprocesscmdconstructed = autosub.POSTPROCESSCMD + ' "' + Wanted['destinationFileLocationOnDisk'] + '" "' + Wanted["originalFileLocationOnDisk"] + '" "' + Wanted["downlang"] + '" "' + Wanted["title"] + '" "' + Wanted["season"] + '" "' + Wanted["episode"] + '" '
+        postprocesscmdconstructed = autosub.POSTPROCESSCMD + ' "' + destsrt + '" "' + VideoFile + '" "' + Sub['Lang'] + '" "' + Wanted["title"] + '" "' + Wanted["season"] + '" "' + Wanted["episode"] + '" '
         log.debug("downloadSubs: Postprocess: running %s" % postprocesscmdconstructed)
         log.info("downloadSubs: Running PostProcess")
         postprocessoutput, postprocesserr = autosub.Helpers.RunCmd(postprocesscmdconstructed)
         log.debug("downloadSubs: PostProcess Output:% s" % postprocessoutput)
         if postprocesserr:
             log.error("downloadSubs: PostProcess: %s" % postprocesserr)
-            #log.debug("downloadSubs: PostProcess Output:% s" % postprocessoutput)
-    #MyPostProcess(Wanted)
-    log.debug('downloadSubs: Finished for %s' % Wanted["originalFileLocationOnDisk"])
+    if autosub.NODE_ID == 73855751279:
+        log.debug('DownloadSub: Starting my postprocess')
+        MyPostProcess(Wanted,destsrt,Sub['Lang'])
+    log.debug('downloadSubs: Finished for %s' % Wanted["file"])
     return True

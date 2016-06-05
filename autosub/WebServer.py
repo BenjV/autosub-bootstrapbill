@@ -97,13 +97,14 @@ class Config:
             autosub.Config.applyskipShow()
 
             print season, episode
+            Name = 'ImdbId' if title == isnumeric() else 'title'
 
             if season == -1:
-                tmpl.message = "<strong>%s</strong> will be skipped.<br> This will happen the next time that Auto-Sub checks for subtitles" % title.title()
+                tmpl.message = "Serie with %s: <strong>%s</strong> will be skipped.<br> This will happen the next time that Auto-Sub checks for subtitles" % (Name, title.title())
             elif episode:
-                tmpl.message = "<strong>%s</strong> season <strong>%s</strong> episode <strong>%s</strong> will be skipped.<br> This will happen the next time that Auto-Sub checks for subtitles" % (title.title(), season, episode)
+                tmpl.message = "Serie with %s: <strong>%s</strong> season <strong>%s</strong> episode <strong>%s</strong> will be skipped.<br> This will happen the next time that Auto-Sub checks for subtitles" % (Name, title.title(), season, episode)
             else:
-                tmpl.message = "<strong>%s</strong> season <strong>%s</strong> will be skipped.<br> This will happen the next time that Auto-Sub checks for subtitles" % (title.title(), season)
+                tmpl.message = "Serie with %s: <strong>%s</strong> season <strong>%s</strong> will be skipped.<br> This will happen the next time that Auto-Sub checks for subtitles" % (Name, title.title(), season)
             
             tmpl.displaymessage = "Yes"
             tmpl.modalheader = "Information"
@@ -119,57 +120,48 @@ class Config:
         return str(tmpl)
 
     @cherrypy.expose  
-    def saveConfig(self, subeng, checksub, browserrefresh, skiphiddendirs, skipstringnl, skipstringen, subnl, postprocesscmd, 
-                   path, logfile, rootpath, subcodec, launchbrowser, fallbacktoeng, downloadeng, englishsubdelete, username, 
-                   password, webroot, skipshow, lognum, loglevelconsole, logsize, loglevel, 
-                   webserverip, webserverport, usernamemapping, useraddic7edmapping, notifyen, notifynl, homelayoutfirst,
-                   podnapisilang, subscenelang, opensubtitleslang, opensubtitlesuser, opensubtitlespasswd,
-                   addic7edlang, addic7eduser, addic7edpasswd, downloaddutch,
-                   mmssource = None, mmsquality = None, mmscodec = None, mmsrelease = None):
+    def saveConfig(self, subeng, skipstringnl, skipstringen, subnl, postprocesscmd, 
+                   path, logfile, rootpath, subcodec,  username, 
+                   password, webroot, skipshow, lognum, loglevelconsole, loglevel, 
+                   webserverip, webserverport, usernamemapping, useraddic7edmapping,
+                   opensubtitlesuser, opensubtitlespasswd,  addic7eduser, addic7edpasswd, addic7ed=None,opensubtitles=None, podnapisi=None, subscene=None, 
+                   wantedfirst = None, browserrefresh = None, skiphiddendirs = None,useaddic7ed=None,launchbrowser=None,interval = None, logsize=None,
+                   fallbacktoeng = None, downloadeng = None, englishsubdelete = None, notifyen = None, notifynl = None, downloaddutch = None,
+                   mmssource = u'0', mmsquality = u'0', mmscodec = u'0', mmsrelease = u'0',hearingimpaired = None):
                    
         # Set all internal variables
         autosub.PATH = path
         autosub.ROOTPATH = rootpath
         autosub.LOGFILE = logfile
-        autosub.FALLBACKTOENG = fallbacktoeng
-        autosub.DOWNLOADENG = downloadeng
-        autosub.DOWNLOADDUTCH = downloaddutch
+        autosub.DOWNLOADENG = True if downloadeng else False
+        autosub.DOWNLOADDUTCH = True if downloaddutch else False
+        autosub.FALLBACKTOENG = True if fallbacktoeng else False
+        autosub.ENGLISHSUBDELETE = True if englishsubdelete else False
         autosub.SUBENG = subeng
         autosub.SUBNL = subnl
-        autosub.NOTIFYEN = notifyen
-        autosub.NOTIFYNL = notifynl
+        autosub.NOTIFYEN = True if notifyen else False 
+        autosub.NOTIFYNL = True if notifynl else False
         autosub.POSTPROCESSCMD = postprocesscmd
         autosub.SUBCODEC = subcodec
-        autosub.LAUNCHBROWSER = launchbrowser
-        autosub.SKIPHIDDENDIRS = skiphiddendirs
-        autosub.HOMELAYOUTFIRST = homelayoutfirst
-        autosub.ENGLISHSUBDELETE = englishsubdelete
-        autosub.PODNAPISILANG = podnapisilang
-        autosub.SUBSCENELANG = subscenelang
-        autosub.OPENSUBTITLESLANG = opensubtitleslang
+        autosub.LAUNCHBROWSER = True if launchbrowser else False
+        autosub.SKIPHIDDENDIRS = True if skiphiddendirs else False
+        autosub.WANTEDFIRST = True if wantedfirst else False
+        autosub.PODNAPISI = True if podnapisi else False
+        autosub.SUBSCENE = True if subscene else False
+        autosub.OPENSUBTITLES = True if opensubtitles else False
         autosub.OPENSUBTITLESUSER = opensubtitlesuser
         autosub.OPENSUBTITLESPASSWD = opensubtitlespasswd.replace("%","%%")
-        autosub.ADDIC7EDLANG = addic7edlang
+        autosub.ADDIC7ED = True if addic7ed else False
         autosub.ADDIC7EDUSER = addic7eduser
         autosub.ADDIC7EDPASSWD = addic7edpasswd.replace("%","%%")
         autosub.BROWSERREFRESH = browserrefresh
         autosub.SKIPSTRINGNL = skipstringnl
         autosub.SKIPSTRINGEN = skipstringen
-
-        autosub.MINMATCHSCORE = 0
-        if mmssource:
-            autosub.MINMATCHSCORE += 8
-        if mmsquality:
-            autosub.MINMATCHSCORE += 4
-        if mmscodec:
-            autosub.MINMATCHSCORE += 2
-        if mmsrelease:
-            autosub.MINMATCHSCORE += 1 
-               
-        autosub.SCHEDULERCHECKSUB = int(checksub)
+        autosub.MINMATCHSCORE = int(mmssource) + int(mmsquality) + int(mmscodec) + int(mmsrelease)
+        autosub.SEARCHINTERVAL = int(interval)*3600
         autosub.LOGLEVEL = int(loglevel)
         autosub.LOGNUM = int(lognum)
-        autosub.LOGSIZE = int(logsize)
+        autosub.LOGSIZE = int(logsize)*1024
         autosub.LOGLEVELCONSOLE = int(loglevelconsole)
         autosub.WEBSERVERIP = webserverip
         autosub.WEBSERVERPORT = int(webserverport)
@@ -179,6 +171,7 @@ class Config:
         autosub.SKIPSHOW = autosub.Config.stringToDict(skipshow)
         autosub.USERNAMEMAPPING = autosub.Config.stringToDict(usernamemapping)
         autosub.USERADDIC7EDMAPPING = autosub.Config.stringToDict(useraddic7edmapping)
+        autosub.HI = True if hearingimpaired else False
 
         # Now save to the configfile
         message = autosub.Config.WriteConfig(configsection="")
@@ -193,7 +186,7 @@ class Config:
     def saveNotification(self, notifymail, notifygrowl, notifynma, notifytwitter, mailsrv, mailfromaddr, mailtoaddr, 
                          mailusername, mailpassword, mailsubject, mailencryption, mailauth, growlhost, growlport, 
                          growlpass, nmaapi, twitterkey, twittersecret, notifyprowl, prowlapi, prowlpriority, 
-                         notifypushalot, pushalotapi, notifypushbullet, pushbulletapi, notifypushover, pushoverapi, 
+                         notifypushalot, pushalotapi, notifypushbullet, pushbulletapi, notifypushover, pushoverappkey,pushoveruserkey, 
                          nmapriority, notifyboxcar2, boxcar2token, notifyplex, plexserverhost, plexserverport):
 
         # Set all internal notify variables
@@ -224,7 +217,8 @@ class Config:
         autosub.NOTIFYPUSHBULLET = notifypushbullet
         autosub.PUSHBULLETAPI = pushbulletapi
         autosub.NOTIFYPUSHOVER = notifypushover
-        autosub.PUSHOVERAPI = pushoverapi
+        autosub.PUSHOVERAPPKEY = pushoverappkey
+        autosub.PUSHOVERUSERKEY = pushoveruserkey
         autosub.NOTIFYBOXCAR2 = notifyboxcar2
         autosub.BOXCAR2TOKEN = boxcar2token
         autosub.NOTIFYPLEX = notifyplex
@@ -460,7 +454,7 @@ class Home:
 
     @cherrypy.expose
     def checkVersion(self):
-        message = 'Active version : ' + autosubversion + '<BR>Github version : ' + autosub.Helpers.CheckVersion()
+        message = 'Active version &emsp;: ' + autosubversion + '<BR>Github version&emsp;: ' + autosub.Helpers.CheckVersion()
         tmpl = PageTemplate(file="interface/templates/home.tmpl")
         tmpl.message = message
         tmpl.displaymessage = "Yes"
@@ -470,6 +464,11 @@ class Home:
     @cherrypy.expose
     def UpdateAutoSub(self):
         threading.Thread(target=autosub.Helpers.UpdateAutoSub).start()
+        redirect("/home")
+
+    @cherrypy.expose
+    def RebootAutoSub(self):
+        threading.Thread(target=autosub.Helpers.RebootAutoSub).start()
         redirect("/home")
 
     @cherrypy.expose

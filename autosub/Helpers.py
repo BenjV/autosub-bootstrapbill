@@ -69,6 +69,15 @@ def CheckVersion():
 
     return GithubVersion
 
+def RebootAutoSub():
+    args =[]
+    args = sys.argv[:]
+    args.insert(0, sys.executable)
+    args.append('-u')
+    log.info('RebootAutoSub: Now restarting autosub...')
+    log.debug('RebootAutoSub: Python exec arguments are %s,  %s' %(sys.executable,args))
+    os.execv(sys.executable, args)
+
 
 def UpdateAutoSub():
     '''
@@ -78,19 +87,19 @@ def UpdateAutoSub():
     log.debug('UpdateAutoSub: Update started')
 
     # Piece of Code to let you test the reboot of autosub after an update, without actually updating anything
-    RestartTest = False
-    if RestartTest:
-        log.debug('UpdateAutoSub: Module is in restart Test mode')
-        args = []
-        args = sys.argv[:]
-        args.insert(0, sys.executable)
-        args.append('-u')
-        time.sleep(5)
-        log.debug('UpdateAutoSub: Python exec arguments are %s' %(args))
-        os.execv(sys.executable, args)
+    #RestartTest = True
+    #if RestartTest:
+    #    log.debug('UpdateAutoSub: Module is in restart Test mode')
+    #    args = []
+    #    args = sys.argv[:]
+    #    args.insert(0, sys.executable)
+    #    args.append('-u')
+    #    time.sleep(5)
+    #    log.debug('UpdateAutoSub: Python exec arguments are %s' %(args))
+    #    os.execv(sys.executable, args)
     # Get the version number from github
     GithubVersion = CheckVersion()
-    if autosubversion >= GithubVersion:
+    if autosub.VERSION >= int(GithubVersion.split('.')[0]) * 1000 + int(GithubVersion.split('.')[1]) * 100 + int(GithubVersion.split('.')[2]) * 10:
         message = 'No update available. Current version: ' + autosubversion + '. GitHub version: ' + GithubVersion
         log.info('UpdateAutoSub: %s' % message)
         return message
@@ -103,7 +112,6 @@ def UpdateAutoSub():
     try:
         Result = Session.get(autosub.ZIPURL,verify=autosub.CERTIFICATEPATH)
         ZipData= Result.content
-        #ZipData = urllib.urlopen(autosub.ZIPURL).read()
     except Exception as error:
         log.error('UpdateAutoSub: Could not connect to github. Error is %s' % error)
         return error
@@ -122,7 +130,7 @@ def UpdateAutoSub():
                     log.debug('UpdateAutoSub: Problem removing old release folder. Error is: %s' %error)
                     return error
         else:
-            return 'No correct zzipfiuel could be downloaded'
+            return 'No correct zipfile could be downloaded'
         Result = zf.extractall(autosub.PATH)
         log.debug('UpdateAutoSub: Zipfile extracted')
     except Exception as error:
@@ -265,36 +273,44 @@ def nameMapping(showName):
         log.debug("nameMapping: found match in system namemapping for %s" % showName)
         return autosub.NAMEMAPPINGUPPER[showName.upper()]
 
-def SkipShow(showName, season, episode):
-    if showName.upper() in autosub.SKIPSHOWUPPER.keys():
+def SkipShow(Imdb,showName, season, episode):
+    if showName.upper() in autosub.SKIPSHOWUPPER.keys() or  Imdb in autosub.SKIPSHOWUPPER.keys():
         log.debug("SkipShow: Found %s in skipshow dictionary" % showName)
-        for seasontmp in autosub.SKIPSHOWUPPER[showName.upper()]:
-            # Skip entire TV show
-            if seasontmp == '-1':
-                log.debug("SkipShow: variable of %s is set to -1, skipping the complete Serie" % showName)
-                return True
-            try:
-                toskip = literal_eval(seasontmp)
-            except:
-                log.error("SkipShow: %s is not a valid parameter, check your Skipshow settings" % seasontmp)
-                continue
-            # Skip specific season:
-            if isinstance(toskip, int):
-                if int(season) == toskip:
-                    log.debug("SkipShow: Season %s matches variable of %s, skipping season" % (season, showName))
-                    return True
-            # Skip specific episode
-            elif isinstance(toskip, float):
-                seasontoskip = int(toskip)
-                episodetoskip = int(round((toskip-seasontoskip) * 100))
-                if int(season) == seasontoskip:
-                    if episodetoskip == 0:
-                        log.debug("SkipShow: Season %s matches variable of %s, skipping season" % (season, showName))
+        try:
+            for ShowId, SkipList in autosub.SKIPSHOWUPPER.iteritems():
+                if ShowId == Imdb or  showName.upper() == ShowId:
+                    if '-1' in SkipList:
                         return True
-                    elif int(episode) == episodetoskip:
-                        format = season + 'x' + episode
-                        log.debug("SkipShow: Episode %s matches variable of %s, skipping episode" % (format, showName))
-                        return True
+                # Skip entire TV show
+                    for value in SkipList:
+                        if value == '-1':
+                            log.debug("SkipShow: variable of %s is set to -1, skipping the complete Serie" % showName)
+                            return True
+                        try:
+                            toskip = literal_eval(value)
+                        except:
+                            log.error("SkipShow: %s is not a valid parameter, check your Skipshow settings" % seasontmp)
+                            continue
+                        # Skip specific season:
+                        if isinstance(toskip, int):
+                            if int(season) == toskip:
+                                log.debug("SkipShow: Season %s matches variable of %s, skipping season" % (season, showName))
+                                return True
+                        # Skip specific episode
+                        elif isinstance(toskip, float):
+                            seasontoskip = int(toskip)
+                            episodetoskip = int(round((toskip-seasontoskip) * 100))
+                            if int(season) == seasontoskip:
+                                if episodetoskip == 0:
+                                    log.debug("SkipShow: Season %s matches variable of %s, skipping season" % (season, showName))
+                                    return True
+                                elif int(episode) == episodetoskip:
+                                    format = season + 'x' + episode
+                                    log.debug("SkipShow: Episode %s matches variable of %s, skipping episode" % (format, showName))
+                                    return True
+        except:
+            log.error('SkipShow: Problem with SkipShow, check the format in the settings.')
+            return False
 
 
 def checkAPICallsSubSeeker(use=False):

@@ -18,7 +18,7 @@
 #end if
 
 <div class="overview">
-#if $autosub.HOMELAYOUTFIRST == "Downloaded":
+#if $autosub.WANTEDFIRST:
 	<div id="Display2">
 #else
 	<div id="Display1">
@@ -39,11 +39,27 @@
 					<th class="center">Show name</th>
 					<th class="center">Se</th>
 					<th class="center">Ep</th>
-					<th class="center">Src</th>
-					<th class="center">Quality</th>
-					<th class="center">Codec</th>
-					<th class="center">Group</th>
-					<th class="center">Lang</th>
+					#if $autosub.MINMATCHSCORE & 8
+						<th class="center text-danger">Src</th>
+					#else
+						<th class="center">Src</th>
+					#end if
+					#if $autosub.MINMATCHSCORE & 4
+						<th class="center text-danger">Quality</th>
+					#else
+						<th class="center">Quality</th>
+					#end if
+					#if $autosub.MINMATCHSCORE & 2
+						<th class="center text-danger">Codec</th>
+					#else
+						<th class="center">Codec</th>
+					#end if
+					#if $autosub.MINMATCHSCORE & 1
+						<th class="center text-danger">Group</th>
+					#else
+						<th class="center">Group</th>
+					#end if
+					<th class="center">&emsp;Lang</th>
 					<th class="center">Imdb : A7 Id's</th>
 					<th class="center">File Date</th>
 					<th class="center">&nbsp;</th>
@@ -54,38 +70,63 @@
 
 #set $title_escaped = $cgi.escape($var['title'], True)
 		<tr>
-			<td align="left"><a data-placement="right" data-toggle="tooltip" data-original-title="$var['originalFileLocationOnDisk']">$var['title']</a></td>
+			<td align="left"><a data-placement="right" data-toggle="tooltip" data-original-title="$var['file']">$var['title']</a></td>
 			<td>$var['season']</td>
 			<td>$var['episode']</td>
-#if $type($var['source']) == UnicodeType:
-			<td>$var['source']</td>
+
+
+#if $autosub.MINMATCHSCORE & 8
+	<td class="text-danger">
 #else
-			<td>Unknown</td>
+	<td>
 #end if
-#if $type($var['quality']) == UnicodeType:
-			<td>$var['quality']</td>
+#if $type($var['source']) == UnicodeType
+	$var['source']
 #else
-			<td>Unknown</td>
+	Unknown
 #end if
-#if $type($var['codec']) == UnicodeType:
-			<td>$var['codec']</td>
+</td>
+
+#if $autosub.MINMATCHSCORE & 4: 
+	<td class="text-danger">
 #else
-			<td>Unknown</td>
+	<td>
 #end if
-#if $type($var['releasegrp']) == UnicodeType:
-			<td>$var['releasegrp']</td>
+#if $type($var['quality']) == UnicodeType
+	$var['quality']
 #else
-			<td>Unknown</td>
+	Unknown
 #end if
-			<td>
-#for lang in $var['lang']
-#if lang == "Dutch"
-			<img src="$autosub.WEBROOT/images/Dutch.png" alt="$lang" title="$lang">
+
+
+#if $autosub.MINMATCHSCORE & 2
+	<td class="text-danger">
+#else
+	<td>
 #end if
-#if lang == "English"
-			<img src="$autosub.WEBROOT/images/English.png" alt="$lang" title="$lang">
+#if $type($var['codec']) == UnicodeType
+	$var['codec']
+#else
+	Unknown
 #end if
-#end for
+#if $autosub.MINMATCHSCORE & 1
+	<td class="text-danger">
+#else
+	<td>
+#end if
+#if $type($var['releasegrp']) == UnicodeType
+	$var['releasegrp']
+#else
+	Unknown
+#end if
+
+<td>
+#if "Dutch" in $var['langs']
+			<img src="$autosub.WEBROOT/images/Dutch.png" alt="Dutch" title="Dutch">
+#end if
+#if "English" in $var['langs']
+			<img src="$autosub.WEBROOT/images/English.png" alt="English" title="English">
+#end if
 			</td>
 #if $var['ImdbId']:
 	#set $ImdbLink = "http://www.imdb.com/title/tt" + $var['ImdbId']
@@ -115,9 +156,15 @@
 			    <li class="dropdown">
 				<a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-wrench"></span></a>
 				    <ul class="dropdown-menu">
-					<li><a href="$autosub.WEBROOT/config/skipShow/$var['title'].replace(' ', '%20')/-1">Skip $var['title']</a></li>
-					<li><a href="$autosub.WEBROOT/config/skipShow/$var['title'].replace(' ', '%20')/$var['season']">Skip $var['title'] S$var['season']</a></li>
-					<li><a href="$autosub.WEBROOT/config/skipShow/$var['title'].replace(' ', '%20')/$var['season']/$var['episode']">Skip $var['title'] $SE</a></li>
+					#if not $var['ImdbId']
+						<li><a href="$autosub.WEBROOT/config/skipShow/$var['title'].replace(' ', '%20')/-1">Skip $var['title']</a></li>
+						<li><a href="$autosub.WEBROOT/config/skipShow/$var['title'].replace(' ', '%20')/$var['season']">Skip $var['title'] S$var['season']</a></li>
+						<li><a href="$autosub.WEBROOT/config/skipShow/$var['title'].replace(' ', '%20')/$var['season']/$var['episode']">Skip $var['title'] $SE</a></li>
+					#else
+						<li><a href="$autosub.WEBROOT/config/skipShow/$var['ImdbId']/-1">Skip $var['title']</a></li>
+						<li><a href="$autosub.WEBROOT/config/skipShow/$var['ImdbId']/$var['season']">Skip $var['title'] S$var['season']</a></li>
+						<li><a href="$autosub.WEBROOT/config/skipShow/$var['ImdbId']/$var['season']/$var['episode']">Skip $var['title'] $SE</a></li>
+					#end if
 				    </ul>
 				</li>
 			</ul>
@@ -133,10 +180,26 @@
 					<th class="center">show name</th>
 					<th class="center">Se</th>
 					<th class="center">Ep</th>
-					<th class="center">Src</th>
-					<th class="center">Quality</th>
-					<th class="center">Codec</th>
-					<th class="center">Group</th>
+					#if $autosub.MINMATCHSCORE & 8
+						<th class="center text-danger">Src</th>
+					#else
+						<th class="center">Src</th>
+					#end if
+					#if $autosub.MINMATCHSCORE & 4
+						<th class="center text-danger">Quality</th>
+					#else
+						<th class="center">Quality</th>
+					#end if
+					#if $autosub.MINMATCHSCORE & 2
+						<th class="center text-danger">Codec</th>
+					#else
+						<th class="center">Codec</th>
+					#end if
+					#if $autosub.MINMATCHSCORE & 1
+						<th class="center text-danger">Group</th>
+					#else
+						<th class="center">Group</th>
+					#end if
 					<th class="center">Lang</th>
 					<th class="center">Imdb : A7 Id's</th>
 					<th class="center">File Date</th>
@@ -154,7 +217,7 @@
 		
 #set $lastdownload = lastDown().getlastDown()
 
-#if $autosub.HOMELAYOUTFIRST == "Downloaded":
+#if not $autosub.WANTEDFIRST:
 	<div id="Display1">
 #else
 	<div id="Display2">
@@ -266,8 +329,8 @@
     #else:
 		<div class="well well-sm center well-header"><font size="3"><b>Time until next run:
 			#try
-			    $int($time.strftime('%H', $time.gmtime(($autosub.CHECKSUB.interval - ($time.time() - $autosub.CHECKSUB.lastrun) )))) hours and 
-                $int($time.strftime('%M', $time.gmtime(($autosub.CHECKSUB.interval - ($time.time() - $autosub.CHECKSUB.lastrun) )))) minutes
+			    $int($time.strftime('%H', $time.gmtime(($autosub.SEARCHINTERVAL - ($time.time() - $autosub.CHECKSUB.lastrun) )))) hours and 
+                $int($time.strftime('%M', $time.gmtime(($autosub.SEARCHINTERVAL - ($time.time() - $autosub.CHECKSUB.lastrun) )))) minutes
 				</b></font>
 			#except
 			     <div class="well well-sm center well-header"><font size="3"><b>Search is busy...</b></font>

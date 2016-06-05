@@ -10,10 +10,10 @@ import traceback
 import autosub
 
 class Scheduler:
-    def __init__(self, command, interval, runnow, name):      
+    def __init__(self, command,runnow, name):      
         self.command = command
         self.name = name
-        self.interval = interval
+        #self.interval = interval*3600
         self.thread = threading.Thread(None, self.runcommand, self.name)
         self.stop = False
         if runnow:
@@ -27,7 +27,7 @@ class Scheduler:
             
     def runcommand(self):
         while True:
-            if time.time() - self.lastrun > self.interval:
+            if time.time() - self.lastrun > autosub.SEARCHINTERVAL:
                 try:
                     print 'scheduler run'
                     self.command.run()

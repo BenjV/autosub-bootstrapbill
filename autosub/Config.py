@@ -1,4 +1,4 @@
-# Autosub Config.py - https://code.google.com/p/autosub-bootstrapbill/
+# Autosub Config.py
 #
 # The Autosub config Module
 #
@@ -24,11 +24,6 @@ import autosub.version as version
 log = logging.getLogger('thelogger')
 #/Settings -----------------------------------------------------------------------------------------------------------------------------------------
 
-# TODO: Webserver config, basic are done. CherryPy logging still needs a file only
-# TODO: Auto restart if needed after saving config
-# TODO: Make the config page pretty again
-# TODO: Make user re-enter password and compare 'em to rule out typing errors
-# TODO: Code cleanup?
 
 
 def ReadConfig(configfile):
@@ -46,213 +41,80 @@ def ReadConfig(configfile):
         print "Config ERROR: Not a valid configuration file! Using default values instead!"
         print "***************************************************************************"
         cfg = SafeConfigParser()
+    autosub.CONFIGVERSION = 1 if not cfg.has_option("config", "configversion")  else cfg.getint("config", "configversion") 
+    # First we check whether the config has been upgraded
+    if autosub.CONFIGVERSION < version.configversion:
+        upgradeConfig(cfg, autosub.CONFIGVERSION, version.configversion)
+    elif autosub.CONFIGVERSION > version.configversion:
+        print "Config: ERROR! Config version higher then this version of AutoSub supports. Update AutoSub!"
+        os._exit(1)
+    ConfigItems = cfg.items('config')
+
 
     if cfg.has_section('config'):
-        if cfg.has_option('config', 'path'):
-            autosub.PATH = cfg.get('config', 'path')
-        else:
-            print "Config ERROR: Variable PATH is missing. This is required! Using current working directory instead."
-            autosub.PATH = unicode(os.getcwd(), autosub.SYSENCODING)
-
-        if cfg.has_option('config', 'downloadeng'):
-            autosub.DOWNLOADENG = cfg.getboolean('config', 'downloadeng')
-        else:
-            autosub.DOWNLOADENG = False
-
-        if cfg.has_option('config', 'downloaddutch'):
-            autosub.DOWNLOADDUTCH = cfg.getboolean('config', 'downloaddutch')
-        else:
-            autosub.DOWNLOADDUTCH = True
-
-        if cfg.has_option('config', 'minmatchscore'):
-            autosub.MINMATCHSCORE = int(cfg.get('config', 'minmatchscore'))
-        else:
-            autosub.MINMATCHSCORE = 0
-
-        if cfg.has_option('config', 'checksub'):
-            autosub.SCHEDULERCHECKSUB = int(cfg.get('config', 'checksub'))
-            # CHECKSUB may only be ran 4 times a day, to prevent the API key from being banned
-            
-            if autosub.SCHEDULERCHECKSUB < 21600:
-                print "Config WARNING: checksub variable is lower then 21600! This is not allowed, this is to prevent our API-key from being banned."
-                autosub.SCHEDULERCHECKSUB = 21600  # Run every 6 hours
-        else:
-            autosub.SCHEDULERCHECKSUB = 21600  # Run every 6 hours
-
-        if cfg.has_option("config", "rootpath"):
-            autosub.ROOTPATH = cfg.get("config", "rootpath")
-        else:
-            print "Config ERROR: Variable ROOTPATH is missing. This is required! Using current working directory instead."
-            autosub.ROOTPATH = unicode(os.getcwd(), autosub.SYSENCODING)
-
-        if cfg.has_option("config", "fallbacktoeng"):
-            autosub.FALLBACKTOENG = cfg.getboolean("config", "fallbacktoeng")
-        else:
-            autosub.FALLBACKTOENG = True
-
-        if cfg.has_option("config", "subeng"):
-            autosub.SUBENG = cfg.get("config", "subeng")
-        else:
-            autosub.SUBENG = 'en'
-
-        if cfg.has_option("config", "subnl"):
-            autosub.SUBNL = cfg.get("config", "subnl")
-        else:
-            autosub.SUBNL = u""
-
-        if cfg.has_option("config", "notifyen"):
-            autosub.NOTIFYEN = cfg.getboolean("config", "notifyen")
-        else:
-            autosub.NOTIFYEN = True
-
-        if cfg.has_option("config", "notifynl"):
-            autosub.NOTIFYNL = cfg.getboolean("config", "notifynl")
-        else:
-            autosub.NOTIFYNL = True
-
-        if cfg.has_option("config", "workdir"):
-            autosub.PATH = cfg.get("config", "workdir")
-            print "Config WARNING: Workdir is an old variable. Replace it with 'path'."
-
-        if cfg.has_option("config", "logfile"):
-            autosub.LOGFILE = cfg.get("config", "logfile")
-        else:
-            print "Config ERROR: Variable LOGFILE is missing. This is required! Using 'AutoSubService.log' instead."
-            autosub.LOGFILE = u"AutoSubService.log"
-
-        if cfg.has_option("config", "subcodec"):
-            autosub.SUBCODEC = cfg.get("config", "subcodec")
-        else:
-            autosub.SUBCODEC = u'windows-1252'
-        
-        if cfg.has_option("config", "configversion"):
-            autosub.CONFIGVERSION = int(cfg.get("config", "configversion"))
-        else:
-            autosub.CONFIGVERSION = 1
-
-        if cfg.has_option("config", "postprocesscmd"):
-            autosub.POSTPROCESSCMD = cfg.get("config", "postprocesscmd")
-            
-        if cfg.has_option("config", "launchbrowser"):
-            autosub.LAUNCHBROWSER = cfg.getboolean("config", "launchbrowser")
-
-        if cfg.has_option("config", "browserrefresh"):
-            autosub.BROWSERREFRESH = int(cfg.get("config", "browserrefresh"))
-        else:
-            autosub.BROWSERREFRESH = 1
-        
-        if cfg.has_option("config", "skiphiddendirs"):
-            autosub.SKIPHIDDENDIRS = cfg.getboolean("config", "skiphiddendirs")
-        else:
-            autosub.SKIPHIDDENDIRS = False
-        
-        if cfg.has_option("config", "homelayoutfirst"):
-            autosub.HOMELAYOUTFIRST = cfg.get("config", "homelayoutfirst")
-        else:
-            autosub.HOMELAYOUTFIRST = u"Wanted"
-        
-        if cfg.has_option("config", "englishsubdelete"):
-            autosub.ENGLISHSUBDELETE = cfg.getboolean("config", "englishsubdelete")
-        else:
-            autosub.ENGLISHSUBDELETE = False
-
-        if cfg.has_option("config", "podnapisilang"):
-            autosub.PODNAPISILANG = cfg.get("config", "podnapisilang")
-        else:
-            autosub.PODNAPISILANG = u"Both"
-            
-        if cfg.has_option("config", "subscenelang"):
-            autosub.SUBSCENELANG = cfg.get("config", "subscenelang")
-        else:
-            autosub.SUBSCENELANG = u"Both"
-                     
-        if cfg.has_option("config", "opensubtitleslang"):
-            autosub.OPENSUBTITLESLANG = cfg.get("config", "opensubtitleslang")
-        else:
-            autosub.OPENSUBTITLESLANG = u"Both"
-
-        if cfg.has_option("config", "opensubtitlesuser"):
-            autosub.OPENSUBTITLESUSER = cfg.get("config", "opensubtitlesuser")
-        else:
-            autosub.OPENSUBTITLESUSER = u""
-
-        if cfg.has_option("config", "opensubtitlespasswd"):
-            autosub.OPENSUBTITLESPASSWD = cfg.get("config", "opensubtitlespasswd")
-        else:
-            autosub.OPENSUBTITLESPASSWD = u"" 
-            
-        if cfg.has_option("config", "addic7edlang"):
-            autosub.ADDIC7EDLANG = cfg.get("config", "addic7edlang")
-        else:
-            autosub.ADDIC7EDLANG = u"None"
-
-        if cfg.has_option("config", "addic7eduser"):
-            autosub.ADDIC7EDUSER = cfg.get("config", "addic7eduser")
-        else:
-            autosub.ADDIC7EDUSER = u""
-
-        if cfg.has_option("config", "addic7edpasswd"):
-            autosub.ADDIC7EDPASSWD = cfg.get("config", "addic7edpasswd")
-        else:
-            autosub.ADDIC7EDPASSWD = u""
-
-        if cfg.has_option("config", "skipstringnl"):
-            autosub.SKIPSTRINGNL = cfg.get("config", "skipstringnl")
-        else:
-            autosub.SKIPSTRINGNL = u""
-
-        if cfg.has_option("config", "skipstringen"):
-            autosub.SKIPSTRINGEN = cfg.get("config", "skipstringen")
-        else:
-            autosub.SKIPSTRINGNL = u""  
-           
- # Here we change the old "webdl" entry if it still exists for the more versatile "skipstring" entries for both languages
-        if cfg.has_option("config", "webdl"):
-            Webdl = cfg.get("config", "webdl")
-            if Webdl == u"DutchOnly":
-                autosub.SKIPSTRINGEN = "Web-dl"
-            elif Webdl == "None":
-                autosub.SKIPSTRINGNL = autosub.SKIPSTRINGEN= u"Web-dl"
-            cfg.remove_option("config","webdl")
-            cfg.set("config","skipstringnl",autosub.SKIPSTRINGNL)
-            cfg.set("config","skipstringen",autosub.SKIPSTRINGEN)
-            with codecs.open(autosub.CONFIGFILE, 'wb', encoding=autosub.SYSENCODING) as cfile:
-                cfg.write(cfile)        
-        
+        autosub.WANTEDFIRST         = True  if not cfg.has_option("config", "wantedfirst")         else cfg.getboolean("config", "wantedfirst")
+        autosub.DOWNLOADDUTCH       = True  if not cfg.has_option('config', 'downloaddutch')       else cfg.getboolean('config', 'downloaddutch')
+        autosub.DOWNLOADENG         = False if not cfg.has_option('config', 'downloadeng')         else cfg.getboolean('config', 'downloadeng')
+        autosub.FALLBACKTOENG       = False if not cfg.has_option("config", "fallbacktoeng")       else cfg.getboolean("config", "fallbacktoeng")
+        autosub.NOTIFYEN            = False if not cfg.has_option("config", "notifyen")            else cfg.getboolean("config", "notifyen")
+        autosub.NOTIFYNL            = False if not cfg.has_option("config", "notifynl")            else cfg.getboolean("config", "notifynl")
+        autosub.LAUNCHBROWSER       = False if not cfg.has_option("config", "launchbrowser")       else cfg.getboolean("config", "launchbrowser")
+        autosub.SKIPHIDDENDIRS      = False if not cfg.has_option("config", "skiphiddendirs")      else cfg.getboolean("config", "skiphiddendirs")
+        autosub.ENGLISHSUBDELETE    = False if not cfg.has_option("config", "englishsubdelete")    else cfg.getboolean("config", "englishsubdelete")
+        autosub.PODNAPISI           = False if not cfg.has_option("config", "podnapisi")           else cfg.getboolean("config", "podnapisi")
+        autosub.SUBSCENE            = False if not cfg.has_option("config", "subscene")            else cfg.getboolean("config", "subscene")
+        autosub.OPENSUBTITLES       = False if not cfg.has_option("config", "opensubtitles")       else cfg.getboolean("config", "opensubtitles")
+        autosub.ADDIC7ED            = False if not cfg.has_option("config", "addic7ed")            else cfg.getboolean("config", "addic7ed")
+        autosub.HI                  = False if not cfg.has_option("config", "hearingimpaired")     else cfg.getboolean("config", "hearingimpaired")
+        autosub.MINMATCHSCORE       = 8     if not cfg.has_option('config', 'minmatchscore')       else cfg.getint('config', 'minmatchscore')
+        autosub.SEARCHINTERVAL      = 21600 if not cfg.has_option('config', 'searchinterval')      else cfg.getint('config', 'searchinterval')
+        autosub.BROWSERREFRESH      = 1     if not cfg.has_option("config", "browserrefresh")      else cfg.getint("config", "browserrefresh")
+        autosub.SUBENG              = u"en" if not cfg.has_option("config", "subeng")              else cfg.get("config", "subeng")
+        autosub.SUBNL               = u""   if not cfg.has_option("config", "subnl")               else cfg.get("config", "subnl")
+        autosub.POSTPROCESSCMD      = u""   if not cfg.has_option("config", "postprocesscmd")      else cfg.get("config", "postprocesscmd")
+        autosub.OPENSUBTITLESUSER   = u""   if not cfg.has_option("config", "opensubtitlesuser")   else cfg.get("config", "opensubtitlesuser")
+        autosub.OPENSUBTITLESPASSWD = u""   if not cfg.has_option("config", "opensubtitlespasswd") else cfg.get("config", "opensubtitlespasswd") 
+        autosub.ADDIC7EDUSER        = u""   if not cfg.has_option("config", "addic7eduser")        else cfg.get("config", "addic7eduser")
+        autosub.ADDIC7EDPASSWD      = u""   if not cfg.has_option("config", "addic7edpasswd")      else cfg.get("config", "addic7edpasswd") 
+        autosub.SKIPSTRINGNL        = u""   if not cfg.has_option("config", "skipstringnl")        else cfg.get("config", "skipstringnl")
+        autosub.SKIPSTRINGEN        = u""   if not cfg.has_option("config", "skipstringen")        else cfg.get("config", "skipstringen")
+        autosub.LOGFILE             = u"AutoSubService.log"  if not cfg.has_option("config", "logfile")  else cfg.get("config", "logfile")
+        autosub.SUBCODEC            = u'windows-1252'        if not cfg.has_option("config", "subcodec") else cfg.get("config", "subcodec")
+        autosub.PATH                = unicode(os.getcwd(), autosub.SYSENCODING) if not cfg.has_option('config', 'path')     else cfg.get('config', 'path')
+        autosub.ROOTPATH            = unicode(os.getcwd(), autosub.SYSENCODING) if not cfg.has_option("config", "rootpath") else cfg.get("config", "rootpath")
     else:
         # config section is missing
         print "Config ERROR: Config section is missing. This is required, it contains vital options! Using default values instead!"
-        print "Config ERROR: Variable ROOTPATH is missing. This is required! Using current working directory instead."
         autosub.PATH = unicode(os.getcwd(), autosub.SYSENCODING)
+        autosub.ROOTPATH = autosub.PATH
         autosub.DOWNLOADENG = False
         autosub.DOWNLOADDUTCH = True        
         autosub.MINMATCHSCORE = 8
-        autosub.SCHEDULERCHECKSUB = 28800
-        print "Config ERROR: Variable ROOTPATH is missing. This is required! Using current working directory instead."
-        autosub.ROOTPATH = unicode(os.getcwd(), autosub.SYSENCODING)
-        autosub.FALLBACKTOENG = True
+        autosub.SEARCHINTERVAL = 21600
+        autosub.FALLBACKTOENG = False
         autosub.SUBENG = u'en'
         autosub.SUBNL = u""
-        autosub.NOTIFYEN = True
-        autosub.NOTIFYNL = True
+        autosub.NOTIFYEN = False
+        autosub.NOTIFYNL = False
         autosub.SKIPHIDDENDIRS = False
-        print "Config ERROR: Variable LOGFILE is missing. This is required! Using 'AutoSubService.log' instead."
         autosub.LOGFILE = u"AutoSubService.log"
         autosub.CONFIGVERSION = version.configversion
-        autosub.HOMELAYOUTFIRST = u"Wanted"
+        autosub.WANTEDFIRST = True
         autosub.ENGLISHSUBDELETE = False
-        autosub.PODNAPISILANG = u"Both"
-        autosub.SUBSCENELANG = u"Both"
-        autosub.OPENSUBTITLESLANG = u"Both"
+        autosub.PODNAPISI = False
+        autosub.SUBSCENE = False
+        autosub.OPENSUBTITLES = Fale
         autosub.OPENSUBTITLESUSER = u""
         autosub.OPENSUBTITLESPASSWD = u""
-        autosub.ADDIC7EDLANG = u"None"
+        autosub.ADDIC7ED = False
         autosub.ADDIC7EDUSER = u""
         autosub.ADDIC7EDPASSWD = u""
         autosub.SKIPSTRINGNL = u""
         autosub.SKIPSTRINGEN = u""
         autosub.SUBCODEC = u'windows-1252'
         autosub.BROWSERREFRESH = 1
+        autosub.HI = False
+        autosub.POSTPROCESSCMD = u""
 
     if cfg.has_section('logfile'):
         if cfg.has_option("logfile", "loglevel"):
@@ -284,23 +146,14 @@ def ReadConfig(configfile):
                 autosub.LOGLEVELCONSOLE = logging.CRITICAL
         else:
             autosub.LOGLEVELCONSOLE = logging.ERROR
-
-        if cfg.has_option("logfile", "logsize"):
-            autosub.LOGSIZE = int(cfg.get("logfile", "logsize"))
-        else:
-            autosub.LOGSIZE = 1000000
-
-        if cfg.has_option("logfile", "lognum"):
-            autosub.LOGNUM = int(cfg.get("logfile", "lognum"))
-        else:
-            autosub.LOGNUM = 3
-
+        autosub.LOGSIZE = cfg.getint("logfile", "logsize") if cfg.has_option("logfile", "logsize") else 1024000
+        autosub.LOGNUM  = cfg.getint("logfile", "lognum")  if cfg.has_option("logfile", "lognum")  else 3
     else:
         # Logfile section is missing, so set defaults for all options
         autosub.LOGLEVEL = logging.INFO
         autosub.LOGLEVELCONSOLE = logging.ERROR
-        autosub.LOGSIZE = 1000000
-        autosub.LOGNUM = 1
+        autosub.LOGSIZE = 1024000
+        autosub.LOGNUM = 3
 
     if cfg.has_section('webserver'):
         if cfg.has_option('webserver', 'webserverip') and cfg.has_option('webserver', 'webserverport'):
@@ -332,10 +185,14 @@ def ReadConfig(configfile):
     if cfg.has_section('skipshow'):
         # Try to read skipshow section in the config
         autosub.SKIPSHOW = dict(cfg.items('skipshow'))
-        # The following 4 lines convert the skipshow to uppercase. And also convert the variables to a list
+
+        # The following 5 lines convert the skipshow to uppercase. And also convert the variables to a list
+        # also replace the "~" with ":" neccesary because the config parser sees ":" as a delimiter
         autosub.SKIPSHOWUPPER = {}
         for x in autosub.SKIPSHOW:
-            autosub.SKIPSHOWUPPER[x.upper()] = [y.strip() for y in autosub.SKIPSHOW[x].split(',')]
+            autosub.SKIPSHOWUPPER[x.upper().replace('~',':')] = [y.strip() for y in autosub.SKIPSHOW[x].split(',')]
+            del autosub.SKIPSHOW[x]
+            autosub.SKIPSHOW[x.replace('~',':')] = y
     else:
         autosub.SKIPSHOW = {}
         autosub.SKIPSHOWUPPER = {}
@@ -360,179 +217,41 @@ def ReadConfig(configfile):
 
     if cfg.has_section('notify'):
             #Mail
-            if cfg.has_option('notify', 'notifymail'):
-                autosub.NOTIFYMAIL = cfg.getboolean('notify', 'notifymail')
-            else:
-                autosub.NOTIFYMAIL = False
 
-            if cfg.has_option('notify', 'mailsrv'):
-                autosub.MAILSRV = cfg.get('notify', 'mailsrv')
-            else:
-                autosub.MAILSRV = u"smtp.gmail.com:587"
-
-            if cfg.has_option('notify', 'mailfromaddr'):
-                autosub.MAILFROMADDR = cfg.get('notify', 'mailfromaddr')
-            else:
-                autosub.MAILFROMADDR = u"example@gmail.com"
-
-            if cfg.has_option('notify', 'mailtoaddr'):
-                autosub.MAILTOADDR = cfg.get('notify', 'mailtoaddr')
-            else:
-                autosub.MAILTOADDR = u"example@gmail.com"
-
-            if cfg.has_option('notify', 'mailusername'):
-                autosub.MAILUSERNAME = cfg.get('notify', 'mailusername')
-            else:
-                autosub.MAILUSERNAME = u"example@gmail.com"
-
-            if cfg.has_option('notify', 'mailpassword'):
-                autosub.MAILPASSWORD = cfg.get('notify', 'mailpassword')
-            else:
-                autosub.MAILPASSWORD = u"mysecretpassword"
-
-            if cfg.has_option('notify', 'mailsubject'):
-                autosub.MAILSUBJECT = cfg.get('notify', 'mailsubject')
-            else:
-                autosub.MAILSUBJECT = u"Auto-Sub downloaded"
-
-            if cfg.has_option('notify', 'mailencryption'):
-                autosub.MAILENCRYPTION = cfg.get('notify', 'mailencryption')
-            else:
-                autosub.MAILENCRYPTION = u"TLS"
-                
-            if cfg.has_option('notify', 'mailauth'):
-                autosub.MAILAUTH = cfg.get('notify', 'mailauth')
-            else:
-                autosub.MAILAUTH = u""
-       
-            #Growl
-            if cfg.has_option('notify', 'notifygrowl'):
-                autosub.NOTIFYGROWL = cfg.getboolean('notify', 'notifygrowl')
-            else:
-                autosub.NOTIFYGROWL = False
-
-            if cfg.has_option('notify', 'growlhost'):
-                autosub.GROWLHOST = cfg.get('notify', 'growlhost')
-            else:
-                autosub.GROWLHOST = u"127.0.0.1"
-
-            if cfg.has_option('notify', 'growlport'):
-                autosub.GROWLPORT = cfg.get('notify', 'growlport')
-            else:
-                autosub.GROWLPORT = u"23053"
-
-            if cfg.has_option('notify', 'growlpass'):
-                autosub.GROWLPASS = cfg.get('notify', 'growlpass')
-            else:
-                autosub.GROWLPASS = u"mysecretpassword"
-
-            #Twitter
-            if cfg.has_option('notify', 'notifytwitter'):
-                autosub.NOTIFYTWITTER = cfg.getboolean('notify', 'notifytwitter')
-            else:
-                autosub.NOTIFYTWITTER = False
-
-            if cfg.has_option('notify', 'twitterkey'):
-                autosub.TWITTERKEY = cfg.get('notify', 'twitterkey')
-            else:
-                autosub.TWITTERKEY = u"token key"
-
-            if cfg.has_option('notify', 'twittersecret'):
-                autosub.TWITTERSECRET = cfg.get('notify', 'twittersecret')
-            else:
-                autosub.TWITTERSECRET = u"token secret"
-
-            #Notify My Android
-            if cfg.has_option('notify', 'notifynma'):
-                autosub.NOTIFYNMA = cfg.getboolean('notify', 'notifynma')
-            else:
-                autosub.NOTIFYNMA = False
-
-            if cfg.has_option('notify', 'nmaapi'):
-                autosub.NMAAPI = cfg.get('notify', 'nmaapi')
-            else:
-                autosub.NMAAPI = u"API key"
-            
-            if cfg.has_option('notify', 'nmapriority'):
-                autosub.NMAPRIORITY = int(cfg.get('notify', 'nmapriority'))
-            else:
-                autosub.NMAPRIORITY = 0
-            
-            #Prowl    
-            if cfg.has_option('notify', 'notifyprowl'):
-                autosub.NOTIFYPROWL = cfg.getboolean('notify', 'notifyprowl')
-            else:
-                autosub.NOTIFYPROWL = False
-
-            if cfg.has_option('notify', 'prowlapi'):
-                autosub.PROWLAPI = cfg.get('notify', 'prowlapi')
-            else:
-                autosub.PROWLAPI = u"API key"
-            
-            if cfg.has_option('notify', 'prowlpriority'):
-                autosub.PROWLPRIORITY = int(cfg.get('notify', 'prowlpriority'))
-            else:
-                autosub.PROWLPRIORITY = 0
-            
-            #Pushalot - Windows Phone and Windows 8 notifier.
-            if cfg.has_option('notify', 'notifypushalot'):
-                autosub.NOTIFYPUSHALOT = cfg.getboolean('notify', 'notifypushalot')
-            else:
-                autosub.NOTIFYPUSHALOT = False
-
-            if cfg.has_option('notify', 'pushalotapi'):
-                autosub.PUSHALOTAPI = cfg.get('notify', 'pushalotapi')
-            else:
-                autosub.PUSHALOTAPI = u"API key"
-
-            #Pushbullet.
-            if cfg.has_option('notify', 'notifypushbullet'):
-                autosub.NOTIFYPUSHBULLET = cfg.getboolean('notify', 'notifypushbullet')
-            else:
-                autosub.NOTIFYPUSHBULLET = False
-
-            if cfg.has_option('notify', 'pushbulletapi'):
-                autosub.PUSHBULLETAPI = cfg.get('notify', 'pushbulletapi')
-            else:
-                autosub.PUSHBULLETAPI = u"API key"
-            
-            #Pushover.
-            if cfg.has_option('notify', 'notifypushover'):
-                autosub.NOTIFYPUSHOVER = cfg.getboolean('notify', 'notifypushover')
-            else:
-                autosub.NOTIFYPUSHOVER = False
-
-            if cfg.has_option('notify', 'pushoverapi'):
-                autosub.PUSHOVERAPI = cfg.get('notify', 'pushoverapi')
-            else:
-                autosub.PUSHOVERAPI = u"API key"
-            
-            #Boxcar - iOS and OSX notifier.
-            if cfg.has_option('notify', 'notifyboxcar2'):
-                autosub.NOTIFYBOXCAR2 = cfg.getboolean('notify', 'notifyboxcar2')
-            else:
-                autosub.NOTIFYBOXCAR2 = False
-            
-            if cfg.has_option('notify', 'boxcar2token'):
-                autosub.BOXCAR2TOKEN = cfg.get('notify', 'boxcar2token')
-            else:
-                autosub.BOXCAR2TOKEN = u"Boxcar2 access token"
-            
-            #Plex Media Server
-            if cfg.has_option('notify', 'notifyplex'):
-                autosub.NOTIFYPLEX = cfg.getboolean('notify', 'notifyplex')
-            else:
-                autosub.NOTIFYPLEX = False
-            
-            if cfg.has_option('notify', 'plexserverhost'):
-                autosub.PLEXSERVERHOST = cfg.get('notify', 'plexserverhost')
-            else:
-                autosub.PLEXSERVERHOST = u"127.0.0.1"
-            
-            if cfg.has_option('notify', 'plexserverport'):
-                autosub.PLEXSERVERPORT = cfg.get('notify', 'plexserverport')
-            else:
-                autosub.PLEXSERVERPORT = u"32400"
+            autosub.NOTIFYMAIL       = cfg.getboolean('notify', 'notifymail')       if cfg.has_option('notify', 'notifymail')       else False
+            autosub.MAILSRV          = cfg.get('notify', 'mailsrv')                 if cfg.has_option('notify', 'mailsrv')          else u"smtp.gmail.com:587"
+            autosub.MAILFROMADDR     = cfg.get('notify', 'mailfromaddr')            if cfg.has_option('notify', 'mailfromaddr')     else u"example@gmail.com"
+            autosub.MAILTOADDR       = cfg.get('notify', 'mailtoaddr')              if cfg.has_option('notify', 'mailtoaddr')       else u"example@gmail.com"
+            autosub.MAILUSERNAME     = cfg.get('notify', 'mailusername')            if cfg.has_option('notify', 'mailusername')     else u"example@gmail.com"
+            autosub.MAILPASSWORD     = cfg.get('notify', 'mailpassword')            if cfg.has_option('notify', 'mailpassword')     else u"mysecretpassword"
+            autosub.MAILSUBJECT      = cfg.get('notify', 'mailsubject')             if cfg.has_option('notify', 'mailsubject')      else u"Auto-Sub downloaded"
+            autosub.MAILENCRYPTION   = cfg.get('notify', 'mailencryption')          if cfg.has_option('notify', 'mailencryption')   else u"TLS"
+            autosub.MAILAUTH         = cfg.get('notify', 'mailauth')                if cfg.has_option('notify', 'mailauth')         else u""
+            autosub.NOTIFYGROWL      = cfg.getboolean('notify', 'notifygrowl')      if cfg.has_option('notify', 'notifygrowl')      else False
+            autosub.GROWLHOST        = cfg.get('notify', 'growlhost')               if cfg.has_option('notify', 'growlhost')        else u"127.0.0.1"
+            autosub.GROWLPORT        = cfg.get('notify', 'growlport')               if cfg.has_option('notify', 'growlport')        else u"23053"
+            autosub.GROWLPASS        = cfg.get('notify', 'growlpass')               if cfg.has_option('notify', 'growlpass')        else u"mysecretpassword"
+            autosub.NOTIFYTWITTER    = cfg.getboolean('notify', 'notifytwitter')    if cfg.has_option('notify', 'notifytwitter')    else False
+            autosub.TWITTERKEY       = cfg.get('notify', 'twitterkey')              if cfg.has_option('notify', 'twitterkey')       else u"token key"
+            autosub.TWITTERSECRET    = cfg.get('notify', 'twittersecret')           if cfg.has_option('notify', 'twittersecret')    else u"token secret"
+            autosub.NOTIFYNMA        = cfg.getboolean('notify', 'notifynma')        if cfg.has_option('notify', 'notifynma')        else False
+            autosub.NMAAPI           = cfg.get('notify', 'nmaapi')                  if cfg.has_option('notify', 'nmaapi')           else u"API key"
+            autosub.NMAPRIORITY      = cfg.getint('notify', 'nmapriority')          if cfg.has_option('notify', 'nmapriority')      else 0
+            autosub.NOTIFYPROWL      = cfg.getboolean('notify', 'notifyprowl')      if cfg.has_option('notify', 'notifyprowl')      else False
+            autosub.PROWLAPI         = cfg.get('notify', 'prowlapi')                if cfg.has_option('notify', 'prowlapi')         else u"API key"
+            autosub.PROWLPRIORITY    = cfg.getint('notify', 'prowlpriority')        if cfg.has_option('notify', 'prowlpriority')    else 0
+            autosub.NOTIFYPUSHALOT   = cfg.getboolean('notify', 'notifypushalot')   if cfg.has_option('notify', 'notifypushalot')   else False
+            autosub.PUSHALOTAPI      = cfg.get('notify', 'pushalotapi')             if cfg.has_option('notify', 'pushalotapi')      else u"API key"
+            autosub.NOTIFYPUSHBULLET = cfg.getboolean('notify', 'notifypushbullet') if cfg.has_option('notify', 'notifypushbullet') else False
+            autosub.PUSHBULLETAPI    = cfg.get('notify', 'pushbulletapi')           if cfg.has_option('notify', 'pushbulletapi')    else u"API key"
+            autosub.NOTIFYPUSHOVER   = cfg.getboolean('notify', 'notifypushover')   if cfg.has_option('notify', 'notifypushover')   else False
+            autosub.PUSHOVERAPPKEY   = cfg.get('notify', 'pushoverappkey')          if cfg.has_option('notify', 'pushoverappkey')   else u"API Applicatie key"
+            autosub.PUSHOVERUSERKEY  = cfg.get('notify', 'pushoveruserkey')         if cfg.has_option('notify', 'pushoveruserkey')  else u"API User key"
+            autosub.NOTIFYBOXCAR2    = cfg.getboolean('notify', 'notifyboxcar2')    if cfg.has_option('notify', 'notifyboxcar2')    else False
+            autosub.BOXCAR2TOKEN     = cfg.get('notify', 'boxcar2token')            if cfg.has_option('notify', 'boxcar2token')     else u"Boxcar2 access token"
+            autosub.NOTIFYPLEX       = cfg.getboolean('notify', 'notifyplex')       if cfg.has_option('notify', 'notifyplex')       else False
+            autosub.PLEXSERVERHOST   = cfg.get('notify', 'plexserverhost')          if cfg.has_option('notify', 'plexserverhost')   else u"127.0.0.1"
+            autosub.PLEXSERVERPORT   = cfg.get('notify', 'plexserverport')          if cfg.has_option('notify', 'plexserverport')   else u"32400"
             
     else:
         # notify section is missing
@@ -562,7 +281,8 @@ def ReadConfig(configfile):
         autosub.NOTIFYPUSHBULLET = False
         autosub.PUSHBULLETAPI = u"API key"
         autosub.NOTIFYPUSHOVER = False
-        autosub.PUSHOVERAPI = u"API key"
+        autosub.PUSHOVERAPPKEY = u"API Appliction key"
+        autosub.PUSHOVERUSERKEY = u"API Userkey"
         autosub.NOTIFYBOXCAR2 = False
         autosub.BOXCAR2TOKEN = u"Boxcar2 access token"
         autosub.NOTIFYPLEX = False
@@ -781,11 +501,11 @@ def ReadConfig(configfile):
 
     autosub.LASTESTDOWNLOAD = []
 
-    if autosub.CONFIGVERSION < version.configversion:
-        upgradeConfig(autosub.CONFIGVERSION, version.configversion)
-    elif autosub.CONFIGVERSION > version.configversion:
-        print "Config: ERROR! Config version higher then this version of AutoSub supports. Update AutoSub!"
-        os._exit(1)
+    #if autosub.CONFIGVERSION < version.configversion:
+    #    upgradeConfig(cfg, autosub.CONFIGVERSION, version.configversion)
+    #elif autosub.CONFIGVERSION > version.configversion:
+    #    print "Config: ERROR! Config version higher then this version of AutoSub supports. Update AutoSub!"
+    #    os._exit(1)
 
 def SaveToConfig(section=None, variable=None, value=None):
     """
@@ -805,6 +525,8 @@ def SaveToConfig(section=None, variable=None, value=None):
         #no config yet
         pass
 
+    if ':' in variable:
+        variable = variable.replace(':','~')
     if cfg.has_section(section):
         cfg.set(section, variable.encode('utf8'), value.encode('utf8'))
         edited = True
@@ -965,35 +687,36 @@ def saveConfigSection():
         cfg.add_section(section)
     
     cfg.set(section, "path", autosub.PATH)
+    cfg.set(section, "rootpath", autosub.ROOTPATH)
+    cfg.set(section, "logfile", autosub.LOGFILE)
     cfg.set(section, "downloadeng", str(autosub.DOWNLOADENG))
     cfg.set(section, "downloaddutch", str(autosub.DOWNLOADDUTCH))    
-    cfg.set(section, "minmatchscore", str(autosub.MINMATCHSCORE))
-    cfg.set(section, "checksub", str(autosub.SCHEDULERCHECKSUB))
-    cfg.set(section, "rootpath", autosub.ROOTPATH)
     cfg.set(section, "fallbacktoeng", str(autosub.FALLBACKTOENG))
+    cfg.set(section, "englishsubdelete", str(autosub.ENGLISHSUBDELETE))
     cfg.set(section, "subeng", autosub.SUBENG)
     cfg.set(section, "subnl", autosub.SUBNL)
     cfg.set(section, "notifyen", str(autosub.NOTIFYEN))
     cfg.set(section, "notifynl", str(autosub.NOTIFYNL))
-    cfg.set(section, "logfile", autosub.LOGFILE)
     cfg.set(section, "postprocesscmd", autosub.POSTPROCESSCMD)
-    cfg.set(section, "configversion", str(autosub.CONFIGVERSION))
-    cfg.set(section, "launchbrowser", str(autosub.LAUNCHBROWSER))
-    cfg.set(section, "browserrefresh", autosub.BROWSERREFRESH)
-    cfg.set(section, "skiphiddendirs", str(autosub.SKIPHIDDENDIRS))
     cfg.set(section, "subcodec", autosub.SUBCODEC)
-    cfg.set(section, "homelayoutfirst", autosub.HOMELAYOUTFIRST)
-    cfg.set(section, "englishsubdelete", str(autosub.ENGLISHSUBDELETE))
-    cfg.set(section, "podnapisilang", autosub.PODNAPISILANG)
-    cfg.set(section, "subscenelang", autosub.SUBSCENELANG)
-    cfg.set(section, "opensubtitleslang", autosub.OPENSUBTITLESLANG)
+    cfg.set(section, "launchbrowser", str(autosub.LAUNCHBROWSER))
+    cfg.set(section, "skiphiddendirs", str(autosub.SKIPHIDDENDIRS))
+    cfg.set(section, "wantedfirst", str(autosub.WANTEDFIRST))
+    cfg.set(section, "podnapisi", str(autosub.PODNAPISI))
+    cfg.set(section, "subscene", str(autosub.SUBSCENE))
+    cfg.set(section, "opensubtitles", str(autosub.OPENSUBTITLES))
+    cfg.set(section, "addic7ed", str(autosub.ADDIC7ED))
     cfg.set(section, "opensubtitlesuser", autosub.OPENSUBTITLESUSER)
     cfg.set(section, "opensubtitlespasswd", autosub.OPENSUBTITLESPASSWD)
-    cfg.set(section, "addic7edlang", autosub.ADDIC7EDLANG)
     cfg.set(section, "addic7eduser", autosub.ADDIC7EDUSER)
     cfg.set(section, "addic7edpasswd", autosub.ADDIC7EDPASSWD)
+    cfg.set(section, "browserrefresh", str(autosub.BROWSERREFRESH))
     cfg.set("config","skipstringnl",autosub.SKIPSTRINGNL)
-    cfg.set("config","skipstringen",autosub.SKIPSTRINGEN)
+    cfg.set("config","skipstringen",autosub.SKIPSTRINGEN)   
+    cfg.set(section, "minmatchscore", str(autosub.MINMATCHSCORE))
+    cfg.set(section, "searchinterval", str(autosub.SEARCHINTERVAL))
+    cfg.set(section, "configversion", str(autosub.CONFIGVERSION))
+    cfg.set(section,"hearingimpaired",str(autosub.HI))
     
     with codecs.open(autosub.CONFIGFILE, 'wb', encoding=autosub.SYSENCODING) as cfile:
         cfg.write(cfile)
@@ -1180,7 +903,8 @@ def saveNotifySection():
     cfg.set(section, "notifypushbullet", str(autosub.NOTIFYPUSHBULLET))
     cfg.set(section, "pushbulletapi", autosub.PUSHBULLETAPI)
     cfg.set(section, "notifypushover", str(autosub.NOTIFYPUSHOVER))
-    cfg.set(section, "pushoverapi", autosub.PUSHOVERAPI)
+    cfg.set(section, "pushoverappkey", autosub.PUSHOVERAPPKEY)
+    cfg.set(section, "pushoveruserkey", autosub.PUSHOVERUSERKEY)
     cfg.set(section, "notifyboxcar2", str(autosub.NOTIFYBOXCAR2))
     cfg.set(section, "boxcar2token", autosub.BOXCAR2TOKEN)
     cfg.set(section, "notifyplex", str(autosub.NOTIFYPLEX))
@@ -1193,7 +917,7 @@ def saveNotifySection():
 def checkForRestart():
     """
     Check if internal variables are different from the config file.
-    Only check the variables the require a restart to take effect
+    Only check the variables that require a restart to take effect
     """
     #TODO: This function is very ugly and should be rewritten comletely. This is not a way to check it!
     cfg = SafeConfigParser()
@@ -1206,10 +930,10 @@ def checkForRestart():
         pass
 
     # Set the default values
-    schedulerchecksub = 86400
+    #schedulerinterval = 6
     loglevel = logging.INFO
     loglevelconsole = logging.ERROR
-    logsize = 1000000
+    logsize = 1024000
     lognum = 1
     webserverip = '0.0.0.0'
     webserverport = 8083
@@ -1218,9 +942,9 @@ def checkForRestart():
     password = ''
 
     # Check if an option excists in the config file, if so replace the default value
-    if cfg.has_section('config'):
-        if cfg.has_option('config', 'checksub'):
-            schedulerchecksub = int(cfg.get('config', 'checksub'))
+    #if cfg.has_section('config'):
+    #    if cfg.has_option('config', 'checksub'):
+    #        schedulerinterval = int(cfg.get('config', 'searchinterval'))
 
     if cfg.has_option("config", "logfile"):
         logfile = cfg.get("config", "logfile")
@@ -1269,7 +993,7 @@ def checkForRestart():
             password = cfg.get('webserver', 'password')
 
     # Now compare the values, if one differs a restart is required.
-    if schedulerchecksub != autosub.SCHEDULERCHECKSUB or loglevel != autosub.LOGLEVEL or loglevelconsole != autosub.LOGLEVELCONSOLE or logsize != autosub.LOGSIZE or lognum != autosub.LOGNUM or webserverip != autosub.WEBSERVERIP or webserverport != autosub.WEBSERVERPORT or username != autosub.USERNAME or password != autosub.PASSWORD or webroot != autosub.WEBROOT:
+    if loglevel != autosub.LOGLEVEL or loglevelconsole != autosub.LOGLEVELCONSOLE or logsize != autosub.LOGSIZE or lognum != autosub.LOGNUM or webserverip != autosub.WEBSERVERIP or webserverport != autosub.WEBSERVERPORT or username != autosub.USERNAME or password != autosub.PASSWORD or webroot != autosub.WEBROOT:
         return True
     else:
         return False
@@ -1319,13 +1043,13 @@ def WriteConfig(configsection=None):
         ReadConfig(autosub.CONFIGFILE)
         return "Configuration has been saved."
 
-def upgradeConfig(from_version, to_version):
+def upgradeConfig(cfg, from_version, to_version):
     print "Config: Upgrading config version from %d to %d" %(from_version, to_version)
     upgrades = to_version - from_version
     if upgrades != 1:
         print "Config: More than 1 upgrade required. Starting subupgrades"
         for x in range (0, upgrades):
-            upgradeConfig(from_version + x, from_version + x + 1)
+            upgradeConfig(cfg, from_version + x, from_version + x + 1)
     else:
         if from_version == 1 and to_version == 2:
             print "Config: Upgrading minmatchscores"
@@ -1339,7 +1063,6 @@ def upgradeConfig(from_version, to_version):
             print "Config: New value's Minmatchscore: %d" %(autosub.MINMATCHSCORE)
             print "Config: Config upgraded to version 2"
             autosub.CONFIGVERSION = 2
-            autosub.CONFIGUPGRADED = True
         elif from_version == 2 and to_version == 3:
             for title in autosub.SKIPSHOWUPPER:
                 items = autosub.SKIPSHOWUPPER[title]
@@ -1349,5 +1072,61 @@ def upgradeConfig(from_version, to_version):
                 SaveToConfig('skipshow', title, string_items)
                 applyskipShow()
             autosub.CONFIGVERSION = 3
-            autosub.CONFIGUPGRADED = True
+        elif from_version == 3 and to_version == 4:
+            if cfg.has_option('config', 'checksub'):
+                autosub.SEARCHINTERVAL = cfg.getint('config', 'checksub')
+            else:
+                autosub.SEARCHINTERVAL = 21600
+            cfg.set('config', 'searchinterval', str(autosub.SEARCHINTERVAL))
+            cfg.remove_option('config','checksub')
 
+            if cfg.has_option('config', 'scandisk'):
+                cfg.remove_option('config','scandisk')
+
+            if cfg.has_option('config', 'undertexterlang '):
+                cfg.remove_option('config','undertexterlang ')
+            autosub.WANTEDFIRST = True
+            if cfg.has_option('config','homelayoutfirst'):
+                if cfg.get("config", "homelayoutfirst") != "Wanted":
+                    autosub.WANTEDFIRST = False
+                cfg.remove_option('config','homelayoutfirst')
+            cfg.set('config', 'wantedfirst', str(autosub.WANTEDFIRST))
+            autosub.PODNAPISI = False 
+            if cfg.has_option('config', 'podnapisilang'):
+                if cfg.get("config", "podnapisilang") != 'None' :
+                    autosub.PODNAPISI = True
+                cfg.remove_option('config','podnapisilang')
+            cfg.set('config', 'podnapisi', str(autosub.PODNAPISI))
+            autosub.SUBSCENE = False
+            if cfg.has_option('config', 'subscenelang'):
+                if cfg.get("config", "subscenelang") != 'None' :
+                    autosub.SUBSCENE = True
+                cfg.remove_option('config','subscenelang')
+            cfg.set('config', 'subscene', str(autosub.SUBSCENE))
+            autosub.OPENSUBTITLES = False
+            if cfg.has_option('config', 'opensubtitleslang'):
+                if cfg.get("config", "opensubtitleslang") != 'None' :
+                    autosub.OPENSUBTITLES = True
+                cfg.remove_option('config','opensubtitleslang')
+            cfg.set('config', 'opensubtitles', str(autosub.OPENSUBTITLES))
+            autosub.ADDIC7ED = False
+            if cfg.has_option('config', 'addic7edlang'):
+                if cfg.get("config", "addic7edlang") != 'None' :
+                    autosub.ADDIC7ED = True
+                cfg.remove_option('config','addic7edlang')
+            cfg.set('config', 'addic7ed', str(autosub.ADDIC7ED))
+
+            if cfg.has_option("config", "webdl"):
+                Webdl = cfg.get("config", "webdl")
+                if Webdl == u"DutchOnly":
+                    autosub.SKIPSTRINGEN = "Web-dl"
+                elif Webdl == "None":
+                    autosub.SKIPSTRINGNL = autosub.SKIPSTRINGEN = u"Web-dl"
+                cfg.remove_option("config","webdl")
+                cfg.set("config","skipstringnl",autosub.SKIPSTRINGNL)
+                cfg.set("config","skipstringen",autosub.SKIPSTRINGEN)
+            autosub.CONFIGVERSION = 4
+            cfg.set('config', 'configversion', str(autosub.CONFIGVERSION))
+            with codecs.open(autosub.CONFIGFILE, 'wb', encoding=autosub.SYSENCODING) as cfile:
+                cfg.write(cfile)
+            print "Config: Config upgraded to version 4"

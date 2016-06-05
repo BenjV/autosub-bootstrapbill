@@ -92,8 +92,9 @@ $(document).ready(function () {
 	
 	$('#testPushover').click(function () {
         $('#testPushover-result').html('<span><img src="' + autosubRoot + '/images/loading16.gif"> Testing Pushover...</span>');
-        var pushoverapi = $("#pushoverapi").val();
-		$.get(autosubRoot + "/config/testPushover", {'pushoverapi': pushoverapi},
+        var pushoverappkey = $("#pushoverappkey").val();
+        var pushoveruserkey = $("#pushoveruserkey").val();
+		$.get(autosubRoot + "/config/testPushover", {'pushoverappkey': pushoverappkey,'pushoveruserkey': pushoveruserkey },
 			function (data) { $('#testPushover-result').html(data); });
     });
 	
@@ -214,6 +215,7 @@ $(document).ready(function () {
  	});
 
 });
+
 
 // Code to sort the Wanted/Downloaded tables on the Home page.
 var lines = $(".overview");

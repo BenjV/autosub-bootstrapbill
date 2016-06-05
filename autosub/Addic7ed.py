@@ -461,12 +461,10 @@ def ReconstructRelease(version_info, HD):
     return versionDicts
 
 
-def makeReleaseName(versionInfo, title, season, episode, HI=False):
+def makeReleaseName(versionInfo, title, season, episode):
     version = versionInfo.replace(' ','.')
     se = 'S' + season + 'E' + episode
     release = '.'.join([title,se,version])
-    if HI:
-        release = release + '.HI'
     return release
 
     
@@ -499,7 +497,7 @@ class Addic7edAPI():
             return False
         
         if r.status_code == 302:
-            log.info('Addic7edAPI: Logged in')
+            log.info('Addic7edAPI: Logged in with username: %s' % addic7eduser)
             self.logged_in = True
             return True
         else:
@@ -510,7 +508,7 @@ class Addic7edAPI():
         if self.logged_in:
             try:
                 r = self.session.get(self.server + '/logout.php', timeout=10)
-                log.info('Addic7edAPI: Logged out')
+                log.debug('Addic7edAPI: Logged out')
             except requests.Timeout:
                 log.debug('Addic7edAPI: Timeout after 10 seconds')
                 return None
@@ -529,7 +527,6 @@ class Addic7edAPI():
             log.error("Addic7edAPI: You are not properly logged in. Check your credentials!")
             return None
 
-        log.debug("Addic7edAPI: Resting for 30 seconds to prevent a ban")
         time.sleep(30)
         try:
             r = self.session.get(self.server + url, timeout=15)
@@ -540,7 +537,7 @@ class Addic7edAPI():
         if r.status_code > 399:
             log.error('Addic7edAPI: Request failed with status code %d' % r.status_code)
             return None
-        return r.content
+        return r.text
 
     def download(self, downloadlink):
         if not self.logged_in:
@@ -564,7 +561,7 @@ class Addic7edAPI():
         
         if r.headers['Content-Type'] == 'text/html':
             log.error('Addic7edAPI: Expected srt file but got HTML; report this!')
-            log.debug("Addic7edAPI: Response content: %s" % r.content)
+            log.debug("Addic7edAPI: Response content: %s" % r.text)
             return None
         if 'UTF' in r.apparent_encoding.upper():
             r.encoding = r.apparent_encoding
@@ -656,5 +653,5 @@ class Addic7edAPI():
                 log.debug("geta7IDApi: Addic7ed ID %s found using filename show name %s" % (show_ids[Name.lower()], localShowName))
                 return show_ids[Name.lower()]
 
-        log.info('geta7ID: The show %s could not be found on the Addic7ed website. Please make an Addi7ed map!' % localShowName)
+        log.info('geta7ID: The show %s could not be found on the Addic7ed website. Please make an Addic7ed map!' % localShowName)
         return None

@@ -84,14 +84,18 @@ class lastDown():
         connection.close()
         return Llist
 
-    def setlastDown (self, **data):
+    def setlastDown (self, Lang, **data):
         connection=sqlite3.connect(autosub.DBFILE)
         cursor=connection.cursor()
         Ldict = data['dict']
-        
+
         if not 'source' in Ldict.keys():
             Ldict['source'] = None
-
+        DstFile = os.path.join(Ldict['folder'],Ldict['file'])
+        if Lang == 'Dutch':
+            DstFile += Ldict['NLext']
+        elif Lang == 'English':
+            DstFile += Ldict['ENext']
         try:
             cursor.execute(self.query_set,[ 
                            Ldict['title'],
@@ -99,12 +103,12 @@ class lastDown():
                            Ldict['episode'],
                            Ldict['quality'],
                            Ldict['source'],
-                           Ldict['downlang'],
+                           Lang,
                            Ldict['codec'],
                            Ldict['timestamp'],
                            Ldict['releasegrp'],
                            Ldict['subtitle'],
-                           Ldict['destinationFileLocationOnDisk']])
+                           DstFile])
             connection.commit()
             connection.close()
         except Exception as error:

@@ -14,14 +14,13 @@ _noextrainfo = 0
 
 def _checkTitle(title):
     if not title:
-        log.debug("ProcessFileName: Invalid title. AutoSub needs a showtitle in the video file! S01E02.mkv file are not supported...")
         return None
     
     for reg in episode_regex:
         results = re.findall(reg, title)
         if not results:
             return CleanSerieName(title)
-        log.debug("ProcessFileName: Title containing episode information (info like: S01E02). Title is: %s" %title)
+
 
 def _returnHit(regex, file_info):
     if not file_info:
@@ -123,7 +122,6 @@ def _returnSceneNumber(number):
 def ProcessFilename(filename, fileext):
     filename = filename.replace(',','.')
     show_info = _returnGroup(show_regex, filename)
-    log.debug("ProcessFileName: Dumping info %r" %show_info)
     title = None
     season = None
     episode = None
@@ -160,8 +158,6 @@ def ProcessFilename(filename, fileext):
         show_dict['codec'] = codec
         show_dict['releasegrp'] = releasegrp
         show_dict['container'] = fileext
-        log.debug("ProcessFileName: Dumping dict for debug %r" %show_dict)
         return show_dict
     else: 
-        log.debug("ProcessFileName: Could not process %s" %filename)
         return {}

@@ -61,7 +61,15 @@ def launchBrowser():
         except:
             log.error('launchBrowser: Failed')
 
+def writePidFile():
+    pid = str(os.getpid())
+    f = open(os.path.join(autosub.PATH,'autosub.pid'), 'w')
+    f.write(pid)
+    f.close()
+
+
 def start():
+
     # Only use authentication in CherryPy is a username and password is set by the user
     if autosub.USERNAME and autosub.PASSWORD:
         users = {autosub.USERNAME: autosub.PASSWORD}
@@ -127,22 +135,28 @@ def start():
     
     if autosub.LAUNCHBROWSER and not autosub.UPDATED:
         launchBrowser()
-
-    autosub.CERTIFICATEPATH = os.path.normpath(autosub.PATH +'/library/requests/cacert.pem')
-    log.info("AutoSub: Starting checkSub thread")
-    autosub.CHECKSUB = autosub.Scheduler.Scheduler(autosub.checkSub.checkSub(), autosub.SCHEDULERCHECKSUB, True, "CHECKSUB")
+    log.info("AutoSub: Starting the Search thread thread")
+    autosub.CHECKSUB = autosub.Scheduler.Scheduler(autosub.checkSub.checkSub(), True, "CHECKSUB")
     autosub.CHECKSUB.thread.start()
 
 
 def stop():
-    log.info("AutoSub: Stopping checkSub thread")
+    log.info("AutoSub: Stopping Search thread")
     autosub.CHECKSUB.stop = True
     autosub.CHECKSUB.thread.join(10)
 
     cherrypy.engine.exit()
-
+    try:
+        os.remove(os.path.join(autosub.PATH,'autosub.pid'))
+    except Exception as error:
+        log.error('AutoSub: Could not remove the PID file. Error is: %s' % error)
     os._exit(0)
 
 def signal_handler(signum, frame):
+    try:
+        os.remove(os.path.join(autosub.PATH,'autosub.pid'))
+    except Exception as error:
+        log.error('AutoSub: Could not remove the PID file. Error is: %s' % error)
+
     log.debug("AutoSub: got signal. Shutting down")
     os._exit(0)
