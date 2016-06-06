@@ -62,6 +62,7 @@ class Config:
 
     @cherrypy.expose
     def skipShow(self, title, season=None, episode=None):
+        title = title.decode("utf-8")
         episodestoskip = None
         if not season:
             tmpl = PageTemplate(file="interface/templates/config-skipshow.tmpl")
@@ -97,7 +98,7 @@ class Config:
             autosub.Config.applyskipShow()
 
             print season, episode
-            Name = 'ImdbId' if title == isnumeric() else 'title'
+            Name = 'ImdbId' if title.isnumeric() else 'title'
 
             if season == -1:
                 tmpl.message = "Serie with %s: <strong>%s</strong> will be skipped.<br> This will happen the next time that Auto-Sub checks for subtitles" % (Name, title.title())

@@ -25,13 +25,12 @@ def _send_notify(message):
     returns: True if the message succeeded, False otherwise
     """
 
-    title = 'TEST MESSAGE'
-    text = 'text for polling'
+    title = 'Autosub'
     params = {
                 'token': autosub.PUSHOVERAPPKEY,
-                'user': autossub.PUSHOVERUSERKEY,
+                'user': autosub.PUSHOVERUSERKEY,
                 'title': title,
-                'message': text,
+                'message': message,
                 'retry': 30, 
                 'expire': 180,
                 'priority': 2,
