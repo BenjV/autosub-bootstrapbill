@@ -97,7 +97,7 @@ class Config:
             autosub.Config.applyskipShow()
 
             print season, episode
-            Name = 'ImdbId' if title == isnumeric() else 'title'
+            Name = 'ImdbId' if isnumeric(title) else 'title'
 
             if season == -1:
                 tmpl.message = "Serie with %s: <strong>%s</strong> will be skipped.<br> This will happen the next time that Auto-Sub checks for subtitles" % (Name, title.title())
