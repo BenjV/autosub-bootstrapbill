@@ -55,17 +55,15 @@
 	#set $title_escaped = $cgi.escape($var['title'], True)
 							<tr>
 								<td><b>
-									<div style="position: relative; float: left; width: 60%;">$var['title'].upper()</div> <div style="position: relative; float: right;">S$var['season'] E$var['episode']</div>
+									<div style="position: relative; float: left; width: 60%;">$var['title']</div> <div style="position: relative; float: right;">S$var['season'] E$var['episode']</div>
 								</b></td>
 								<td align="center" width="50px">
-							#for lang in $var['lang']
-							#if lang == "Dutch"
+							#if "Dutch" in $var['langs']
 								<img src="$autosub.WEBROOT/images/Dutch.png" alt="nl">
 							#end if
-							#if lang == "English"
+							#if "English" in $var['langs']
 								<img src="$autosub.WEBROOT/images/English.png" alt="en">
 							#end if
-							#end for
 								</td>
 							</tr>						
 	#end for
@@ -100,7 +98,7 @@
 			#else:
 							<tr>
 								<td><b>
-									<div style="position: relative; float: left; width: 60%;">$var['show_name'].upper()</div> <div style="position: relative; float: right;">S$var['season'] E$var['episode']</div>
+									<div style="position: relative; float: left; width: 60%;">$var['show_name']</div> <div style="position: relative; float: right;">S$var['season'] E$var['episode']</div>
 								</b></td>
 	
 								<td align="center" width="50px">
@@ -141,7 +139,7 @@
 			</div>
 			
 			<div data-role="footer" data-theme="b">
-				<div class="ui-bar" align="center">AUTO-SUB BOOTSTRAP BILL<br>$autosubversion.upper()</div>
+				<div class="ui-bar" align="center">AUTO-SUB BOOTSTRAP BILL<br>$autosubversion</div>
 			</div>
 		</div>
 	</body>
