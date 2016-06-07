@@ -323,7 +323,7 @@ def DownloadSub(Wanted,SubList):
     lastDown().setlastDown(Sub['Lang'],dict = Wanted)
     # Send notification 
 
-    VideoFile = Wanted['folder'] + Wanted['file'] + Wanted['container']
+    VideoFile = os.path.join(Wanted['folder'] , Wanted['file'] + Wanted['container'])
     if (autosub.NOTIFYNL and Sub['Lang'] == 'Dutch') or (autosub.NOTIFYEN and Sub['Lang'] == 'English') :
         notify.notify(Sub['Lang'], destsrt.encode('ascii','replace'), VideoFile.encode('ascii','replace'), Sub['website'])
 
