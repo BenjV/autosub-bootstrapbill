@@ -36,12 +36,14 @@ def ReadConfig(configfile):
     try:
         with codecs.open(autosub.CONFIGFILE, 'r', autosub.SYSENCODING) as f:
             cfg.readfp(f)
+        autosub.CONFIGVERSION = 1 if not cfg.has_option("config", "configversion")  else cfg.getint("config", "configversion") 
     except:
         print "***************************************************************************"
         print "Config ERROR: Not a valid configuration file! Using default values instead!"
         print "***************************************************************************"
         cfg = SafeConfigParser()
-    autosub.CONFIGVERSION = 1 if not cfg.has_option("config", "configversion")  else cfg.getint("config", "configversion") 
+        cfg.add_section('config')
+        autosub.CONFIGVERSION = version.configversion
     # First we check whether the config has been upgraded
     if autosub.CONFIGVERSION < version.configversion:
         upgradeConfig(cfg, autosub.CONFIGVERSION, version.configversion)
@@ -501,11 +503,11 @@ def ReadConfig(configfile):
 
     autosub.LASTESTDOWNLOAD = []
 
-    #if autosub.CONFIGVERSION < version.configversion:
-    #    upgradeConfig(cfg, autosub.CONFIGVERSION, version.configversion)
-    #elif autosub.CONFIGVERSION > version.configversion:
-    #    print "Config: ERROR! Config version higher then this version of AutoSub supports. Update AutoSub!"
-    #    os._exit(1)
+    if autosub.CONFIGVERSION < version.configversion:
+        upgradeConfig(cfg, autosub.CONFIGVERSION, version.configversion)
+    elif autosub.CONFIGVERSION > version.configversion:
+        print "Config: ERROR! Config version higher then this version of AutoSub supports. Update AutoSub!"
+        os._exit(1)
 
 def SaveToConfig(section=None, variable=None, value=None):
     """
@@ -1126,6 +1128,7 @@ def upgradeConfig(cfg, from_version, to_version):
                 cfg.set("config","skipstringnl",autosub.SKIPSTRINGNL)
                 cfg.set("config","skipstringen",autosub.SKIPSTRINGEN)
             autosub.CONFIGVERSION = 4
+            autosub.CONFIGUPGRADED = True
             cfg.set('config', 'configversion', str(autosub.CONFIGVERSION))
             with codecs.open(autosub.CONFIGFILE, 'wb', encoding=autosub.SYSENCODING) as cfile:
                 cfg.write(cfile)

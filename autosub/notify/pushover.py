@@ -33,7 +33,7 @@ def _send_notify(message):
                 'message': message,
                 'retry': 30, 
                 'expire': 180,
-                'priority': 2,
+                'priority': 0,
                 'sound': 'siren',
             }
     try:
