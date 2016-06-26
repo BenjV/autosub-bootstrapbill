@@ -1,6 +1,4 @@
 #
-# Autosub Addic7ed.py -https://github.com/Donny87/autosub-bootstrapbill
-#
 # The Addic7ed method specific module
 #
 
@@ -67,16 +65,18 @@ _rlsgrps_rest = ['0TV',
                 'BATV',
                 'BTN',
                 'BWB',
+                'C4TV',
                 'ChameE',
                 'CLUE',
                 'CP',
+                'CRAVERS',
                 'DEMAND',
                 'DNR',
                 'EbP',
+                'eXcluSive',
                 'FUSiON',
                 'GFY',
                 'GreenBlade',
-                'HAGGiS',
                 'HoodBag',
                 'hV',
                 'LFF',
@@ -93,8 +93,9 @@ _rlsgrps_rest = ['0TV',
                 'P0W4',
                 'P0W4HD',
                 'playXD',
-                'RANDi',
+                'PublicHD',
                 'RARBG',
+                'RANDi',
                 'REWARD',
                 'ROVERS',
                 'RRH',
@@ -118,17 +119,26 @@ _rlsgrps_rest = ['0TV',
 
 _rlsgrps_HD =  ['0SEC',
                 '2HD',
+                'BRISK',
                 'CTU',
                 'DIMENSION',
                 'EVOLVE',
                 'EXCELLENCE',
+                'FLEET',
                 'IMMERSE',
+                'KNiFESHARP',
                 'KILLERS',
                 'KYR',
                 'MOMENTUM',
+                'MORiTZ',
                 'ORENJi',
-                'PublicHD',
-                'REMARKABLE']
+                'ORGANiC',
+                'QCF',
+                'REMARKABLE',
+                'SERIOUSLY',
+                'SKGTV',
+                'spamTV'
+                'SVA']
 
 _rlsgrps_SD =  ['ASAP',
                 'AVS',
@@ -143,7 +153,8 @@ _rlsgrps_SD =  ['ASAP',
                 'XOR']
 
 _rlsgrps_xvid = ['AFG',
-                 'Hype']
+                 'Hype'
+                 'HAGGIS']
 
 _rlsgrps_h264 = ['TLA',
                  'BAJSKOR']
@@ -155,7 +166,6 @@ _rlsgrps_webdl=['BS',
                 'DRACULA',
                 'ECI',
                 'FiRE',
-                'FLEET',
                 'FUM',
                 'HWD',
                 'KiNGS',
@@ -167,9 +177,12 @@ _rlsgrps_webdl=['BS',
                 'PLLs',
                 'POD',
                 'QUEENS,'
+                'R2D2',
                 'TVSmash',
                 'VietHD',
-                'YFN']
+                'ViSUM',
+                'YFN',
+                'Zakh']
 
 
 def _regexRls(releaseGroupList, list=False):

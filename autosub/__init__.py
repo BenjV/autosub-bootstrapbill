@@ -1,61 +1,62 @@
 import Config
 import logging.handlers
 import time,os
-from autosub.version import autosubversion
+import autosub.version
 
 
-BOOTSTRAPVERSION='3.3.5'
-ROOTPATH = None
+BOOTSTRAPVERSION='3.3.6'
+JQUERYVERSION = '1.9.1'
+JQUERYDATATTABLES = '1.10.12'
+SERIESPATH = u''
 BROWSERREFRESH = int(1)
-REFRESHSTRING = None
-FALLBACKTOENG = None
-DOWNLOADENG = None
-DOWNLOADDUTCH = None
+FALLBACKTOENG = False
+DOWNLOADENG = False
+DOWNLOADDUTCH = True
 SUBENG = u"en"
-LOGFILE = None
+LOGFILE = u"AutoSubService.log"
 SUBNL = u""
 SKIPHIDDENDIRS = True
-NOTIFYNL = None
-NOTIFYEN = None
-LOGLEVEL = None
-LOGLEVELCONSOLE = None
+NOTIFYNL = False
+NOTIFYEN = False
+LOGLEVEL = int(20)
+CONSOLE = None
+LOGHANDLER = None
+LOGLEVELCONSOLE = int(40)
 LOGSIZE = int(1048576)
-LOGNUM = int(1)
-SKIPSHOW = None
-SKIPSHOWUPPER = None
-USERNAMEMAPPING = None
-USERNAMEMAPPINGUPPER = None
-USERADDIC7EDMAPPING = None
-USERADDIC7EDMAPPINGUPPER = None
-NAMEMAPPING = None
-NAMEMAPPINGUPPER = None
-SHOWID_CACHE = None
-POSTPROCESSCMD = None
+LOGNUM = int(3)
+SKIPSHOW = {}
+SKIPSHOWUPPER = {}
+USERNAMEMAPPING = {}
+USERNAMEMAPPINGUPPER = {}
+USERADDIC7EDMAPPING = {}
+NAMEMAPPING = u''
+NAMEMAPPINGUPPER = u''
+POSTPROCESSCMD = u''
 CONFIGFILE = None
 PATH = None
-MINMATCHSCORE = int(8)
-CONFIGVERSION = int(4)
-WANTEDFIRST = None
-ENGLISHSUBDELETE = None
-PODNAPISI = None
-SUBSCENE = None
-OPENSUBTITLES = None
-ADDIC7ED = None
-ADDIC7EDUSER = None
-ADDIC7EDPASSWD = None
+MINMATCHSCORE = int(0)
+CONFIGVERSION = version.configversion
+WANTEDFIRST = True
+ENGLISHSUBDELETE = False
+PODNAPISI = False
+SUBSCENE = False
+OPENSUBTITLES = False
+ADDIC7ED = False
+ADDIC7EDUSER = u''
+ADDIC7EDPASSWD = u''
 ADDIC7EDLOGGED_IN = False
 
-OPENSUBTITLESUSER = None
-OPENSUBTITLESPASSWD = None
-OPENSUBTITLESAPI = None
-OPENSUBTITLESURL = None
+OPENSUBTITLESUSER = u''
+OPENSUBTITLESPASSWD = u''
+OPENSUBTITLESAPI = u''
+OPENSUBTITLESURL = u''
 OPENSUBTITLESTOKEN = None
 
 OPENSUBTITLESTIME = float(0)
 
 ADDIC7EDAPI = None
 WANTEDQUEUE = []
-LASTESTDOWNLOAD = None
+LASTESTDOWNLOAD = []
 
 APIKEY = None
 API = None
@@ -63,65 +64,30 @@ IMDBAPI = None
 
 APICALLSLASTRESET_TVDB = None
 APICALLSLASTRESET_SUBSEEKER = None
-APICALLSRESETINT_TVDB = None
-APICALLSRESETINT_SUBSEEKER = None
-APICALLSMAX_TVDB = None
-APICALLSMAX_SUBSEEKER = None
-APICALLS_TVDB = None
-APICALLS_SUBSEEKER = None
+APICALLSRESETINT_TVDB = 86400
+APICALLSRESETINT_SUBSEEKER = 86400
+APICALLSMAX_TVDB = 2500
+APICALLSMAX_SUBSEEKER = 2500
+APICALLS_TVDB = 2500
+APICALLS_SUBSEEKER = 2500
 
 TIMEOUT = 300
 DOWNLOADS_A7 = int(0)
 DOWNLOADS_A7MAX = int(40)
 
-SEARCHINTERVAL = None
+SEARCHINTERVAL = int(21600)
 SEARCHTIME= float(0)
 SCANDISK = None
 CHECKSUB = None
-DOWNLOADSUBS = None
+#DOWNLOADSUBS = None
 SUBCODEC = u'windows-1252'
 
-WEBSERVERIP = None
-WEBSERVERPORT = None
+WEBSERVERIP = '0.0.0.0'
+WEBSERVERPORT = '8083'
 LAUNCHBROWSER=True
-USERNAME = None
-PASSWORD = None
-WEBROOT = None
-
-NOTIFYMAIL = None
-MAILSRV = None
-MAILFROMADDR = None
-MAILTOADDR = None
-MAILUSERNAME = None
-MAILPASSWORD = None
-MAILSUBJECT = None
-MAILAUTH = None
-MAILENCRYPTION = None
-NOTIFYGROWL = None
-GROWLHOST = None
-GROWLPORT = None
-GROWLPASS = None
-NOTIFYTWITTER = None
-TWITTERKEY = None
-TWITTERSECRET = None
-NOTIFYNMA = None
-NMAAPI = None
-NOTIFYPROWL = None
-PROWLAPI = None
-PROWLPRIORITY = None
-PUSHALOTAPI = None
-NOTIFYPUSHALOT = None
-PUSHBULLETAPI = None
-NOTIFYPUSHBULLET = None
-NOTIFYPUSHOVER = None
-PUSHOVERAPPKEY = None
-PUSHOVERUSERKEY = None
-NMAPRIORITY = None
-NOTIFYBOXCAR2 = None
-BOXCAR2TOKEN = None
-NOTIFYPLEX = None
-PLEXSERVERHOST = None
-PLEXSERVERPORT = None
+USERNAME = u''
+PASSWORD = u''
+WEBROOT = u''
 
 DAEMON = None
 
@@ -137,11 +103,11 @@ SYSENCODING = None
 MOBILEUSERAGENTS = None
 MOBILEAUTOSUB = True
 
-ENGLISH = None
-DUTCH = None
 UPDATED = False
-SKIPSTRINGNL= u''
-SKIPSTRINGEN= u''
+SKIPSTRINGNL = u''
+SKIPSTRINGEN = u''
+SKIPFOLDERSNL = u''
+SKIPFOLDERSEN = u''
 NODE_ID = None
 VERSION = int(0)
 HI = False
@@ -150,6 +116,43 @@ OPENSUBTITLESTOKEN  = None
 ENGLISH = 'English'
 DUTCH = 'Dutch'
 CERTIFICATEPATH=u""
+
+NOTIFYMAIL = False
+MAILSRV = u""
+MAILFROMADDR = u""
+MAILTOADDR = u""
+MAILUSERNAME = u""
+MAILPASSWORD = u""
+MAILSUBJECT = u""
+MAILENCRYPTION = u""
+MAILAUTH = u''
+NOTIFYGROWL = False
+GROWLHOST = u""
+GROWLPORT = u""
+GROWLPASS = u""
+NOTIFYTWITTER = False
+TWITTERKEY = u""
+TWITTERSECRET = u""
+NOTIFYNMA = False
+NMAAPI = u""
+NMAPRIORITY = 0
+PROWLAPI = u""
+NOTIFYPROWL = False
+PROWLPRIORITY = 0
+NOTIFYPUSHALOT = False
+PUSHALOTAPI = u""
+NOTIFYPUSHBULLET = False
+PUSHBULLETAPI = u""
+NOTIFYPUSHOVER = False
+PUSHOVERAPPKEY = u""
+PUSHOVERUSERKEY = u""
+NOTIFYBOXCAR2 = False
+BOXCAR2TOKEN = u""
+NOTIFYPLEX = False
+PLEXSERVERHOST = u""
+PLEXSERVERPORT = u""
+
+
 MOBILEUSERAGENTS = ["midp", "240x320", "blackberry", "netfront", "nokia", "panasonic", 
                     "portalmmm", "sharp", "sie-", "sonyericsson", "symbian", "windows ce", 
                     "benq", "mda", "mot-", "opera mini", "philips", "pocket pc", "sagem",
@@ -158,19 +161,18 @@ MOBILEUSERAGENTS = ["midp", "240x320", "blackberry", "netfront", "nokia", "panas
 DBFILE = 'database.db'
 
 def Initialize():
-    global ROOTPATH,LOGFILE, LOGLEVEL, LOGLEVELCONSOLE, LOGSIZE, LOGNUM,  \
+    global SERIESPATH,PATH, LOGFILE, LOGLEVEL, LOGLEVELCONSOLE, LOGSIZE, LOGNUM,  \
     CONFIGFILE, CERTIFICATEPATH, ZIPURL, APIKEY, API, IMDBAPI,  \
-    APICALLSLASTRESET_TVDB, APICALLSLASTRESET_SUBSEEKER, APICALLSRESETINT_TVDB, APICALLSRESETINT_SUBSEEKER, \
-    APICALLSMAX_TVDB, APICALLSMAX_SUBSEEKER, APICALLS_TVDB, APICALLS_SUBSEEKER, \
-    SEARCHINTERVAL, SCHEDULERDOWNLOADSUBS, \
+    APICALLSLASTRESET_TVDB, APICALLSLASTRESET_SUBSEEKER, \
     USERAGENT, VERSION, VERSIONURL, TVDBURL, \
     OPENSUBTITLESURL, OPENSUBTITLESUSERAGENT
 
-    if 'Alpha' in autosubversion:
-        release = autosubversion.split(' ')[0]
-        versionnumber = autosubversion.split(' ')[1]
+    PATH = unicode(os.getcwd(), SYSENCODING)
+    if 'Alpha' in version.autosubversion:
+        release = version.autosubversion.split(' ')[0]
+        versionnumber = version.autosubversion.split(' ')[1]
     else:
-        versionnumber = autosubversion
+        versionnumber = version.autosubversion
 
     VERSION = int(versionnumber.split('.')[0]) * 1000 + int(versionnumber.split('.')[1]) * 100 + int(versionnumber.split('.')[2]) * 10
     VERSIONURL = u'https://raw.githubusercontent.com/BenjV/autosub-bootstrapbill/master/autosub/version.py'
@@ -180,55 +182,43 @@ def Initialize():
 
     APIKEY = "24430affe80bea1edf0e8413c3abf372a64afff2"
     TIMEOUT = 300 #default http timeout
-    
-    if CONFIGFILE == None:
-        CONFIGFILE = "config.properties"
-    
-    Config.ReadConfig(CONFIGFILE)
+
     CERTIFICATEPATH = os.path.normpath(PATH +'/library/requests/cacert.pem')
     API = "http://api.subtitleseeker.com/get/title_subtitles/?api_key=%s" %APIKEY
     IMDBAPI = "http://thetvdb.com/api/"
     OPENSUBTITLESURL = 'http://api.opensubtitles.org/xml-rpc'
 
-    
     APICALLSLASTRESET_TVDB = time.time()
-    APICALLSLASTRESET_SUBSEEKER = time.time()
-    
-    APICALLSRESETINT_TVDB = 86400
-    APICALLSRESETINT_SUBSEEKER = 86400
-    
-    APICALLSMAX_TVDB = 2500
-    APICALLSMAX_SUBSEEKER = 1000
-    
-    APICALLS_TVDB = APICALLSMAX_TVDB
-    APICALLS_SUBSEEKER = APICALLSMAX_SUBSEEKER      
+    APICALLSLASTRESET_SUBSEEKER = time.time() 
 
     #Set the language paramater for the API query
-
+    if not CONFIGFILE:
+        CONFIGFILE = os.path.join(PATH,'config.properties')
+    Config.ReadConfig(CONFIGFILE)
     
 
 def initLogging(logfile):
-    global LOGLEVEL, LOGSIZE, LOGNUM, LOGLEVELCONSOLE, \
-    DAEMON
+    global LOGLEVEL, LOGSIZE, LOGNUM, LOGLEVELCONSOLE, CONSOLE, LOGHANDLER, DAEMON
     
     # initialize logging
     # A log directory has to be created below the start directory
     log = logging.getLogger("thelogger")
     log.setLevel(LOGLEVEL)
 
-    log_script = logging.handlers.RotatingFileHandler(logfile, 'a', LOGSIZE, LOGNUM)
+
+    LOGHANDLER = logging.handlers.RotatingFileHandler(logfile, 'a', LOGSIZE, LOGNUM)
     log_script_formatter=logging.Formatter('%(asctime)s %(levelname)s  %(message)s')
-    log_script.setFormatter(log_script_formatter)
-    log_script.setLevel(LOGLEVEL)
-    log.addHandler(log_script)
-    
+    LOGHANDLER.setFormatter(log_script_formatter)
+    LOGHANDLER.setLevel(LOGLEVEL)
+    log.addHandler(LOGHANDLER)
+   
     #CONSOLE log handler
-    if DAEMON!=True:
-        console = logging.StreamHandler()
-        console.setLevel(LOGLEVELCONSOLE)
+    if DAEMON != True:
+        CONSOLE = logging.StreamHandler()
+        CONSOLE.setLevel(LOGLEVELCONSOLE)
         # set a format which is simpler for console use
         formatter = logging.Formatter('%(asctime)s %(levelname)s  %(message)s')
-        console.setFormatter(formatter)
-        log.addHandler(console)
+        CONSOLE.setFormatter(formatter)
+        log.addHandler(CONSOLE)
         
     return log

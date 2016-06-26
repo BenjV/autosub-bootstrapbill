@@ -6,13 +6,14 @@ import autosub.WebServer
 import logging
 import os
 import cherrypy
-import sys
+import sys,time
 import webbrowser
 
 import HTMLParser #Don't remove this one, needed for the windows bins
 
 # Settings
 log = logging.getLogger('thelogger')
+
 
 
 def daemon():
@@ -135,6 +136,7 @@ def start():
     
     if autosub.LAUNCHBROWSER and not autosub.UPDATED:
         launchBrowser()
+    time.sleep(3)
     log.info("AutoSub: Starting the Search thread thread")
     autosub.CHECKSUB = autosub.Scheduler.Scheduler(autosub.checkSub.checkSub(), True, "CHECKSUB")
     autosub.CHECKSUB.thread.start()

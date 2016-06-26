@@ -56,6 +56,7 @@ $(document).ready(function () {
 		var mailsubject = $("#mailsubject").val();
 		var mailencryption = $("#mailencryption").val();
 		var mailauth = $("#mailauth").val();
+		var dummy = Date.now(); 
 		$.get(autosubRoot + "/config/testMail", {'mailsrv': mailsrv, 'mailfromaddr': mailfromaddr, 'mailtoaddr': mailtoaddr, 'mailusername': mailusername, 'mailpassword': mailpassword, 'mailsubject': mailsubject, 'mailencryption': mailencryption, 'mailauth': mailauth},
 			function (data) { $('#testMail-result').html(data); });
     });
@@ -64,21 +65,24 @@ $(document).ready(function () {
         $('#testTwitter-result').html('<span><img src="' + autosubRoot + '/images/loading16.gif"> Testing Twitter...</span>');
         var twitterkey = $("#twitterkey").val();
 		var twittersecret = $("#twittersecret").val();
-		$.get(autosubRoot + "/config/testTwitter", {'twitterkey': twitterkey, 'twittersecret': twittersecret},
+		var dummy = Date.now(); 
+		$.get(autosubRoot + "/config/testTwitter", {'twitterkey': twitterkey, 'twittersecret': twittersecret, 'dummy': dummy},
 			function (data) { $('#testTwitter-result').html(data); });
     });
     
     $('#testPushalot').click(function () {
         $('#testPushalot-result').html('<span><img src="' + autosubRoot + '/images/loading16.gif"> Testing Pushalot...</span>');
         var pushalotapi = $("#pushalotapi").val();
-		$.get(autosubRoot + "/config/testPushalot", {'pushalotapi': pushalotapi},
+		var dummy = Date.now(); 
+		$.get(autosubRoot + "/config/testPushalot", {'pushalotapi': pushalotapi, 'dummy': dummy},
 			function (data) { $('#testPushalot-result').html(data); });
     });
 
     $('#testPushbullet').click(function () {
         $('#testPushbullet-result').html('<span><img src="' + autosubRoot + '/images/loading16.gif"> Testing Pushbullet...</span>');
         var pushbulletapi = $("#pushbulletapi").val();
-		$.get(autosubRoot + "/config/testPushbullet", {'pushbulletapi': pushbulletapi},
+		var dummy = Date.now(); 
+		$.get(autosubRoot + "/config/testPushbullet", {'pushbulletapi': pushbulletapi, 'dummy': dummy},
 			function (data) { $('#testPushbullet-result').html(data); });
     });
 	
@@ -86,7 +90,8 @@ $(document).ready(function () {
         $('#testNotifyMyAndroid-result').html('<span><img src="' + autosubRoot + '/images/loading16.gif"> Testing Notify My Android...</span>');
         var nmaapi = $("#nmaapi").val();
 		var nmapriority = $("#nmapriority").val();
-		$.get(autosubRoot + "/config/testNotifyMyAndroid", {'nmaapi': nmaapi, 'nmapriority': nmapriority},
+		var dummy = Date.now(); 
+		$.get(autosubRoot + "/config/testNotifyMyAndroid", {'nmaapi': nmaapi, 'nmapriority': nmapriority, 'dummy': dummy},
 			function (data) { $('#testNotifyMyAndroid-result').html(data); });
     });
 	
@@ -94,7 +99,8 @@ $(document).ready(function () {
         $('#testPushover-result').html('<span><img src="' + autosubRoot + '/images/loading16.gif"> Testing Pushover...</span>');
         var pushoverappkey = $("#pushoverappkey").val();
         var pushoveruserkey = $("#pushoveruserkey").val();
-		$.get(autosubRoot + "/config/testPushover", {'pushoverappkey': pushoverappkey,'pushoveruserkey': pushoveruserkey },
+		var dummy = Date.now(); 
+		$.get(autosubRoot + "/config/testPushover", {'pushoverappkey': pushoverappkey,'pushoveruserkey': pushoveruserkey, 'dummy': dummy },
 			function (data) { $('#testPushover-result').html(data); });
     });
 	
@@ -103,7 +109,8 @@ $(document).ready(function () {
         var growlhost = $("#growlhost").val();
 		var growlport = $("#growlport").val();
 		var growlpass = $("#growlpass").val();
-		$.get(autosubRoot + "/config/testGrowl", {'growlhost': growlhost, 'growlport': growlport, 'growlpass': growlpass},
+		var dummy = Date.now(); 
+		$.get(autosubRoot + "/config/testGrowl", {'growlhost': growlhost, 'growlport': growlport, 'growlpass': growlpass, 'dummy': dummy},
 			function (data) { $('#testGrowl-result').html(data); });
     });
 	
@@ -111,14 +118,16 @@ $(document).ready(function () {
         $('#testProwl-result').html('<span><img src="' + autosubRoot + '/images/loading16.gif"> Testing Prowl...</span>');
         var prowlapi = $("#prowlapi").val();
 		var prowlpriority = $("#prowlpriority").val();
-		$.get(autosubRoot + "/config/testProwl", {'prowlapi': prowlapi, 'prowlpriority': prowlpriority},
+		var dummy = Date.now(); 
+		$.get(autosubRoot + "/config/testProwl", {'prowlapi': prowlapi, 'prowlpriority': prowlpriority, 'dummy': dummy},
 			function (data) { $('#testProwl-result').html(data); });
     });
 	
 	$('#testBoxcar2').click(function () {
         $('#testBoxcar2-result').html('<span><img src="' + autosubRoot + '/images/loading16.gif"> Testing Boxcar2...</span>');
         var boxcar2token = $("#boxcar2token").val();
-		$.get(autosubRoot + "/config/testBoxcar2", {'boxcar2token': boxcar2token},
+		var dummy = Date.now(); 
+		$.get(autosubRoot + "/config/testBoxcar2", {'boxcar2token': boxcar2token, 'dummy': dummy},
 			function (data) { $('#testBoxcar2-result').html(data); });
     });
 	
@@ -126,7 +135,8 @@ $(document).ready(function () {
         $('#testAddic7ed-result').html('<span><img src="' + autosubRoot + '/images/loading16.gif"> Testing Addic7ed login...</span>');
         var addic7eduser = $("#addic7eduser").val();
 		var addic7edpasswd = $("#addic7edpasswd").val();
-		$.get(autosubRoot + "/config/testAddic7ed", {'addic7eduser': addic7eduser, 'addic7edpasswd': addic7edpasswd},
+		var dummy  =Date.now(); 
+		$.get(autosubRoot + "/config/testAddic7ed", {'addic7eduser': addic7eduser, 'addic7edpasswd': addic7edpasswd, 'dummy': dummy},
 			function (data) { $('#testAddic7ed-result').html(data); });
     });
 	
@@ -134,7 +144,8 @@ $(document).ready(function () {
         $('#testPlex-result').html('<span><img src="' + autosubRoot + '/images/loading16.gif"> Testing Plex Media Server...</span>');
         var plexserverhost = $("#plexserverhost").val();
 		var plexserverport = $("#plexserverport").val();
-		$.get(autosubRoot + "/config/testPlex", {'plexserverhost': plexserverhost, 'plexserverport': plexserverport},
+		var dummy = Date.now(); 
+		$.get(autosubRoot + "/config/testPlex", {'plexserverhost': plexserverhost, 'plexserverport': plexserverport, 'dummy': dummy},
 			function (data) { $('#testPlex-result').html(data); });
     });
 	
@@ -148,7 +159,8 @@ $(document).ready(function () {
         $('#testOpenSubtitles-result').html('<span><img src="' + autosubRoot + '/images/loading16.gif"> Testing OpenSubtitles login...</span>');
         var opensubtitlesuser = $("#opensubtitlesuser").val();
         var opensubtitlespasswd = $("#opensubtitlespasswd").val();
-	    $.get(autosubRoot + "/config/testOpenSubtitles", {'opensubtitlesuser': opensubtitlesuser, 'opensubtitlespasswd': opensubtitlespasswd},function (data) { $('#testOpenSubtitles-result').html(data); });
+		var dummy = Date.now(); 
+	    $.get(autosubRoot + "/config/testOpenSubtitles", {'opensubtitlesuser': opensubtitlesuser, 'opensubtitlespasswd': opensubtitlespasswd, 'dummy': dummy},function (data) { $('#testOpenSubtitles-result').html(data); });
     });
 	
 	// Code to display the tooltip and popover.

@@ -258,9 +258,9 @@ def scoreMatch(release, wanted):
     return score
 
 def Addic7edMapping(imdb_id):
-    if imdb_id in autosub.USERADDIC7EDMAPPINGUPPER.keys():
+    if imdb_id in autosub.USERADDIC7EDMAPPING.keys():
         log.debug("nameMapping: found match in user's addic7edmapping for %s" % imdb_id)
-        return autosub.USERADDIC7EDMAPPINGUPPER[imdb_id]
+        return autosub.USERADDIC7EDMAPPING[imdb_id]
     elif imdb_id in a7IdDict.keys():
         log.debug("nameMapping: found match in system Addic7edIdmapping for %s" % imdb_id)
         return a7IdDict[imdb_id]

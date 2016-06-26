@@ -12,7 +12,15 @@
 	</script>
 
 <form role="form" class="form-horizontal" method="post" action="$autosub.WEBROOT/config/saveConfig">
-		<div class="page-header"><h3>Configuration <small><a href="#general">General</a></small> <small><a href="#websites">Websites</a></small> <small><a href="#logfile">Logfile</a></small> <small><a href="#namemapping">Namemapping</a></small> <small><a href="#addic7edmapping">Addic7ed ID's</a></small> <small><a href="#skipshow">Skipshow</a></small> <small><a href="#webserver">Webserver</a></small></h1></div>
+		<div class="page-header"><h3>Configuration 
+			<small><a href="#general"> General</a></small>
+			<small><a href="#websites">Websites</a></small> 
+			<small><a href="#logfile">Logfile</a></small> 
+			<small><a href="#namemapping">Namemapping</a></small> 
+			<small><a href="#addic7edmapping">Addic7ed ID's</a></small> 
+			<small><a href="#skipshow">Skipshow</a></small> 
+			<small><a href="#webserver">Webserver</a></small></h3>
+		</div>
 		<a id="general"></a>
    		<div class="well well-sm center well-header"><b>General</b></div>
 		<div class="well well-sm">
@@ -55,7 +63,7 @@
 		<a id="skipshow"></a>
 		<hr>
 		
-		<div class="well well-sm center well-header"><b>Skipshow</b> <a data-placement="right" data-toggle="tooltip" data-original-title="This allows you to skip a Show. For example: Serie Name = 4.11,5 (This will skip season 4 episode 11 and season 5 of show)."><span class="glyphicon glyphicon-info-sign"></span></a></div>
+		<div class="well well-sm center well-header"><b>Skipshow</b> <a data-placement="right" data-toggle="tooltip" data-original-title="This allows you to skip a Show. For example: Serie Name(or ImdbId) = 4.11,5 (This will skip season 4 episode 11 and season 5 of show)."><span class="glyphicon glyphicon-info-sign"></span></a></div>
 		<div class="well well-sm" align="center">
 		<textarea rows="10" cols="75" name="skipshow" class="form-control">$autosub.Config.displaySkipshow</textarea>
 		</div>

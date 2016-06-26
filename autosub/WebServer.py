@@ -30,6 +30,26 @@ def redirect(abspath, *args, **KWs):
     assert abspath[0] == '/'
     raise cherrypy.HTTPRedirect(autosub.WEBROOT + abspath, *args, **KWs)
 
+def stringToDict(items=None):
+    """
+    Return a correct dict from a string
+    """
+    items = items.split('\r\n')
+    returnitems = []
+
+    for item in items:
+        if item:
+            showinfo = []
+            for x in item.split('='):
+                if x[-1:] == ' ':
+                    x = x[:-1]
+                elif x[:1] == ' ':
+                    x = x[1:]
+                showinfo.append(x)
+            showinfo = tuple(showinfo)
+            returnitems.append(showinfo)
+    returnitems = dict(returnitems)
+    return returnitems
 
 class PageTemplate (Template):
     #Placeholder for future, this object can be used to add stuff to the template
@@ -93,9 +113,9 @@ class Config:
                     episodestoskip = str(season + float(episode)/100)
                 else:
                     episodestoskip = str(season)
-
-            autosub.Config.SaveToConfig('skipshow',title,episodestoskip)
-            autosub.Config.applyskipShow()
+            autosub.SKIPSHOW[title] = episodestoskip
+            autosub.SKIPSHOWUPPER[title.upper()] = episodestoskip
+            message = autosub.Config.WriteConfig()
 
             print season, episode
             Name = 'ImdbId' if title.isnumeric() else 'title'
@@ -110,19 +130,10 @@ class Config:
             tmpl.displaymessage = "Yes"
             tmpl.modalheader = "Information"
             return str(tmpl)
-    
-    @cherrypy.expose
-    def applyConfig(self):
-        autosub.Config.applyAllSettings()
-        tmpl = PageTemplate(file="interface/templates/home.tmpl")
-        tmpl.message = "Settings read & applied"
-        tmpl.displaymessage = "Yes"
-        tmpl.modalheader = "Information"
-        return str(tmpl)
 
     @cherrypy.expose  
-    def saveConfig(self, subeng, skipstringnl, skipstringen, subnl, postprocesscmd, 
-                   path, logfile, rootpath, subcodec,  username, 
+    def saveConfig(self, subeng, skipstringnl, skipstringen, skipfoldersnl,skipfoldersen, subnl, postprocesscmd, 
+                   logfile, seriespath, subcodec,  username, 
                    password, webroot, skipshow, lognum, loglevelconsole, loglevel, 
                    webserverip, webserverport, usernamemapping, useraddic7edmapping,
                    opensubtitlesuser, opensubtitlespasswd,  addic7eduser, addic7edpasswd, addic7ed=None,opensubtitles=None, podnapisi=None, subscene=None, 
@@ -131,8 +142,7 @@ class Config:
                    mmssource = u'0', mmsquality = u'0', mmscodec = u'0', mmsrelease = u'0',hearingimpaired = None):
                    
         # Set all internal variables
-        autosub.PATH = path
-        autosub.ROOTPATH = rootpath
+        autosub.SERIESPATH = seriespath
         autosub.LOGFILE = logfile
         autosub.DOWNLOADENG = True if downloadeng else False
         autosub.DOWNLOADDUTCH = True if downloaddutch else False
@@ -158,25 +168,41 @@ class Config:
         autosub.BROWSERREFRESH = browserrefresh
         autosub.SKIPSTRINGNL = skipstringnl
         autosub.SKIPSTRINGEN = skipstringen
+        autosub.SKIPFOLDERSNL = skipfoldersnl
+        autosub.SKIPFOLDERSEN = skipfoldersen
         autosub.MINMATCHSCORE = int(mmssource) + int(mmsquality) + int(mmscodec) + int(mmsrelease)
         autosub.SEARCHINTERVAL = int(interval)*3600
-        autosub.LOGLEVEL = int(loglevel)
-        autosub.LOGNUM = int(lognum)
-        autosub.LOGSIZE = int(logsize)*1024
-        autosub.LOGLEVELCONSOLE = int(loglevelconsole)
+    # here we change the loglevels if neccessary
+        if autosub.LOGLEVEL != int(loglevel):
+            autosub.LOGLEVEL = int(loglevel)
+            log.setLevel(autosub.LOGLEVEL)
+            autosub.LOGHANDLER.setLevel(autosub.LOGLEVEL)
+        if autosub.LOGNUM != int(lognum):
+            autosub.LOGNUM = int(lognum)
+            autosub.LOGHANDLER.backupCount = autosub.LOGNUM
+        if autosub.LOGSIZE != int(logsize)*1024:
+            autosub.LOGSIZE = int(logsize)*1024
+            autosub.LOGHANDLER.maxBytes = autosub.LOGSIZE
+
+        if autosub.LOGLEVELCONSOLE != int(loglevelconsole):
+            autosub.LOGLEVELCONSOLE =int(loglevelconsole)
+            autosub.CONSOLE.level = autosub.LOGLEVELCONSOLE
         autosub.WEBSERVERIP = webserverip
         autosub.WEBSERVERPORT = int(webserverport)
         autosub.USERNAME = username
-        autosub.PASSWORD = password
+        autosub.PASSWORD = password.replace("%","%%")
         autosub.WEBROOT = webroot
-        autosub.SKIPSHOW = autosub.Config.stringToDict(skipshow)
-        autosub.USERNAMEMAPPING = autosub.Config.stringToDict(usernamemapping)
-        autosub.USERADDIC7EDMAPPING = autosub.Config.stringToDict(useraddic7edmapping)
+        autosub.SKIPSHOW = stringToDict(skipshow)
+        autosub.USERNAMEMAPPING = stringToDict(usernamemapping)
+        autosub.USERADDIC7EDMAPPING = stringToDict(useraddic7edmapping)
         autosub.HI = True if hearingimpaired else False
-
+        Reboot = False
+        if autosub.WEBSERVERIP != webserverip or autosub.WEBSERVERPORT != int(webserverport) or autosub.USERNAME != username or autosub.PASSWORD != password or autosub.WEBROOT != webroot:
+            Reboot = True
         # Now save to the configfile
-        message = autosub.Config.WriteConfig(configsection="")
-
+        message = autosub.Config.WriteConfig()
+        if Reboot:
+            message += '\n There are settings changed which need a reboot. Please do a manual reboot'
         tmpl = PageTemplate(file="interface/templates/config-settings.tmpl")
         tmpl.message = message
         tmpl.displaymessage = "Yes"
@@ -227,7 +253,7 @@ class Config:
         autosub.PLEXSERVERPORT = plexserverport
 
         # Now save to the configfile
-        message = autosub.Config.WriteConfig(configsection="notifications")
+        message = autosub.Config.WriteConfig()
 
         tmpl = PageTemplate(file="interface/templates/config-notification.tmpl")
         tmpl.message = message
@@ -236,7 +262,7 @@ class Config:
         return str(tmpl)
      
     @cherrypy.expose
-    def testPushalot(self, pushalotapi):
+    def testPushalot(self, pushalotapi, dummy):
         
         log.info("Notification: Testing Pushalot")
         result = notify.pushalot.test_notify(pushalotapi)
@@ -246,7 +272,7 @@ class Config:
             return "Failed to send a test message with <strong>Pushalot</strong>."
 
     @cherrypy.expose
-    def testPushbullet(self, pushbulletapi):
+    def testPushbullet(self, pushbulletapi, dummy):
         
         log.info("Notification: Testing Pushbullet")
         result = notify.pushbullet.test_notify(pushbulletapi)
@@ -256,7 +282,7 @@ class Config:
             return "Failed to send a test message with <strong>Pushbullet</strong>."
     
     @cherrypy.expose
-    def testMail(self, mailsrv, mailfromaddr, mailtoaddr, mailusername, mailpassword, mailsubject, mailencryption, mailauth):  
+    def testMail(self, mailsrv, mailfromaddr, mailtoaddr, mailusername, mailpassword, mailsubject, mailencryption, mailauth, dummy):  
         
         log.info("Notification: Testing Mail")
         result = notify.mail.test_notify(mailsrv, mailfromaddr, mailtoaddr, mailusername, mailpassword, mailsubject, mailencryption, mailauth)
@@ -266,7 +292,7 @@ class Config:
             return "Failed to send a test message with <strong>Mail</strong>."
     
     @cherrypy.expose
-    def testTwitter(self, twitterkey, twittersecret):
+    def testTwitter(self, twitterkey, twittersecret, dummy):
         
         log.info("Notification: Testing Twitter")  
         result = notify.twitter.test_notify(twitterkey, twittersecret)
@@ -276,7 +302,7 @@ class Config:
             return "Failed to send a test message with <strong>Twitter</strong>."
     
     @cherrypy.expose
-    def testNotifyMyAndroid(self, nmaapi, nmapriority):
+    def testNotifyMyAndroid(self, nmaapi, nmapriority, dummy):
         
         log.info("Notification: Testing Notify My Android")     
         result = notify.nma.test_notify(nmaapi, nmapriority)
@@ -286,17 +312,17 @@ class Config:
             return "Failed to send a test message with <strong>Notify My Android</strong>."
     
     @cherrypy.expose
-    def testPushover(self, pushoverapi):
+    def testPushover(self, pushoverappkey, pushoveruserkey, dummy):
         
         log.info("Notification: Testing Pushover")
-        result = notify.pushover.test_notify(pushoverapi)
+        result = notify.pushover.test_notify(pushoverappkey, pushoveruserkey)
         if result:
             return "Auto-Sub successfully sent a test message with <strong>Pushover</strong>."
         else:
             return "Failed to send a test message with <strong>Pushover</strong>."
     
     @cherrypy.expose
-    def testGrowl(self, growlhost, growlport, growlpass):
+    def testGrowl(self, growlhost, growlport, growlpass, dummy):
         
         log.info("Notification: Testing Growl")
         result = notify.growl.test_notify(growlhost, growlport, growlpass)
@@ -306,7 +332,7 @@ class Config:
             return "Failed to send a test message with <strong>Growl</strong>."
     
     @cherrypy.expose
-    def testProwl(self, prowlapi, prowlpriority):
+    def testProwl(self, prowlapi, prowlpriority, dummy):
         
         log.info("Notification: Testing Prowl")
         result = notify.prowl.test_notify(prowlapi, prowlpriority)
@@ -316,7 +342,7 @@ class Config:
             return "Failed to send a test message with <strong>Prowl</strong>."
     
     @cherrypy.expose
-    def testBoxcar2(self, boxcar2token):
+    def testBoxcar2(self, boxcar2token, dummy):
         
         log.info("Notification: Testing Boxcar2")
         result = notify.boxcar2.test_notify(boxcar2token)
@@ -324,19 +350,10 @@ class Config:
             return "Auto-Sub successfully sent a test message with <strong>Boxcar2</strong>."
         else:
             return "Failed to send a test message with <strong>Boxcar2</strong>."
-    
+   
+   
     @cherrypy.expose
-    def testAddic7ed(self, addic7eduser, addic7edpasswd):
-        
-        log.info("Addic7ed: Testing Login")
-        result = autosub.Addic7ed.Addic7edAPI().login(addic7eduser, addic7edpasswd)
-        if result:
-            return "Auto-Sub successfully logged on to <strong>Addic7ed</strong>."
-        else:
-            return "Failed to login to <strong>Addic7ed</strong>."
-    
-    @cherrypy.expose
-    def testPlex(self, plexserverhost, plexserverport):
+    def testPlex(self, plexserverhost, plexserverport, dummy):
         
         log.info("Notification: Testing Plex Media Server")
         result = notify.plexmediaserver.test_update_library(plexserverhost, plexserverport)
@@ -349,21 +366,31 @@ class Config:
     def RetrieveAddic7edCount(self):
 
         log.info("Addic7ed: Retrieving Addic7ed download count")
-        result = Addic7edAPI().checkCurrentDownloads()
+        #result = Addic7edAPI().checkCurrentDownloads()
+        result = True
         if result:
             return "Addic7ed count: %s of %s" % (autosub.DOWNLOADS_A7, autosub.DOWNLOADS_A7MAX)
         else:
             return "Unable to retrieve count at the moment."
 
     @cherrypy.expose
-    def testOpenSubtitles(self, opensubtitlesuser, opensubtitlespasswd):
+    def testAddic7ed(self, addic7eduser, addic7edpasswd, dummy):
+        log.info("Addic7ed: Testing Login")
+        result = autosub.Addic7ed.Addic7edAPI().login(addic7eduser, addic7edpasswd)
+        if result:
+            return "<strong>Success</strong>."
+        else:
+            return "<strong>Failure</strong>."
+
+    @cherrypy.expose
+    def testOpenSubtitles(self, opensubtitlesuser, opensubtitlespasswd, dummy):
         log.info('OpenSubtitles: Testing Login with user %s' % opensubtitlesuser)
         result= OpenSubtitlesLogin(opensubtitlesuser,opensubtitlespasswd)
         if result:
             log.info('OpenSubtitles: login successful')
-            return "Auto-Sub successfully logged on to <strong>OpenSubtitles</strong>."
+            return "<strong>Success</strong>."
         else:
-            return "Failed to login to <strong>OpenSubtitles</strong>."
+            return "<strong>Failure</strong>."
     
     @cherrypy.expose
     def regTwitter(self, token_key=None, token_secret=None, token_pin=None):

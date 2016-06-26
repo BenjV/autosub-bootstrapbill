@@ -221,7 +221,7 @@ def MyPostProcess(Wanted,SubSpecs,Language):
         Muxing = False
 
     # Here we set the language identifier for the sub during muxing
-    if Language == 'English':
+    if Language == autosub.ENGLISH:
         LangId = 'language=eng'
     else:
         LangId = 'language=dut'
@@ -287,9 +287,9 @@ def DownloadSub(Wanted,SubList):
     log.debug("downloadSubs: Download dict: %r" % Wanted)
     destdir = Wanted['folder']
     destsrt = os.path.join(Wanted['folder'], Wanted['file'])
-    if u'Dutch' in SubList[0]['Lang'] :
+    if autosub.DUTCH in SubList[0]['Lang'] :
         destsrt += Wanted['NLext']
-    elif u'English' in SubList[0]['Lang'] :
+    elif autosub.ENGLISH in SubList[0]['Lang'] :
         destsrt += Wanted['ENext']
     else:
         return False
@@ -324,7 +324,7 @@ def DownloadSub(Wanted,SubList):
     # Send notification 
 
     VideoFile = os.path.join(Wanted['folder'] , Wanted['file'] + Wanted['container'])
-    if (autosub.NOTIFYNL and Sub['Lang'] == 'Dutch') or (autosub.NOTIFYEN and Sub['Lang'] == 'English') :
+    if (autosub.NOTIFYNL and Sub['Lang'] == autosub.DUTCH) or (autosub.NOTIFYEN and Sub['Lang'] == autosub.ENGLISH) :
         notify.notify(Sub['Lang'], destsrt.encode('ascii','replace'), VideoFile.encode('ascii','replace'), Sub['website'])
 
     if autosub.POSTPROCESSCMD:

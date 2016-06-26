@@ -22,12 +22,38 @@ def WalkError(error):
     log.error('scanDir: Error walking the folders. Message is %s' % error)
 
 def walkDir(path):
-    SkipListNL = []
-    SkipListEN = []
-    SkipListNL = autosub.SKIPSTRINGNL.split(",")
-    SkipListEN = autosub.SKIPSTRINGEN.split(",")
+    SkipListNL    = autosub.SKIPSTRINGNL.split(",")  if len(autosub.SKIPSTRINGNL) > 0  else []
+    SkipListEN    = autosub.SKIPSTRINGEN.split(",")  if len(autosub.SKIPSTRINGEN) > 0  else []
+    if len(autosub.SKIPFOLDERSNL) == 0:
+        SkipFoldersNL = []
+    else:
+        SkipFoldersNL = autosub.SKIPFOLDERSNL.split(",") if len(autosub.SKIPFOLDERSNL) > 0  else []
+        for idx,folder in enumerate(SkipFoldersNL):
+            SkipFoldersNL[idx] = os.path.normpath(os.path.join(path,folder.rstrip("\/").lstrip("\/")))
+    if len(autosub.SKIPFOLDERSNL) == 0:
+        SkipFoldersNL = []
+    else:
+        SkipFoldersNL = autosub.SKIPFOLDERSNL.split(",") if len(autosub.SKIPFOLDERSNL) > 0  else []
+        for idx,folder in enumerate(SkipFoldersNL):
+            SkipFoldersNL[idx] = os.path.normpath(path + folder)
+    if len(autosub.SKIPFOLDERSEN) == 0:
+        SkipFoldersEN = []
+    else:
+        SkipFoldersEN = autosub.SKIPFOLDERSEN.split(",") if len(autosub.SKIPFOLDERSEN) > 0  else []
+        for idx,folder in enumerate(SkipFoldersEN):
+            SkipFoldersEN[idx] = os.path.normpath(path + folder)
 
     for dirname, dirnames, filenames in os.walk(path, True, WalkError):
+        SkipThisFolderNL = False
+        for skip in SkipFoldersNL:
+            if dirname.startswith(skip):
+                SkipThisFolderNL = True
+                break
+        SkipThisFolderEN = False
+        for skip in SkipFoldersEN:
+            if dirname.startswith(skip):
+                SkipThisFolderEN = True
+                break
 
         log.debug("scanDisk: directory name: %s" %dirname)
         if re.search('_unpack_', dirname, re.IGNORECASE):
@@ -81,7 +107,7 @@ def walkDir(path):
                     log.error('scandisk: No write access to folder: %s' % dirname)
                     continue
                 # Check which languages we want to download based on user settings.
-                if autosub.DOWNLOADDUTCH:
+                if autosub.DOWNLOADDUTCH and not SkipThisFolderNL:
                     Skipped = False
                     for SkipItem in SkipListNL:
                         if not SkipItem: break
@@ -97,7 +123,7 @@ def walkDir(path):
                         # If the Dutch subtitle not skipped and doesn't exist, then add it to the wanted list
                         langs.append(autosub.DUTCH)
 
-                if autosub.DOWNLOADENG or (autosub.FALLBACKTOENG and autosub.DOWNLOADDUTCH and not Skipped):
+                if (autosub.DOWNLOADENG or (autosub.FALLBACKTOENG and autosub.DOWNLOADDUTCH and not Skipped)) and not SkipThisFolderEN:
                     Skipped = False
                     for SkipItem in SkipListEN:
                         if not SkipItem: break
@@ -115,7 +141,8 @@ def walkDir(path):
                 if not langs:
                     # nothing to do for this file
                     continue
-                FileDict = ProcessFilename(os.path.splitext(filename)[0], ext)
+                FileDict = ProcessFilename(os.path.splitext(filename)[0].strip(), ext)
+                time.sleep(0)
                 if not FileDict:
                     continue
                 if not 'title' in FileDict.keys() or not 'season' in FileDict.keys() or not 'episode' in FileDict.keys():
@@ -124,7 +151,6 @@ def walkDir(path):
                     log.error("scanDir: Not enough info in filename: %s" % filename)
                     continue
 
-                log.info("scanDir: %s subtitle(s) for '%s' wanted and added to Wanted Queue" % (langs, filename))
                 FileDict['timestamp'] = unicode(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(os.path.getctime(os.path.join(dirname, filename)))))
                 FileDict['langs'] = langs
                 FileDict['NLext'] = NLext
@@ -135,6 +161,7 @@ def walkDir(path):
                 FileDict['ImdbId'],FileDict['A7Id'], FileDict['TvdbId'], FileDict['title'] = Helpers.getShowid(FileDict['title'],autosub.ADDIC7EDLOGGED_IN)
                 if autosub.Helpers.SkipShow(FileDict['ImdbId'],FileDict['title'], FileDict['season'], FileDict['episode']):
                     continue
+                log.info("scanDir: %s WANTED FOR: %s" % (langs, filename))
                 autosub.WANTEDQUEUE.append(FileDict)
     return
 
@@ -145,7 +172,7 @@ class scanDisk():
     If found add these Dutch or English subtitles to the WANTEDQUEUE.
     """
     def run(self):
-        log.info("scanDisk: Starting round of local disk checking at %s" % autosub.ROOTPATH)
+        log.info("scanDisk: Starting round of local disk checking at %s" % autosub.SERIESPATH)
         UseAddic= False
         if autosub.ADDIC7EDUSER and autosub.ADDIC7EDPASSWD and autosub.ADDIC7ED:
             try:
@@ -157,7 +184,7 @@ class scanDisk():
                 log.debug("checkSub: Couldn't connect with Addic7ed.com")
         else:
             autosub.ADDIC7EDLOGGED_IN = False
-        seriespaths = [x.strip() for x in autosub.ROOTPATH.split(',')]
+        seriespaths = [x.strip() for x in autosub.SERIESPATH.split(',')]
         for seriespath in seriespaths:
 
             if not os.path.exists(seriespath):

@@ -84,6 +84,16 @@ the python html5lib module: https://pypi.python.org/pypi/html5lib/1.0b3
 
 Release information:
 
+Version 0.8.9
+- Fixed the login test buttons for opensubtiles en addic7ed
+- Fixed the test button for pushover
+- Fixed the caching issue with all test buttons (before, two times testing only got the cache results not a real test)
+- Scandisk will now give cpu-time to jQuery DataTables to build home screen.
+- rewrote the complete config section
+- Added the creation of a PID file
+- Added setting to skip whole directories
+- Added so releasegroups
+
 Version 0.8.1
 Maintenance release
 

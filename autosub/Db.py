@@ -92,9 +92,9 @@ class lastDown():
         if not 'source' in Ldict.keys():
             Ldict['source'] = None
         DstFile = os.path.join(Ldict['folder'],Ldict['file'])
-        if Lang == 'Dutch':
+        if Lang == autosub.DUTCH:
             DstFile += Ldict['NLext']
-        elif Lang == 'English':
+        elif Lang == autosub.ENGLISH:
             DstFile += Ldict['ENext']
         try:
             cursor.execute(self.query_set,[ 

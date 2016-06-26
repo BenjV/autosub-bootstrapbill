@@ -5,6 +5,7 @@ import signal
 import time
 import locale
 import platform
+from uuid import getnode
 
 # Root path
 base_path = os.path.dirname(os.path.abspath(__file__))
@@ -41,7 +42,7 @@ class Usage(Exception):
 def main(argv=None):
     
     import autosub
-    
+
     #From Sickbeard / Headphones
     try:
         locale.setlocale(locale.LC_ALL, "")
@@ -89,43 +90,57 @@ def main(argv=None):
         return 2
     
     #load configuration
-    if os.path.isfile('config.properties.dev'):
-        autosub.CONFIGFILE='config.properties.dev'
+
     print "AutoSub: Initializing variables and loading config"
     autosub.Initialize()
-    
+    #Here we create a pid file
+    try:
+        pid = str(os.getpid())
+        f = open(os.path.join(autosub.PATH,'autosub.pid'), 'w')
+        f.write(pid)
+        f.close()
+    except Exception as error:
+        print 'AutoSub could not create the PID file. Error is:', error
+
+    # check the logfile location and make it the default if neccessary
+    LogPath,LogFile = os.path.split(autosub.LOGFILE)
+    if not LogFile:
+        LogFile = u"AutoSubService.log"
+    try:
+        if not os.path.exists(LogPath):
+            try:
+                os.makedirs(LogPath)
+            except Exception as error:
+                print "Could not create log folder, fallback to default"
+                LogPath = autosub.PATH
+    except Exception as error:
+        LogPath = autosub.PATH
+    autosub.LOGFILE = os.path.join(LogPath,LogFile)
+
+    autosub.NODE_ID = getnode()
+
     import autosub.AutoSub
     
     signal.signal(signal.SIGINT, autosub.AutoSub.signal_handler)
     
     if autosub.DAEMON==True:
         autosub.AutoSub.daemon()
-    
+
     import autosub.Db
     
-    #make sure that sqlite database is loaded after you demonize 
+    #make sure that sqlite database is loaded after you deamonise 
     autosub.Db.initDatabase()
-    
-    #change to the new work directory
-    if os.path.exists(autosub.PATH):
-        os.chdir(autosub.PATH)
-    else:
-        print "AutoSub: ERROR PATH does not exist, check config."
-        os._exit(1)
-    
+
     print "AutoSub: Starting output to log. Bye!"
     log = autosub.initLogging(autosub.LOGFILE)
     log.debug("AutoSub: Systemencoding is: %s" %autosub.SYSENCODING)
     log.debug("AutoSub: Configversion is: %d" %autosub.CONFIGVERSION)
     log.debug("AutoSub: Dbversion is: %d" %autosub.DBVERSION)
-    
+    log.debug("AutoSUb: Autosub version is: %s" %autosub.version.autosubversion)
 
-
-
-    log.info("AutoSub: Starting threads")
     autosub.AutoSub.start()
     
-    log.info("AutoSub: threads started, going into a loop to keep the main thread going")
+    log.info("AutoSub: Going into a loop to keep the main thread going")
     
     while True:
         time.sleep(1)

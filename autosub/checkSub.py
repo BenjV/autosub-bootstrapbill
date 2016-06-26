@@ -44,6 +44,7 @@ class checkSub():
         # because we remove a video from the list we cannot use the internal counter from a for loop
         # so we track the position in the list with the variable 'Index'
         while Index < End:
+            time.sleep(0)
             Wanted = {}
             Wanted = autosub.WANTEDQUEUE[Index]
             if not Wanted:
@@ -78,9 +79,9 @@ class checkSub():
             if SubsNL:
                 log.debug('checkSub: Dutch Subtitle(s) found trying to download the highest scored.')
                 if DownloadSub(Wanted,SubsNL):
-                    Wanted['langs'].remove('Dutch')
-                    if not autosub.DOWNLOADENG and 'English' in Wanted['langs']:
-                        Wanted['langs'].remove('English')
+                    Wanted['langs'].remove(autosub.DUTCH)
+                    if not autosub.DOWNLOADENG and autosub.ENGLISH in Wanted['langs']:
+                        Wanted['langs'].remove(autosub.ENGLISH)
                         SubsEN =[]
                     if autosub.ENGLISHSUBDELETE and os.path.exists(os.path.join(Wanted['folder'],Wanted['file'] + Wanted['ENext'])):
                         try:
@@ -91,7 +92,7 @@ class checkSub():
             if SubsEN:
                 log.debug('checkSub: English Subtitle(s) found trying to download the highest scored.')
                 if DownloadSub(Wanted,SubsEN):
-                    Wanted['langs'].remove('English')
+                    Wanted['langs'].remove(autosub.ENGLISH)
             if len(Wanted['langs']) == 0:
                 del autosub.WANTEDQUEUE[Index]
                 End -= 1

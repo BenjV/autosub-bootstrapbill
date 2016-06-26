@@ -63,9 +63,9 @@ def SubtitleSeeker(Wanted, sourceWebsites):
                 continue
             score = autosub.Helpers.scoreMatch(NameDict,Wanted)
             if score >= autosub.MINMATCHSCORE:
-                if Item['language'] == 'English':
+                if Item['language'] == autosub.ENGLISH:
                     ScoreListEN.append({'score':score, 'url':Item['url'] , 'website':Item['site'].lower(),'Lang':Item['language'], 'releaseName':Item['release'],'SubCodec':u''})
-                if Item['language'] == 'Dutch':
+                if Item['language'] == autosub.DUTCH:
                     ScoreListNL.append({'score':score, 'url':Item['url'] , 'website':Item['site'].lower(),'Lang':Item['language'], 'releaseName':Item['release'],'SubCodec':u''})
     return ScoreListNL,ScoreListEN
 
@@ -74,9 +74,9 @@ def Addic7ed( Wanted):
 
     ScoreListNL,ScoreListEN = [],[]
     langs = u''
-    if u'English' in Wanted['langs']:
+    if autosub.ENGLISH in Wanted['langs']:
         langs = '|1|'
-    if u'Dutch' in Wanted['langs']:
+    if autosub.DUTCH in Wanted['langs']:
         langs = langs +'17|' if langs else '|17|'
 
     SearchUrl = '/ajax_loadShow.php?show=' + Wanted['A7Id'] + '&season=' + Wanted['season'].lstrip('0') + '&langs=' + langs + '&hd=0&hi=0'
@@ -128,9 +128,9 @@ def Addic7ed( Wanted):
             for version in versionDicts:
                 score = autosub.Helpers.scoreMatch(version, Wanted)
                 if score >= autosub.MINMATCHSCORE:
-                    if cells[3].string == u'Dutch':
+                    if cells[3].string == autosub.DUTCH:
                         ScoreListNL.append({'score':score , 'releaseName':releasename, 'website':'addic7ed.com' , 'url':downloadUrl , 'Lang':cells[3].string, 'SubCodec':''})
-                    if cells[3].string == u'English':
+                    if cells[3].string == autosub.ENGLISH:
                         ScoreListEN.append({'score':score , 'releaseName':releasename, 'website':'addic7ed.com' , 'url':downloadUrl , 'Lang':cells[3].string, 'SubCodec':''})
         except:
             log.debug('getSubLinks: Exception from analysing Addic7ed episode page.')
@@ -172,9 +172,9 @@ def Opensubtitles(Wanted):
          # here we score the subtitle and if it's high enough we add it to the list 
         score = autosub.Helpers.scoreMatch(NameDict,Wanted)
         if score >= autosub.MINMATCHSCORE:
-            if Sub['LanguageName'] == 'Dutch':
+            if Sub['LanguageName'] == autosub.DUTCH:
                 ScoreListNL.append({'score':score, 'url':Sub['IDSubtitleFile'] , 'website':'opensubtitles.org','releaseName':Sub['MovieReleaseName'], 'SubCodec':Sub['SubEncoding'],'Lang':Sub['LanguageName']})
-            if Sub['LanguageName'] == 'English':
+            if Sub['LanguageName'] == autosub.ENGLISH:
                 ScoreListEN.append({'score':score, 'url':Sub['IDSubtitleFile'] , 'website':'opensubtitles.org','releaseName':Sub['MovieReleaseName'], 'SubCodec':Sub['SubEncoding'],'Lang':Sub['LanguageName']})
         else:
             log.debug('Opensubtitles: %s has scorematch %s skipping it.' % (Sub['MovieReleaseName'],score))

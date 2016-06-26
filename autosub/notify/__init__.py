@@ -28,9 +28,9 @@ def notify(lang, subtitlefile, videofile, website):
     subtitlefile = os.path.basename(subtitlefile)
     videofile = os.path.basename(videofile)
     
-    if lang == 'English' and autosub.NOTIFYEN:
+    if lang == autosub.ENGLISH and autosub.NOTIFYEN:
         notifySend(lang, subtitlefile, videofile, website)
-    if lang == 'Dutch' and autosub.NOTIFYNL:
+    if lang == autosub.DUTCH and autosub.NOTIFYNL:
         notifySend(lang, subtitlefile, videofile, website)
 
 def notifySend(lang, subtitlefile, videofile, website):

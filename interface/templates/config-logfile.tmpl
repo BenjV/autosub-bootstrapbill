@@ -1,5 +1,14 @@
 #import autosub
 #import logging
+
+<div class="form-group">
+	<label for="Logfile" class="col-sm-2 control-label">Logfile
+		<a data-placement="bottom" data-toggle="tooltip" data-original-title="The location and the name of the logfile. When not set, AutoSubService.log will be used. This field is required!">
+			<span class="glyphicon glyphicon-info-sign"></span>
+		</a>
+	</label>
+	<div class="col-sm-5"><input type="text" class="form-control" name="logfile" value="$autosub.LOGFILE" placeholder="$os.path.join($autosub.PATH,"AutoSubService.log")"></div>
+</div>
 	
 <div class="form-group">
 	<label for="Loglevel" class="col-sm-2 control-label">Loglevel <a data-placement="bottom" data-toggle="tooltip" data-original-title="Set the loglevel."><span class="glyphicon glyphicon-info-sign"></span></a></label>
