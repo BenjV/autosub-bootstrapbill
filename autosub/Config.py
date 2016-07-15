@@ -603,7 +603,7 @@ def upgradeConfig(cfg, from_version, to_version):
             else:
                 autosub.MINMATCHSCORE = (autosub.MINMATCHSCORE * 2) + 1
             autosub.CONFIGVERSION = 2
-            WriteConfig('all')
+            WriteConfig()
             print "Config: Config upgraded to version 2"
         elif from_version == 2 and to_version == 3:
             for title in autosub.SKIPSHOWUPPER:
@@ -612,7 +612,7 @@ def upgradeConfig(cfg, from_version, to_version):
                 items = ['0' if x=='00' else x for x in items]
                 string_items = ','.join(items)
             autosub.CONFIGVERSION = 3
-            WriteConfig('all')
+            WriteConfig()
             print "Config: Config upgraded to version 3"
         elif from_version == 3 and to_version == 4:
             if cfg.has_option('config', 'checksub'): autosub.SEARCHINTERVAL = cfg.getint('config', 'checksub')
