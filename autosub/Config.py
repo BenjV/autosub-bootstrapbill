@@ -634,5 +634,5 @@ def upgradeConfig(cfg, from_version, to_version):
                 elif Webdl == "None":
                     autosub.SKIPSTRINGNL = autosub.SKIPSTRINGEN = u"Web-dl"
             autosub.CONFIGVERSION = 4
-            WriteConfig('all')
+            WriteConfig()
             print "Config: Config upgraded to version 4"
