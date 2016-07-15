@@ -25,13 +25,13 @@ def _send_notify(pushbulletapi, message):
     if not pushbulletapi:
         pushbulletapi = autosub.PUSHBULLETAPI
 
-    mydata = {'type': 'note'.encode('utf-8'),
-            'title': 'Auto-Sub'.encode('utf-8'),
+    mydata = {'type': u'note'.encode('utf-8'),
+            'title': u'Auto-Sub'.encode('utf-8'),
             'body': message.encode('utf-8') }
 
     try:
         http_handler.request('POST', '/v2/pushes', body=json.dumps(mydata),
-                            headers={'Content-Type': 'application/json', 'Authorization': 'Bearer %s' % pushbulletapi})  
+                            headers={'Content-Type': u'application/json', 'Authorization': u'Bearer %s' % pushbulletapi})  
     except:
         log.error("Pushbullet: notification failed.")
         return False  

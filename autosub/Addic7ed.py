@@ -512,12 +512,15 @@ class Addic7edAPI():
         if r.status_code == 302:
             log.info('Addic7edAPI: Logged in with username: %s' % addic7eduser)
             self.logged_in = True
+            ADDIC7EDLOGGED_IN = True
             return True
         else:
             log.error('Addic7edAPI: Failed to login')
+            ADDIC7EDLOGGED_IN = False
             return False
 
     def logout(self):
+        ADDIC7EDLOGGED_IN = False
         if self.logged_in:
             try:
                 r = self.session.get(self.server + '/logout.php', timeout=10)

@@ -6,7 +6,7 @@ import autosub.version
 
 BOOTSTRAPVERSION='3.3.6'
 JQUERYVERSION = '1.9.1'
-JQUERYDATATTABLES = '1.10.12'
+JQUERYDATATABLES = '1.10.12'
 SERIESPATH = u''
 BROWSERREFRESH = int(1)
 FALLBACKTOENG = False
@@ -26,11 +26,10 @@ LOGSIZE = int(1048576)
 LOGNUM = int(3)
 SKIPSHOW = {}
 SKIPSHOWUPPER = {}
-USERNAMEMAPPING = {}
-USERNAMEMAPPINGUPPER = {}
+NAMEMAPPING = {}
+USERNAMEMAPPING = None
 USERADDIC7EDMAPPING = {}
-NAMEMAPPING = u''
-NAMEMAPPINGUPPER = u''
+#ADDIC7EDMAPPING = {}
 POSTPROCESSCMD = u''
 CONFIGFILE = None
 PATH = None
@@ -151,7 +150,7 @@ BOXCAR2TOKEN = u""
 NOTIFYPLEX = False
 PLEXSERVERHOST = u""
 PLEXSERVERPORT = u""
-
+SEARCHBUSY = False
 
 MOBILEUSERAGENTS = ["midp", "240x320", "blackberry", "netfront", "nokia", "panasonic", 
                     "portalmmm", "sharp", "sie-", "sonyericsson", "symbian", "windows ce", 
@@ -191,10 +190,9 @@ def Initialize():
     APICALLSLASTRESET_TVDB = time.time()
     APICALLSLASTRESET_SUBSEEKER = time.time() 
 
-    #Set the language paramater for the API query
     if not CONFIGFILE:
         CONFIGFILE = os.path.join(PATH,'config.properties')
-    Config.ReadConfig(CONFIGFILE)
+    Config.ReadConfig()
     
 
 def initLogging(logfile):

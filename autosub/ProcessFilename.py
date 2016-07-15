@@ -130,6 +130,7 @@ def ProcessFilename(filename, fileext):
     quality = None
     codec = None
     releasegrp = None
+    extra_info = None
 
     global _noextrainfo
     _noextrainfo = 0
@@ -140,12 +141,11 @@ def ProcessFilename(filename, fileext):
         if 'episode' in show_info.keys(): episode = _returnSceneNumber(show_info['episode'])
         if 'extra_info' in show_info.keys(): extra_info = show_info['extra_info']
     if extra_info:
-        extra_info = extra_info.lower()
-   
-    source = _getSource(extra_info)
-    quality = _getQuality(extra_info, fileext)
-    codec = _getCodec(extra_info, fileext)
-    releasegrp = _getReleasegrp(extra_info)
+        extra_info = extra_info.lower() 
+        source = _getSource(extra_info)
+        quality = _getQuality(extra_info, fileext)
+        codec = _getCodec(extra_info, fileext)
+        releasegrp = _getReleasegrp(extra_info)
 
     if title and season and episode: #and _noextrainfo < 4:
         show_dict = {}

@@ -38,7 +38,6 @@ class Scheduler:
             
             if self.runnow:
                 try:
-                    print 'schedular runnow'
                     self.command.run()
                     self.lastrun = time.time() 
                     self.runnow = False

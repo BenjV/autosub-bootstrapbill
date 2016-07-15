@@ -26,6 +26,7 @@ class checkSub():
     If the subtitles are found, call DownloadSub
     """
     def run(self):
+        autosub.SEARCHBUSY = True
         StartTime = time.time()
         autosub.DBCONNECTION = sqlite3.connect(autosub.DBFILE)
         autosub.DBIDCACHE = idCache()
@@ -44,36 +45,18 @@ class checkSub():
         # because we remove a video from the list we cannot use the internal counter from a for loop
         # so we track the position in the list with the variable 'Index'
         while Index < End:
-            time.sleep(0)
             Wanted = {}
             Wanted = autosub.WANTEDQUEUE[Index]
             if not Wanted:
                 Index += 1
                 continue
-            #First we check we have enough info to try to find a sub else we skip this one
-            Skip = False
-            if   autosub.MINMATCHSCORE & 8 and not Wanted['source']    : Skip = True
-            elif autosub.MINMATCHSCORE & 4 and not Wanted['quality']   : Skip = True
-            elif autosub.MINMATCHSCORE & 2 and not Wanted['codec']     : Skip = True
-            elif autosub.MINMATCHSCORE & 1 and not Wanted['releasegrp']: Skip = True
-            elif not Wanted['ImdbId'] : Skip = True
-            if Skip:
-                log.debug('checkSub: Skipped for not meeting the minmatch score. File is: %s' % Wanted['file'] )
-                Index += 1
-                continue
 
-
-            if not Wanted['ImdbId']:
-                Index += 1
-                continue
-
-            log.debug("checkSub: trying to get a downloadlink for %s, language is %s" % (Wanted['file'], Wanted['langs']))
-            log.debug("checkSub: ID's are. IMDB: %s, Addic7ed: %s" %(Wanted['ImdbId'],Wanted['A7Id']))
+            log.info("checkSub: Searching downloadlink(s) for %s, for %s" % (Wanted['file'], Wanted['langs']))
             # get all links above the minimal match score as input for downloadSub
             SubsNL,SubsEN = autosub.getSubLinks.getSubLinks(Wanted)
 
             if not SubsNL and not SubsEN:
-                log.debug("checkSub: no suitable subs were found for %s based on your minimal match score" % Wanted['file'])
+                log.debug("checkSub: No subs found for %s" % Wanted['file'])
                 Index += 1
                 continue
             if SubsNL:
@@ -93,8 +76,11 @@ class checkSub():
                 log.debug('checkSub: English Subtitle(s) found trying to download the highest scored.')
                 if DownloadSub(Wanted,SubsEN):
                     Wanted['langs'].remove(autosub.ENGLISH)
+                    time.sleep(0)
+
             if len(Wanted['langs']) == 0:
                 del autosub.WANTEDQUEUE[Index]
+                time.sleep(0)
                 End -= 1
             else:
                 Index += 1
@@ -111,4 +97,5 @@ class checkSub():
                                         
         log.info("checkSub: Finished round of subs Search. Go to sleep until the next round.")
         autosub.SEARCHTIME = time.time() - StartTime
+        autosub.SEARCHBUSY = False
         return True

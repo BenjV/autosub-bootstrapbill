@@ -117,7 +117,7 @@ class Config:
             autosub.SKIPSHOWUPPER[title.upper()] = episodestoskip
             message = autosub.Config.WriteConfig()
 
-            print season, episode
+            #print season, episode
             Name = 'ImdbId' if title.isnumeric() else 'title'
 
             if season == -1:
@@ -140,6 +140,13 @@ class Config:
                    wantedfirst = None, browserrefresh = None, skiphiddendirs = None,useaddic7ed=None,launchbrowser=None,interval = None, logsize=None,
                    fallbacktoeng = None, downloadeng = None, englishsubdelete = None, notifyen = None, notifynl = None, downloaddutch = None,
                    mmssource = u'0', mmsquality = u'0', mmscodec = u'0', mmsrelease = u'0',hearingimpaired = None):
+
+        if autosub.SEARCHBUSY:
+            tmpl = PageTemplate(file="interface/templates/config-settings.tmpl")
+            tmpl.message = "Search is busy, not possible to save the config now"
+            tmpl.displaymessage = "Yes"
+            tmpl.modalheader = "Information"
+            return str(tmpl)
                    
         # Set all internal variables
         autosub.SERIESPATH = seriespath
@@ -375,19 +382,14 @@ class Config:
 
     @cherrypy.expose
     def testAddic7ed(self, addic7eduser, addic7edpasswd, dummy):
-        log.info("Addic7ed: Testing Login")
-        result = autosub.Addic7ed.Addic7edAPI().login(addic7eduser, addic7edpasswd)
-        if result:
+        if autosub.Addic7ed.Addic7edAPI().login(addic7eduser, addic7edpasswd):
             return "<strong>Success</strong>."
         else:
             return "<strong>Failure</strong>."
 
     @cherrypy.expose
     def testOpenSubtitles(self, opensubtitlesuser, opensubtitlespasswd, dummy):
-        log.info('OpenSubtitles: Testing Login with user %s' % opensubtitlesuser)
-        result= OpenSubtitlesLogin(opensubtitlesuser,opensubtitlespasswd)
-        if result:
-            log.info('OpenSubtitles: login successful')
+        if  OpenSubtitlesLogin(opensubtitlesuser,opensubtitlespasswd):
             return "<strong>Success</strong>."
         else:
             return "<strong>Failure</strong>."

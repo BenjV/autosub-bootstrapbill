@@ -39,6 +39,7 @@ class idCache():
             return None, None, None, None
 
     def getInfo(self, ImdbId):
+
         try:
             Result = self.cursor.execute(self.query_getInfo, [ImdbId]).fetchone()
             if Result:

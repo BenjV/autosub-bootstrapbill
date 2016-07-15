@@ -24,24 +24,22 @@ def WalkError(error):
 def walkDir(path):
     SkipListNL    = autosub.SKIPSTRINGNL.split(",")  if len(autosub.SKIPSTRINGNL) > 0  else []
     SkipListEN    = autosub.SKIPSTRINGEN.split(",")  if len(autosub.SKIPSTRINGEN) > 0  else []
+
+    # Check for dutch folder skip
     if len(autosub.SKIPFOLDERSNL) == 0:
         SkipFoldersNL = []
     else:
         SkipFoldersNL = autosub.SKIPFOLDERSNL.split(",") if len(autosub.SKIPFOLDERSNL) > 0  else []
         for idx,folder in enumerate(SkipFoldersNL):
-            SkipFoldersNL[idx] = os.path.normpath(os.path.join(path,folder.rstrip("\/").lstrip("\/")))
-    if len(autosub.SKIPFOLDERSNL) == 0:
-        SkipFoldersNL = []
-    else:
-        SkipFoldersNL = autosub.SKIPFOLDERSNL.split(",") if len(autosub.SKIPFOLDERSNL) > 0  else []
-        for idx,folder in enumerate(SkipFoldersNL):
-            SkipFoldersNL[idx] = os.path.normpath(path + folder)
+            SkipFoldersNL[idx] = os.path.normpath(os.path.join(path,folder.strip(" \/")))
+
+    # Check for english folder skip
     if len(autosub.SKIPFOLDERSEN) == 0:
         SkipFoldersEN = []
     else:
         SkipFoldersEN = autosub.SKIPFOLDERSEN.split(",") if len(autosub.SKIPFOLDERSEN) > 0  else []
         for idx,folder in enumerate(SkipFoldersEN):
-            SkipFoldersEN[idx] = os.path.normpath(path + folder)
+            SkipFoldersEN[idx] = os.path.normpath(os.path.join(path,folder.strip(" \/")))
 
     for dirname, dirnames, filenames in os.walk(path, True, WalkError):
         SkipThisFolderNL = False
@@ -80,89 +78,97 @@ def walkDir(path):
         langs = []
         FileDict = {}
         for filename in filenames:
-            root,ext = os.path.splitext(filename)
-            if ext[1:] in ('avi', 'mkv', 'wmv', 'ts', 'mp4'):
-                if re.search('sample', filename):
-                    continue
-                if not platform.system() == 'Windows':
-                    # Get best ascii compatible character for special characters
-                    try:
-                        if not isinstance(filename, unicode):
-                            coding = detect(filename)['encoding']
-                            filename = unicode(filename.decode(coding),errors='replace')
-                        correctedFilename = ''.join((c for c in unicodedata.normalize('NFD', filename) if unicodedata.category(c) != 'Mn'))
-                        if filename != correctedFilename:
-                            os.rename(os.path.join(dirname, filename), os.path.join(dirname, correctedFilename))
-                            log.info("scanDir: Renamed file %s" % correctedFilename)
-                            filename = correctedFilename
-                    except:
-                        log.error("scanDir: Skipping directory, file %s, %s" % (dirname,filename))
+            try:
+                root,ext = os.path.splitext(filename)
+                if ext[1:] in ('avi', 'mkv', 'wmv', 'ts', 'mp4'):
+                    if re.search('sample', filename):
                         continue
-                # What subtitle files should we expect?
-                langs = []
-                NLext = u'.' + autosub.SUBNL  + u'.srt' if autosub.SUBNL  else u'.srt'
-                ENext = u'.' + autosub.SUBENG + u'.srt' if autosub.SUBENG else u'.srt'
-                ENext = u'.en.srt'if NLext == ENext and autosub.DOWNLOADDUTCH else ENext
-                if not os.access(dirname, os.W_OK):
-                    log.error('scandisk: No write access to folder: %s' % dirname)
-                    continue
-                # Check which languages we want to download based on user settings.
-                if autosub.DOWNLOADDUTCH and not SkipThisFolderNL:
-                    Skipped = False
-                    for SkipItem in SkipListNL:
-                        if not SkipItem: break
-                        if re.search(SkipItem.lower(), filename.lower()):
+                    if not platform.system() == 'Windows':
+                        # Get best ascii compatible character for special characters
+                        try:
+                            if not isinstance(filename, unicode):
+                                coding = detect(filename)['encoding']
+                                filename = unicode(filename.decode(coding),errors='replace')
+                            correctedFilename = ''.join((c for c in unicodedata.normalize('NFD', filename) if unicodedata.category(c) != 'Mn'))
+                            if filename != correctedFilename:
+                                os.rename(os.path.join(dirname, filename), os.path.join(dirname, correctedFilename))
+                                log.info("scanDir: Renamed file %s" % correctedFilename)
+                                filename = correctedFilename
+                        except:
+                            log.error("scanDir: Skipping directory, file %s, %s" % (dirname,filename))
+                            continue
+                    # What subtitle files should we expect?
+                    langs = []
+                    NLext = u'.' + autosub.SUBNL  + u'.srt' if autosub.SUBNL  else u'.srt'
+                    ENext = u'.' + autosub.SUBENG + u'.srt' if autosub.SUBENG else u'.srt'
+                    ENext = u'.en.srt'if NLext == ENext and autosub.DOWNLOADDUTCH else ENext
+                    if not os.access(dirname, os.W_OK):
+                        log.error('scandisk: No write access to folder: %s' % dirname)
+                        continue
+                    # Check which languages we want to download based on user settings.
+                    log.debug('scanDir: Processing file: %s' % filename)
+                    if autosub.DOWNLOADDUTCH and not SkipThisFolderNL:
+                        Skipped = False
+                        for SkipItem in SkipListNL:
+                            if not SkipItem: break
+                            if re.search(SkipItem.lower(), filename.lower()):
+                                Skipped = True
+                                break
+                        if Skipped:
+                            log.info("scanDir: %s found in %s so skipped for Dutch subs" % (SkipItem, filename))
+                        elif os.path.exists(os.path.join(dirname, root + NLext)):
                             Skipped = True
-                            break
-                    if Skipped:
-                        log.info("scanDir: %s found in %s so skipped for Dutch subs" % (SkipItem, filename))
-                    elif os.path.exists(os.path.join(dirname, root + NLext)):
-                        Skipped = True
-                        log.debug("scanDir: %s skipped because the Dutch subtitle already exists" % filename) 
-                    else:
-                        # If the Dutch subtitle not skipped and doesn't exist, then add it to the wanted list
-                        langs.append(autosub.DUTCH)
+                            log.debug("scanDir: %s skipped because the Dutch subtitle already exists" % filename) 
+                        else:
+                            # If the Dutch subtitle not skipped and doesn't exist, then add it to the wanted list
+                            langs.append(autosub.DUTCH)
 
-                if (autosub.DOWNLOADENG or (autosub.FALLBACKTOENG and autosub.DOWNLOADDUTCH and not Skipped)) and not SkipThisFolderEN:
-                    Skipped = False
-                    for SkipItem in SkipListEN:
-                        if not SkipItem: break
-                        if re.search(SkipItem.lower(), filename.lower()):
-                            Skipped = True
-                            break
-                    if Skipped:
-                        log.info("scanDir: %s found in %s so skipped for English subs" % (SkipItem, filename))
-                    elif os.path.exists(os.path.join(dirname, root + ENext)):
-                        log.debug("scanDir: %s skipped because the English subtitle already exists" % filename) 
-                    else:
-                        # If the English subtitle not skipped and doesn't exist, then add it to the wanted list
-                        if not os.path.exists(os.path.join(dirname, root + ENext)):
-                            langs.append(autosub.ENGLISH)
-                if not langs:
-                    # nothing to do for this file
-                    continue
-                FileDict = ProcessFilename(os.path.splitext(filename)[0].strip(), ext)
-                time.sleep(0)
-                if not FileDict:
-                    continue
-                if not 'title' in FileDict.keys() or not 'season' in FileDict.keys() or not 'episode' in FileDict.keys():
-                    continue
-                if not FileDict['releasegrp'] and not FileDict['source'] and not FileDict['quality'] and not FileDict['source']:
-                    log.error("scanDir: Not enough info in filename: %s" % filename)
-                    continue
+                    if (autosub.DOWNLOADENG or (autosub.FALLBACKTOENG and autosub.DOWNLOADDUTCH and not Skipped)) and not SkipThisFolderEN:
+                        Skipped = False
+                        for SkipItem in SkipListEN:
+                            if not SkipItem: break
+                            if re.search(SkipItem.lower(), filename.lower()):
+                                Skipped = True
+                                break
+                        if Skipped:
+                            log.info("scanDir: %s found in %s so skipped for English subs" % (SkipItem, filename))
+                        elif os.path.exists(os.path.join(dirname, root + ENext)):
+                            log.debug("scanDir: %s skipped because the English subtitle already exists" % filename) 
+                        else:
+                            # If the English subtitle not skipped and doesn't exist, then add it to the wanted list
+                            if not os.path.exists(os.path.join(dirname, root + ENext)):
+                                langs.append(autosub.ENGLISH)
+                    if not langs:
+                        # nothing to do for this file
+                        continue
+                    FileDict = ProcessFilename(os.path.splitext(filename)[0].strip(), ext)
+                    if not FileDict:
+                        log.debug('scanDisk: not enough info in the filename: %s' % filename)
+                        continue
+                    Skip = False
+                    if   autosub.MINMATCHSCORE & 8 and not FileDict['source']    : Skip = True
+                    elif autosub.MINMATCHSCORE & 4 and not FileDict['quality']   : Skip = True
+                    elif autosub.MINMATCHSCORE & 2 and not FileDict['codec']     : Skip = True
+                    elif autosub.MINMATCHSCORE & 1 and not FileDict['releasegrp']: Skip = True
+                    if Skip:
+                        log.debug('scanDisk: Filespec does not meet minmatchscore so skipping this one')
 
-                FileDict['timestamp'] = unicode(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(os.path.getctime(os.path.join(dirname, filename)))))
-                FileDict['langs'] = langs
-                FileDict['NLext'] = NLext
-                FileDict['ENext'] = ENext
-                FileDict['file'] = root
-                FileDict['container'] = ext
-                FileDict['folder'] = dirname
-                FileDict['ImdbId'],FileDict['A7Id'], FileDict['TvdbId'], FileDict['title'] = Helpers.getShowid(FileDict['title'],autosub.ADDIC7EDLOGGED_IN)
-                if autosub.Helpers.SkipShow(FileDict['ImdbId'],FileDict['title'], FileDict['season'], FileDict['episode']):
-                    continue
-                log.info("scanDir: %s WANTED FOR: %s" % (langs, filename))
-                autosub.WANTEDQUEUE.append(FileDict)
+                    FileDict['timestamp'] = unicode(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(os.path.getctime(os.path.join(dirname, filename)))))
+                    FileDict['langs'] = langs
+                    FileDict['NLext'] = NLext
+                    FileDict['ENext'] = ENext
+                    FileDict['file'] = root
+                    FileDict['container'] = ext
+                    FileDict['folder'] = dirname
+                    FileDict['ImdbId'],FileDict['A7Id'], FileDict['TvdbId'], FileDict['title'] = Helpers.getShowid(FileDict['title'])
+                    if autosub.Helpers.SkipShow(FileDict['ImdbId'],FileDict['title'], FileDict['season'], FileDict['episode']):
+                        log.debug("scanDir: SKIPPED %s by Skipshow rules from config.")
+                        continue
+                    log.info("scanDir: %s WANTED FOR: %s" % (langs, filename))
+                    autosub.WANTEDQUEUE.append(FileDict)
+                    time.sleep(0)
+            except Exception as error:
+                log.error('scanDir: Problem scanning file %s. Error is: %s' %(filename, error))
     return
 
 

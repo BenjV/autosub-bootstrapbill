@@ -14,6 +14,7 @@ from ConfigParser import SafeConfigParser
 
 import autosub
 import autosub.version as version
+import autosub.ID_lookup
 
 # Autosub specific modules
 
@@ -25,19 +26,20 @@ log = logging.getLogger('thelogger')
 #/Settings -----------------------------------------------------------------------------------------------------------------------------------------
 
 
-def ReadConfig(configfile):
+def ReadConfig():
     """
     Read the config file and set all the variables.
     """
 
     # Read config file
     cfg = SafeConfigParser()
-    cfg.optionxform=str
+    cfg.optionxform = lambda option: option
 
     try:
         with codecs.open(autosub.CONFIGFILE, 'r', autosub.SYSENCODING) as f:
             cfg.readfp(f)
     except:
+        #No config found so we create a default config
         Message = WriteConfig()
         return
 
@@ -47,6 +49,7 @@ def ReadConfig(configfile):
     elif autosub.CONFIGVERSION > version.configversion:
         print "Config: ERROR! Config version higher then this version of AutoSub supports. Update AutoSub!"
         os._exit(1)
+
     section = 'config'
     if not cfg.has_section(section):  cfg.add_section(section)
     if cfg.has_option(section, "configversion"):        autosub.CONFIGVERSION       = cfg.getint("config", "configversion") 
@@ -62,10 +65,14 @@ def ReadConfig(configfile):
     if cfg.has_option(section, "podnapisi"):            autosub.PODNAPISI           = cfg.getboolean(section, "podnapisi")
     if cfg.has_option(section, "subscene"):             autosub.SUBSCENE            = cfg.getboolean(section, "subscene")
     if cfg.has_option(section, "addic7ed"):             autosub.ADDIC7ED            = cfg.getboolean(section, "addic7ed")
+    if cfg.has_option(section, "opensubtitles"):        autosub.OPENSUBTITLES       = cfg.getboolean(section, "opensubtitles")
     if cfg.has_option(section, "hearingimpaired"):      autosub.HI                  = cfg.getboolean(section, "hearingimpaired")
     if cfg.has_option(section, 'minmatchscore'):        autosub.MINMATCHSCORE       = cfg.getint(section, 'minmatchscore')
     if cfg.has_option(section, 'searchinterval'):       autosub.SEARCHINTERVAL      = cfg.getint(section, 'searchinterval')
     if cfg.has_option(section, "browserrefresh"):       autosub.BROWSERREFRESH      = cfg.getint(section, "browserrefresh")
+    if cfg.has_option(section, "path"):                 autosub.PATH                = cfg.get(section, "path")
+    if cfg.has_option(section, "rootpath"):             autosub.SERIESPATH          = cfg.get(section, "rootpath")
+    if cfg.has_option(section, "seriespath"):           autosub.SERIESPATH          = cfg.get(section, "seriespath")
     if cfg.has_option(section, "subeng"):               autosub.SUBENG              = cfg.get(section, "subeng")
     if cfg.has_option(section, "subnl"):                autosub.SUBNL               = cfg.get(section, "subnl")
     if cfg.has_option(section, "postprocesscmd"):       autosub.POSTPROCESSCMD      = cfg.get(section, "postprocesscmd")
@@ -74,13 +81,11 @@ def ReadConfig(configfile):
     if cfg.has_option(section, "addic7eduser"):         autosub.ADDIC7EDUSER        = cfg.get(section, "addic7eduser")
     if cfg.has_option(section, "addic7edpasswd"):       autosub.ADDIC7EDPASSWD      = cfg.get(section, "addic7edpasswd") 
     if cfg.has_option(section, "logfile"):              autosub.LOGFILE             = cfg.get(section, "logfile")
-    if cfg.has_option(section, "subcoautosub"):         autosub.SUBCODEC            = cfg.get(section, "subcodec")
-    if cfg.has_option(section, "rootpath"):             autosub.SERIESPATH          = cfg.get(section, "rootpath")
-    if cfg.has_option(section, "seriespath"):           autosub.SERIESPATH          = cfg.get(section, "seriespath")
+    if cfg.has_option(section, "subcodec"):             autosub.SUBCODEC            = cfg.get(section, "subcodec")
     if cfg.has_option(section, "skipstringnl"):         autosub.SKIPSTRINGNL        = cfg.get(section, "skipstringnl")
     if cfg.has_option(section, "skipstringen"):         autosub.SKIPSTRINGEN        = cfg.get(section, "skipstringen")
     if cfg.has_option(section, "skipfoldersnl"):        autosub.SKIPFOLDERSNL       = cfg.get(section, "skipfoldersnl")
-    if cfg.has_option(section, "skipfolderSen"):        autosub.SKIPFOLDERSEN       = cfg.get(section, "skipfoldersen")
+    if cfg.has_option(section, "skipfoldersen"):        autosub.SKIPFOLDERSEN       = cfg.get(section, "skipfoldersen")
 
 
 
@@ -89,6 +94,7 @@ def ReadConfig(configfile):
     # *******************
     section = 'logfile'
     if not cfg.has_section(section): cfg.add_section(section)
+    if cfg.has_option(section, "logfile"): autosub.LOGFILE = cfg.get(section, "logfile")
     if cfg.has_option(section, "loglevel"):
         LogLevel = cfg.get(section, "loglevel").upper()
         if LogLevel == u'ERROR':
@@ -142,38 +148,241 @@ def ReadConfig(configfile):
         #autosub.SKIPSHOW = dict(cfg.items('skipshow'))
         # The following 5 lines convert the skipshow to uppercase. And also convert the variables to a list
         # also replace the "~" with ":" neccesary because the config parser sees ":" as a delimiter
+        # The UPPER version is for searching, the normal for dispaly in the user interface
     for show in SkipShows:
         if re.match("^[0-9 ,.-]+$", SkipShows[show]):
             autosub.SKIPSHOW[show.replace('~',':')] = SkipShows[show]
             autosub.SKIPSHOWUPPER[show.upper().replace('~',':')] = [Item.strip() for Item in SkipShows[show].split(',')]
 
-    # ***********************
-    # * Namemapping Section *
-    # ***********************
-    section = 'namemapping'
-    if not cfg.has_section(section): cfg.add_section(section)
-
-    NameMapping = dict(cfg.items(section))
-    autosub.USERNAMEMAPPING = {}
-    autosub.USERNAMEMAPPINGUPPER = {}
-    for Name in NameMapping:
-        if NameMapping[Name].isdigit():
-            autosub.USERNAMEMAPPING[Name.replace('~',':')] = NameMapping[Name]
-            autosub.USERNAMEMAPPINGUPPER[Name.upper().replace('~',':')] = [Item.strip() for Item in NameMapping[Name].split(',')]
 
     # ********************************
     # * Addic7ed Namemapping Section *
     # ********************************
     section = 'addic7edmapping'
     if not cfg.has_section(section): cfg.add_section(section)
+    autosub.USERADDIC7EDMAPPING={}
+    autosub.USERADDIC7EDMAPPING = dict(cfg.items(section))
+    for Name in autosub.USERADDIC7EDMAPPING.iterkeys():
+        if Name.isdigit and autosub.USERADDIC7EDMAPPING[Name].isdigit():
+            autosub.ADDIC7EDMAPPING[Name] = autosub.USERADDIC7EDMAPPING[Name].strip()
+        else:
+            print'ReadConfig: Addic7ed mapping has an unkown format.',Name,' = ', NameMapping[Name]
 
+    # Settings
+
+    autosub.NAMEMAPPING = {
+        "AGAINST THE WALL" :"1836237",
+            "ALCATRAZ" :"1728102",
+            "ALMOST HUMAN" :"2654580",
+            "ALPHAS" :"1183865",
+            "AMERICAN DAD" :"0397306",
+            "AMERICAN HORROR STORY" :"1844624",
+            "APPROPRIATE ADULT" :"1831575",
+            "ARE YOU THERE CHELSEA" :"1826989",
+            "ATLANTIS" :"2705602",
+            "ATLANTIS 2013" :"2705602",
+            "AWKWARD" : "1663676",
+            "BACK IN THE GAME" : "2655470",
+            "BATES MOTEL" :"2188671",
+            "BEAUTY AND THE BEAST" :"2193041",
+            "BEAUTY AND THE BEAST 2012" :"2193041",
+            "BETRAYAL" :"2751074",
+            "BLUE BLOODS" :"1595859",
+            "BOARDWALK EMPIRE" : "0979432",
+            "BOB'S BURGERS" :"1561755",
+            "BOBS BURGERS" :"1561755",
+            "BODY OF PROOF" :"1587669",
+            "BORGEN" :"1526318",
+            "BREAKOUT KINGS" :"1590961",
+            "BREAKING BAD" : "903747",
+            "CASTLE (2009)" :"1219024",
+            "CASTLE 2009" :"1219024",
+            "CHARLIE'S ANGELS 2011" :"1760943",
+            "CHARLIES ANGELS 2011" :"1760943",
+            "CHICAGO FIRE" : "2261391",
+            "CHICAGO FIRE (2012)" : "2261391",
+            "CHICAGO PD" : "2805096",
+            "CHICAGO P.D" : "2805096",
+            "CHICAGO P.D." : "2805096",
+            "COMMON LAW 2012" :"1771072",
+            "CONTINUUM" : "1954347",
+            "COVERT AFFAIRS" :"1495708",
+            "CRACKED (2013)" : "2078576",
+            "CRIMINAL MINDS" :"0452046",
+            "CSI" :"0247082",
+            "CSI CRIME SCENE INVESTIGATION" :"0247082",
+            "CSI MIAMI" :"0313043",
+            "CSI NEW YORK" :"0395843",
+            "CSI NY" :"0395843",
+            "DA VINCI'S DEMONS" :"2094262",
+            "DALLAS 2012" :"1723760",
+            "DESPERATE HOUSEWIVES" :"0410975",
+            "DEVIOUS MAIDS" : "2226342",
+            "DOCTOR WHO" : "0436992",
+            "DOCTOR WHO (2005)" : "0436992",
+            "DON'T TRUST THE B---- IN APARTMENT 23" :"1819509",
+            "DONT TRUST THE BITCH IN APARTMENT 23" :"1819509",
+            "DRACULA" :"2296682",
+            "DRACULA (2013)" :"2296682",
+            "DREAMWORKS DRAGONS: RIDERS OF BERK" :"2325846",
+            "EASTBOUND & DOWN" :"0866442",
+            "EASTBOUND AND DOWN" :"0866442",
+            "EMILY OWENS M D" :"2290339",
+            "FALLING SKIES" :"1462059",
+            "FAST N LOUD" : "2346169",
+            "FEMME FATALES" :"1841108",
+            "FRANKLIN AND BASH" :"1600199",
+            "FREE AGENTS" :"1839481",
+            "FREE AGENTS US" :"1839481",
+            "FRINGE" :"1119644",
+            "GAME OF THRONES" : "0944947",
+            "GLEE" : "1327801",
+            "GREY'S ANATOMY" :"0413573",
+            "GREYS ANATOMY" :"0413573",
+            "GRIMM" :"1830617",
+            "HARRY'S LAW" :"1582453",
+            "HARRYS LAW" :"1582453",
+            "HAVEN" :"1519931",
+            "HAWAII FIVE 0" :"1600194",
+            "HAWAII FIVE 0 2010" :"1600194",
+            "HAWAII FIVE-0" :"1600194",
+            "HAWAII FIVE-0 2010" :"1600194",
+            "HELLO LADIES" :"2378794",
+            "HOMELAND" :"1796960",
+            "HOSTAGES" :"2647258",
+            "HOUSE OF CARDS 2013" :"1856010",
+            "HOW I MET YOUR MOTHER" : "0460649",
+            "HOW TO SURVIVE THE END OF THE WORLD" : "3377330",
+            "INTELLIGENCE US" : "2693776",
+            "KING" :"1804880",
+            "KINGS OF CRASH" : "2623754",
+            "LAST MAN STANDING" : "1828327",
+            "LAST MAN STANDING US" : "1828327",
+            "LAW AND ORDER SVU" :"0203259",
+            "LAW AND ORDER UK" :"1166893",
+            "LONGMIRE" : "1836037",
+            "LUCK" :"1578887",
+            "LUTHER" :"1474684",
+            "MAN UP" :"1828238",
+            "MARVEL'S AGENTS OF S H I E L D" :"2364582",
+            "MARVELS AGENTS OF S H I E L D" :"2364582",
+            "MARVEL AGENTS OF SHIELD": "2364582",
+            "AGENTS OF S H I E L D" :"2364582",
+            "MASTERS OF SEX" :"2137109",
+            "MELISSA AND JOEY" :"1597420",
+            "MERLIN" :"1199099",
+            "MERLIN 2008" :"1199099",
+            "MIKE AND MOLLY" :"1608180",
+            "MISSING 2012" :"1828246",
+            "MOCKINGBIRD LANE" :"2130271",
+            "MODERN FAMILY" :"1442437",
+            "MOONSHINERS" : "1877005",
+            "MR SUNSHINE" :"1583638",
+            "NASHVILLE" :"2281375",
+            "NASHVILLE 2012" :"2281375",
+            "NCIS" :"0364845",
+            "NCIS LOS ANGELES" :"1378167",
+            "NECESSARY ROUGHNESS" :"1657505",
+            "NEW GIRL" : "1826940",
+            "NEW TRICKS" :"0362357",
+            "NIP TUCK" :"0361217",
+            "NIP-TUCK" :"0361217",
+            "ONCE UPON A TIME" :"1843230",
+            "ONCE UPON TIME" :"1843230",
+            "ONCE UPON A TIME 2011" :"1843230",
+            "ONCE UPON A TIME IN WONDERLAND" :"2802008",
+            "OPPENHEIMER (1980)" : "0078037",
+            "PARKS AND RECREATION" : "1266020",
+            "PERSON OF INTEREST" :"1839578",
+            "PLAYED" :"2886812",
+            "PRETTY LITTLE LIARS" : "1578873",
+            "PRIME SUSPECT US" :"1582456",
+            "PRIMEVAL NEW WORLD" :"2295953",
+            "RAY DONOVAN" :"2249007",
+            "REIGN 2013" :"2710394",
+            "REVOLUTION" :"2070791",
+            "REVOLUTION 2012" :"2070791",
+            "RIZZOLI AND ISLES" :"1551632",
+            "ROOKIE BLUE" : "1442065",
+            "SCANDAL" :"1837576",
+            "SCANDAL (2012)" :"1837576",
+            "SCANDAL 2012" :"1837576",
+            "SCANDAL US" :"1837576",
+            "SCOTT AND BAILEY" :"1843678",
+            "SEAN SAVES THE WORLD" :"2715776",
+            "SHAMELESS US" :"1586680",
+            "SILENT WITNESS" :"0115355",
+            "SINBAD" :"1979918",
+            "SLEEPY HOLLOW" :"2647544",
+            "SNOOKI AND JWOWW" : "2083701",
+            "SONS OF ANARCHY" : "1124373",
+            "SOUTH PARK" : "0121955",
+            "SPARTACUS" :"1442449",
+            "SPARTACUS BLOOD AND SAND" :"1442449",
+            "SPARTACUS GODS OF THE ARENA" :"1758429",
+            "SPARTACUS VENGEANCE" :"1442449",
+            "STAR WARS THE CLONE WARS" :"0458290",
+            "SUBURGATORY" :"1741256",
+            "SUITS" :"1632701",
+            "SUN, SEX AND SUSPICIOUS PARENTS" : "1832153",
+            "SUPER FUN NIGHT" :"2298477",
+            "THE AFTER" : "3145422",
+            "THE AMERICANS 2013" : "2149175",
+            "THE AMERICANS (2013)" : "2149175",
+            "THE AMERICANS" : "2149175",
+            "THE BIG BANG THEORY" : "898266",
+            "THE BIGGEST LOSER" :"0429318",
+            "THE BLACKLIST" :"2741602",
+            "THE CLIENT LIST" :"2022170",
+            "THE CLOSER" :"0458253",
+            "THE DUKES OF HAZZARD" : "78607",
+            "THE GADGET SHOW" :"0830851",
+            "THE KENNEDYS" :"1567215",
+            "THE KILLING (2011)" :"1637727",
+            "THE LA COMPLEX" :"1794147",
+            "THE LEGEND OF KORRA" :"1695360",
+            "THE LYING GAME" :"1798274",
+            "THE MENTALIST" :"1196946",
+            "THE NEWSROOM (2012)" :"1870479",
+            "THE NEWSROOM 2012" :"1870479",
+            "THE O C" :"0362359",
+            "THE OFFICE US" :"0386676",
+            "THE ORIGINALS" :"2632424",
+            "THE PIGLET FILES" : "0098895",
+            "THE PROTECTOR" :"1836417",
+            "THE RIVER" :"1836195",
+            "THE TOMORROW PEOPLE US" :"2660734",
+            "THE WALKING DEAD" : "1520211",
+            "THE WIRE" : "306414",
+            "THE WRONG MANS" :"2603596",
+            "THUNDERCATS 2011" :"1666278",
+            "TOUCH" :"1821681",
+            "TROPHY WIFE" :"2400736",
+            "TWO AND A HALF MEN" : "0369179",
+            "UNDER THE DOME" : "1553656",
+            "UNFORGETTABLE" :"1842530",
+            "UNTOUCHABLES-THE VENTURE BROS" :"0417373",
+            "UP ALL NIGHT 2011" :"1843323",
+            "UTOPIA" :"2384811",
+            "VEGAS" :"2262383",
+            "WHITE COLLAR" :"1358522",
+            "XIII THE SERIES 2011" :"1713938"    }
+
+    # ***********************
+    # * Namemapping Section *
+    # ***********************
+    section = 'namemapping'
+    if not cfg.has_section(section): cfg.add_section(section)
     NameMapping = dict(cfg.items(section))
-    autosub.USERADDIC7EDMAPPING = {}
-    for Name in NameMapping:
-        if Name.isdigit and NameMapping[Name].isdigit():
-            autosub.USERADDIC7EDMAPPING[Name] = NameMapping[Name]
-
-    # ******************
+    autosub.USERNAMEMAPPING={}
+    for Name in NameMapping.iterkeys():
+        if NameMapping[Name].isdigit():
+            autosub.NAMEMAPPING[Name.upper().replace('~',':')] = NameMapping[Name].strip()
+            autosub.USERNAMEMAPPING[Name.replace('~',':')] = NameMapping[Name].strip()
+        else:
+            print 'ReadConfig: Username mapping has an unknown format.',Name,' = ',NameMapping[Name] 
+   
+     # ******************
     # * Notify Section *
     # ******************
     section = 'notify'
@@ -212,253 +421,46 @@ def ReadConfig(configfile):
     if cfg.has_option(section, 'boxcar2token'): autosub.BOXCAR2TOKEN         = cfg.get(section, 'boxcar2token')
     if cfg.has_option(section, 'notifyplex'): autosub.NOTIFYPLEX             = cfg.getboolean(section, 'notifyplex')
     if cfg.has_option(section, 'plexserverhost'): autosub.PLEXSERVERHOST     = cfg.get(section, 'plexserverhost')
-    if cfg.has_option(section, 'plexserverport'): autosub.PLEXSERVERPORT     = cfg.get(section, 'plexserverport')
-
-    # Settings
-
-    autosub.NAMEMAPPING = {
-            "Against the Wall" :"1836237",
-            "alcatraz" :"1728102",
-            "almost human" :"2654580",
-            "alphas" :"1183865",
-            "american dad" :"0397306",
-            "american horror story" :"1844624",
-            "appropriate adult" :"1831575",
-            "Are You There Chelsea" :"1826989",
-            "atlantis" :"2705602",
-            "atlantis 2013" :"2705602",
-            "awkward" : "1663676",
-            "back in the game" : "2655470",
-            "Bates Motel" :"2188671",
-            "beauty and the beast" :"2193041",
-            "beauty and the beast 2012" :"2193041",
-            "betrayal" :"2751074",
-            "blue bloods" :"1595859",
-            "boardwalk empire" : "0979432",
-            "bob's burgers" :"1561755",
-            "bobs burgers" :"1561755",
-            "Body of Proof" :"1587669",
-            "borgen" :"1526318",
-            "breakout kings" :"1590961",
-            "breaking bad" : "903747",
-            "Castle (2009)" :"1219024",
-            "castle 2009" :"1219024",
-            "charlie's angels 2011" :"1760943",
-            "Charlies Angels 2011" :"1760943",
-            "chicago fire" : "2261391",
-            "chicago fire (2012)" : "2261391",
-            "chicago pd" : "2805096",
-            "chicago p.d" : "2805096",
-            "chicago p.d." : "2805096",
-            "Common Law 2012" :"1771072",
-            "continuum" : "1954347",
-            "covert affairs" :"1495708",
-            "cracked (2013)" : "2078576",
-            "criminal minds" :"0452046",
-            "csi" :"0247082",
-            "csi crime scene investigation" :"0247082",
-            "Csi Miami" :"0313043",
-            "csi new york" :"0395843",
-            "csi ny" :"0395843",
-            "Da Vinci's Demons" :"2094262",
-            "Dallas 2012" :"1723760",
-            "desperate housewives" :"0410975",
-            "devious maids" : "2226342",
-            "Doctor Who" : "0436992",
-            "Doctor Who (2005)" : "0436992",
-            "don't trust the b---- in apartment 23" :"1819509",
-            "dont trust the bitch in apartment 23" :"1819509",
-            "dracula" :"2296682",
-            "dracula (2013)" :"2296682",
-            "DreamWorks Dragons: Riders of Berk" :"2325846",
-            "eastbound & down" :"0866442",
-            "eastbound and down" :"0866442",
-            "emily owens m d" :"2290339",
-            "Falling skies" :"1462059",
-            "Fast N Loud" : "2346169",
-            "Femme Fatales" :"1841108",
-            "Franklin and Bash" :"1600199",
-            "Free Agents" :"1839481",
-            "Free Agents Us" :"1839481",
-            "fringe" :"1119644",
-            "game of thrones" : "0944947",
-            "Glee" : "1327801",
-            "Grey's Anatomy" :"0413573",
-            "Greys Anatomy" :"0413573",
-            "grimm" :"1830617",
-            "harry's law" :"1582453",
-            "Harrys Law" :"1582453",
-            "haven" :"1519931",
-            "Hawaii Five 0" :"1600194",
-            "Hawaii Five 0 2010" :"1600194",
-            "Hawaii Five-0" :"1600194",
-            "hawaii five-0 2010" :"1600194",
-            "hello ladies" :"2378794",
-            "homeland" :"1796960",
-            "hostages" :"2647258",
-            "house of cards 2013" :"1856010",
-            "how i met your mother" : "0460649",
-            "How To Survive The End Of The World" : "3377330",
-            "Intelligence us" : "2693776",
-            "king" :"1804880",
-            "kings of crash" : "2623754",
-            "Last Man Standing" : "1828327",
-            "Last Man Standing Us" : "1828327",
-            "law and order svu" :"0203259",
-            "law and order uk" :"1166893",
-            "longmire" : "1836037",
-            "luck" :"1578887",
-            "luther" :"1474684",
-            "Man Up" :"1828238",
-            "marvel's agents of s h i e l d" :"2364582",
-            "marvels agents of s h i e l d" :"2364582",
-            "marvel agents of shield": "2364582",
-            "agents of s h i e l d" :"2364582",
-            "masters of sex" :"2137109",
-            "Melissa And Joey" :"1597420",
-            "Merlin" :"1199099",
-            "Merlin 2008" :"1199099",
-            "Mike and Molly" :"1608180",
-            "missing 2012" :"1828246",
-            "mockingbird lane" :"2130271",
-            "modern family" :"1442437",
-            "moonshiners" : "1877005",
-            "Mr Sunshine" :"1583638",
-            "nashville" :"2281375",
-            "nashville 2012" :"2281375",
-            "ncis" :"0364845",
-            "Ncis Los Angeles" :"1378167",
-            "Necessary Roughness" :"1657505",
-            "new girl" : "1826940",
-            "new tricks" :"0362357",
-            "nip tuck" :"0361217",
-            "nip-tuck" :"0361217",
-            "once upon a time" :"1843230",
-            "once upon time" :"1843230",
-            "once upon a time 2011" :"1843230",
-            "once upon a time in wonderland" :"2802008",
-            "oppenheimer (1980)" : "0078037",
-            "Parks and Recreation" : "1266020",
-            "person of interest" :"1839578",
-            "played" :"2886812",
-            "pretty little liars" : "1578873",
-            "Prime Suspect Us" :"1582456",
-            "primeval new world" :"2295953",
-            "ray donovan" :"2249007",
-            "reign 2013" :"2710394",
-            "Revolution" :"2070791",
-            "Revolution 2012" :"2070791",
-            "Rizzoli And Isles" :"1551632",
-            "rookie blue" : "1442065",
-            "Scandal" :"1837576",
-            "scandal (2012)" :"1837576",
-            "Scandal 2012" :"1837576",
-            "Scandal US" :"1837576",
-            "scott and bailey" :"1843678",
-            "sean saves the world" :"2715776",
-            "Shameless Us" :"1586680",
-            "silent witness" :"0115355",
-            "Sinbad" :"1979918",
-            "sleepy hollow" :"2647544",
-            "snooki and jwoww" : "2083701",
-            "sons of anarchy" : "1124373",
-            "South Park" : "0121955",
-            "Spartacus" :"1442449",
-            "Spartacus Blood And Sand" :"1442449",
-            "Spartacus Gods Of The Arena" :"1758429",
-            "spartacus vengeance" :"1442449",
-            "star wars the clone wars" :"0458290",
-            "suburgatory" :"1741256",
-            "suits" :"1632701",
-            "sun, sex and suspicious parents" : "1832153",
-            "super fun night" :"2298477",
-            "The After" : "3145422",
-            "the americans 2013" : "2149175",
-            "the americans (2013)" : "2149175",
-            "the americans" : "2149175",
-            "the big bang theory" : "898266",
-            "the biggest loser" :"0429318",
-            "the blacklist" :"2741602",
-            "the client list" :"2022170",
-            "the closer" :"0458253",
-            "the dukes of hazzard" : "78607",
-            "the gadget show" :"0830851",
-            "The Kennedys" :"1567215",
-            "the killing (2011)" :"1637727",
-            "The La Complex" :"1794147",
-            "The Legend Of Korra" :"1695360",
-            "the lying game" :"1798274",
-            "the mentalist" :"1196946",
-            "the newsroom (2012)" :"1870479",
-            "the newsroom 2012" :"1870479",
-            "the o c" :"0362359",
-            "the office us" :"0386676",
-            "the originals" :"2632424",
-            "the piglet files" : "0098895",
-            "the protector" :"1836417",
-            "The River" :"1836195",
-            "the tomorrow people us" :"2660734",
-            "the walking dead" : "1520211",
-            "the wire" : "306414",
-            "the wrong mans" :"2603596",
-            "thundercats 2011" :"1666278",
-            "Touch" :"1821681",
-            "trophy wife" :"2400736",
-            "two and a half men" : "0369179",
-            "under the dome" : "1553656",
-            "unforgettable" :"1842530",
-            "untouchables-the venture bros" :"0417373",
-            "Up All Night 2011" :"1843323",
-            "utopia" :"2384811",
-            "Vegas" :"2262383",
-            "white collar" :"1358522",
-            "xiii the series 2011" :"1713938"
-    }
-    
-    autosub.NAMEMAPPINGUPPER = {}
-    for x in autosub.NAMEMAPPING.keys():
-        autosub.NAMEMAPPINGUPPER[x.upper()] = autosub.NAMEMAPPING[x]
-    autosub.LASTESTDOWNLOAD = []
-        
+    if cfg.has_option(section, 'plexserverport'): autosub.PLEXSERVERPORT     = cfg.get(section, 'plexserverport')      
 
 def WriteConfig():
     cfg = SafeConfigParser()
-    cfg.optionxform=str
+    cfg.optionxform = lambda option: option
 
     section = 'config'
     cfg.add_section(section)
-    cfg.set(section, "seriespath", autosub.SERIESPATH)
-    cfg.set(section, "logfile", autosub.LOGFILE)
-    cfg.set(section, "downloadeng", str(autosub.DOWNLOADENG))
-    cfg.set(section, "downloaddutch", str(autosub.DOWNLOADDUTCH))    
-    cfg.set(section, "fallbacktoeng", str(autosub.FALLBACKTOENG))
-    cfg.set(section, "englishsubdelete", str(autosub.ENGLISHSUBDELETE))
+    cfg.set(section, "path", autosub.PATH )
+    cfg.set(section, "seriespath", autosub.SERIESPATH) 
+    cfg.set(section, 'downloaddutch', str(autosub.DOWNLOADDUTCH))
+    cfg.set(section, 'downloadeng', str(autosub.DOWNLOADENG))
     cfg.set(section, "subeng", autosub.SUBENG)
     cfg.set(section, "subnl", autosub.SUBNL)
+    cfg.set(section, "fallbacktoeng", str(autosub.FALLBACKTOENG))
     cfg.set(section, "notifyen", str(autosub.NOTIFYEN))
     cfg.set(section, "notifynl", str(autosub.NOTIFYNL))
-    cfg.set(section, "postprocesscmd", autosub.POSTPROCESSCMD)
-    cfg.set(section, "subcodec", autosub.SUBCODEC)
+    cfg.set(section, "wantedfirst", str(autosub.WANTEDFIRST))
     cfg.set(section, "launchbrowser", str(autosub.LAUNCHBROWSER))
     cfg.set(section, "skiphiddendirs", str(autosub.SKIPHIDDENDIRS))
-    cfg.set(section, "wantedfirst", str(autosub.WANTEDFIRST))
+    cfg.set(section, "englishsubdelete", str(autosub.ENGLISHSUBDELETE))
+    cfg.set(section, "addic7ed", str(autosub.ADDIC7ED))
+    cfg.set(section, "opensubtitles", str(autosub.OPENSUBTITLES))
     cfg.set(section, "podnapisi", str(autosub.PODNAPISI))
     cfg.set(section, "subscene", str(autosub.SUBSCENE))
-    cfg.set(section, "opensubtitles", str(autosub.OPENSUBTITLES))
-    cfg.set(section, "addic7ed", str(autosub.ADDIC7ED))
+    cfg.set(section, "hearingimpaired", str(autosub.HI))
+    cfg.set(section, 'minmatchscore', str(autosub.MINMATCHSCORE))
+    cfg.set(section, "configversion", str(autosub.CONFIGVERSION ))  
+    cfg.set(section, 'searchinterval', str(autosub.SEARCHINTERVAL))
+    cfg.set(section, "browserrefresh", str(autosub.BROWSERREFRESH))
+    cfg.set(section, "postprocesscmd", autosub.POSTPROCESSCMD)
     cfg.set(section, "opensubtitlesuser", autosub.OPENSUBTITLESUSER)
     cfg.set(section, "opensubtitlespasswd", autosub.OPENSUBTITLESPASSWD)
     cfg.set(section, "addic7eduser", autosub.ADDIC7EDUSER)
     cfg.set(section, "addic7edpasswd", autosub.ADDIC7EDPASSWD)
-    cfg.set(section, "browserrefresh", str(autosub.BROWSERREFRESH)) 
-    cfg.set(section, "minmatchscore", str(autosub.MINMATCHSCORE))
-    cfg.set(section, "searchinterval", str(autosub.SEARCHINTERVAL))
-    cfg.set(section, "configversion", str(autosub.CONFIGVERSION))
-    cfg.set(section, "hearingimpaired",str(autosub.HI))
-    cfg.set(section, "skipstringnl",autosub.SKIPSTRINGNL)
-    cfg.set(section, "skipstringen",autosub.SKIPSTRINGEN)
-    cfg.set(section, "skipfoldersnl",autosub.SKIPFOLDERSNL)
-    cfg.set(section, "skipfoldersen",autosub.SKIPFOLDERSEN)  
+    cfg.set(section, "subcodec", autosub.SUBCODEC)
+    cfg.set(section, "skipstringnl", autosub.SKIPSTRINGNL)
+    cfg.set(section, "skipstringen", autosub.SKIPSTRINGEN)
+    cfg.set(section, "skipfoldersnl", autosub.SKIPFOLDERSNL)
+    cfg.set(section, "skipfoldersen", autosub.SKIPFOLDERSEN)
 
     section = 'webserver'
     cfg.add_section(section)
@@ -470,6 +472,7 @@ def WriteConfig():
 
     section = 'logfile'
     cfg.add_section(section)
+    cfg.set(section, "logfile", autosub.LOGFILE)
     cfg.set(section, "loglevel", logging.getLevelName(autosub.LOGLEVEL))
     cfg.set(section, "loglevelconsole", logging.getLevelName(autosub.LOGLEVELCONSOLE))
     cfg.set(section, "logsize", str(autosub.LOGSIZE))
@@ -544,6 +547,8 @@ def WriteConfig():
             cfg.write(cfile)
     except Exception as error:
         return error
+    # here we read the config back because the the UPPERCASE variants of the config (for searching) has to be filled
+    ReadConfig()
     return 'Config has been saved.'
 
 def displaySkipshow():
