@@ -137,7 +137,7 @@ _rlsgrps_HD =  ['0SEC',
                 'REMARKABLE',
                 'SERIOUSLY',
                 'SKGTV',
-                'spamTV'
+                'spamTV',
                 'SVA']
 
 _rlsgrps_SD =  ['ASAP',
