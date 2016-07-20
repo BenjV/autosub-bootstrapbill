@@ -47,7 +47,7 @@ def SubtitleSeeker(Wanted, sourceWebsites):
         if not 'total_matches' in Result['results'].keys():
             return ScoreListNL,ScoreListEN
     except Exception as error:
-        log.info('getSublink: No subtitle found on Subtitleseeker for this video : %s' % Wanted['originalFileLocationOnDisk'])
+        log.info('getSublink: No subtitle found on Subtitleseeker for this video.')
         return ScoreListNL,ScoreListEN
     if int(Result['results']['total_matches']) == 0:
         return ScoreListNL,ScoreListEN
