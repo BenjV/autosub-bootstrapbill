@@ -56,8 +56,8 @@ $(document).ready(function () {
 		var mailsubject = $("#mailsubject").val();
 		var mailencryption = $("#mailencryption").val();
 		var mailauth = $("#mailauth").val();
-		var dummy = Date.now(); 
-		$.get(autosubRoot + "/config/testMail", {'mailsrv': mailsrv, 'mailfromaddr': mailfromaddr, 'mailtoaddr': mailtoaddr, 'mailusername': mailusername, 'mailpassword': mailpassword, 'mailsubject': mailsubject, 'mailencryption': mailencryption, 'mailauth': mailauth},
+		var dummy = Date.now();
+		$.get(autosubRoot + "/config/testMail", {'mailsrv': mailsrv, 'mailfromaddr': mailfromaddr, 'mailtoaddr': mailtoaddr, 'mailusername': mailusername, 'mailpassword': mailpassword, 'mailsubject': mailsubject, 'mailencryption': mailencryption, 'mailauth': mailauth, 'dummy': dummy},
 			function (data) { $('#testMail-result').html(data); });
     });
 
