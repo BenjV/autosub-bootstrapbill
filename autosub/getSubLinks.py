@@ -47,7 +47,7 @@ def SubtitleSeeker(Wanted, sourceWebsites):
         if not 'total_matches' in Result['results'].keys():
             return ScoreListNL,ScoreListEN
     except Exception as error:
-        log.info('getSublink: No subtitle found on Subtitleseeker for this video.')
+        log.info('getSublink: No subtitle found on Subtitleseeker for this video : %s' % Wanted['file'])
         return ScoreListNL,ScoreListEN
     if int(Result['results']['total_matches']) == 0:
         return ScoreListNL,ScoreListEN
@@ -83,7 +83,11 @@ def Addic7ed( Wanted):
         langs = langs +'17|' if langs else '|17|'
 
     SearchUrl = '/ajax_loadShow.php?show=' + Wanted['A7Id'] + '&season=' + Wanted['season'].lstrip('0') + '&langs=' + langs + '&hd=0&hi=0'
-    log.debug('getSubLinks: Addic7ed search started for %s.' % Wanted['A7Id'])
+    if int(Wanted['A7Id']) > 0:
+        log.debug('getSubLinks: Addic7ed search started for %s.' % Wanted['A7Id'])
+    else:
+        log.debug('getSubLinks: No Addic7Id for %s, so it is skipped. ' % Wanted['file'])
+        return ScoreListNL,ScoreListEN
 
     Result = autosub.ADDIC7EDAPI.get(SearchUrl)
     if Result:
