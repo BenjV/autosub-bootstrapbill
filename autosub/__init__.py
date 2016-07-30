@@ -76,6 +76,8 @@ DOWNLOADS_A7MAX = int(40)
 
 SEARCHINTERVAL = int(21600)
 SEARCHTIME= float(0)
+SEARCHBUSY = False
+SEARCHSTOP = False
 SCANDISK = None
 CHECKSUB = None
 #DOWNLOADSUBS = None
@@ -150,7 +152,7 @@ BOXCAR2TOKEN = u""
 NOTIFYPLEX = False
 PLEXSERVERHOST = u""
 PLEXSERVERPORT = u""
-SEARCHBUSY = False
+
 
 MOBILEUSERAGENTS = ["midp", "240x320", "blackberry", "netfront", "nokia", "panasonic", 
                     "portalmmm", "sharp", "sie-", "sonyericsson", "symbian", "windows ce", 

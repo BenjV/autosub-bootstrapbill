@@ -481,6 +481,16 @@ class Home:
         tmpl.modalheader = "Information"
 
         return str(tmpl)
+    @cherrypy.expose
+    def stopSearch(self):
+        message = 'Search will be stopped after the current sub search has ended'
+        autosub.SEARCHSTOP = True
+        tmpl = PageTemplate(file="interface/templates/home.tmpl")
+        tmpl.message = message
+        tmpl.displaymessage = "Yes"
+        tmpl.modalheader = "Information"     
+        return str(tmpl)
+
 
     @cherrypy.expose
     def checkVersion(self):

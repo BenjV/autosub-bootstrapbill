@@ -1,3 +1,3 @@
-autosubversion='0.8.15'
+autosubversion='0.8.16'
 configversion=4
 dbversion=9

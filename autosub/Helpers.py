@@ -36,6 +36,27 @@ SOURCE_PARSER = re.compile("(hdtv|tv|dvdrip|dvd|bdrip|blu[e]*ray|web[. _-]*dl)",
 QUALITY_PARSER = re.compile("(1080|720|HD|SD)" , re.IGNORECASE)
 LOG_PARSER = re.compile('^((?P<date>\d{4}\-\d{2}\-\d{2})\ (?P<time>\d{2}:\d{2}:\d{2},\d{3}) (?P<loglevel>\w+))', re.IGNORECASE)
 
+_show = [re.compile('(.+)\s+\(?(\d{4})\)?', re.IGNORECASE),
+              re.compile('(.+)\s+\(?(us)\)?', re.IGNORECASE),
+              re.compile('(.+)\s+\(?(uk)\)?', re.IGNORECASE)]
+
+def _getShow(title):
+    searchName = title
+    suffix = ''
+    for reg in _show:
+        try:
+            m = re.match(reg, title)
+        except TypeError:
+            log.error("_getShow: Error while processing: %s %s" %(searchName, suffix))
+            return searchName, suffix
+        
+        if m:
+            searchName = m.group(1)
+            suffix = m.group(2)
+            break
+    return searchName, suffix
+
+
 def RunCmd(cmd):
     process = subprocess.Popen(cmd,
                             shell = True,
@@ -343,8 +364,12 @@ def checkAPICallsTvdb(use=False):
 def getShowid(ShowName):
     ImdbId = AddicId = TvdbId = AddicMappingId = ImdbNameMappingId = TvdbShowName = None
     UpdateCache = False
+    SearchName, Suffix = _getShow(ShowName)
+    if Suffix:
+        ShowName = SearchName + ' (' + Suffix +')' 
     ShowNameUpper = ShowName.upper()
     log.debug('getShowid: Trying to get info for %s' %ShowName)
+    # check if a suffix is present.
 
     # First we try the User Namemapping
     if ShowNameUpper in autosub.NAMEMAPPING.keys():
@@ -366,8 +391,8 @@ def getShowid(ShowName):
             if ImdbId:
                 UpdateCache = True
                 if ImdbId in autosub.ADDIC7EDMAPPING.keys():
-                    AddicMappingId = unicode(autosub.ADDIC7EDMAPPING[ImdbId], "utf-8") 
-                if not AddicMappingId and autosub.ADDIC7EDLOGGED_IN:
+                    AddicId = unicode(autosub.ADDIC7EDMAPPING[ImdbId], "utf-8") 
+                if not AddicId and autosub.ADDIC7EDLOGGED_IN:
                     AddicId = Addic7edAPI().geta7ID(TvdbShowName, ShowName)
             else:
                 log.debug('getShowid: No ImdbId found on Tvdb for %s.' % ShowName)
@@ -375,9 +400,10 @@ def getShowid(ShowName):
         else:
             if not AddicId:           
                 if ImdbId in autosub.ADDIC7EDMAPPING.keys():
-                    AddicMappingId = unicode(autosub.ADDIC7EDMAPPING[ImdbId], "utf-8") 
+                    AddicMappingId = unicode(autosub.ADDIC7EDMAPPING[ImdbId], "utf-8")
                 if not AddicMappingId and autosub.ADDIC7EDLOGGED_IN:
                     AddicId = Addic7edAPI().geta7ID(TvdbShowName, ShowName)
+                    UpdateCache = True
 
     if UpdateCache:
         idCache().setId(TvdbShowName.upper(), ImdbId, AddicId, TvdbId, TvdbShowName)

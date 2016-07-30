@@ -324,20 +324,22 @@
 </div>
 </div>
 #try:
-    #if $autosub.CHECKSUB.runnow :
+    #if $autosub.SEARCHBUSY :
 		<div class="well well-sm center well-header"><font size="3"><b>Search is busy...
     #else:
-		<div class="well well-sm center well-header"><font size="3"><b>Time until next run:
 			#try
-			    $int($time.strftime('%H', $time.gmtime(($autosub.SEARCHINTERVAL - ($time.time() - $autosub.CHECKSUB.lastrun) )))) hours and 
-                $int($time.strftime('%M', $time.gmtime(($autosub.SEARCHINTERVAL - ($time.time() - $autosub.CHECKSUB.lastrun) )))) minutes
-				</b></font>
+				#if not $autosub.CHECKSUB.runnow:
+					<div class="well well-sm center well-header"><font size="3"><b>Time until next run:
+					$int($time.strftime('%H', $time.gmtime(($autosub.SEARCHINTERVAL - ($time.time() - $autosub.CHECKSUB.lastrun) )))) hours and 
+					$int($time.strftime('%M', $time.gmtime(($autosub.SEARCHINTERVAL - ($time.time() - $autosub.CHECKSUB.lastrun) )))) minutes
+					</b></font>
+				#end if
 			#except
-			     <div class="well well-sm center well-header"><font size="3"><b>Search is busy...</b></font>
+			     <div class="well well-sm center well-header"><font size="3"><b>Autosub is initializing</b></font>
 			#end try
     #end if
 #except:
-     <div class="well well-sm center well-header"><font size="3"><b>Search is busy...</b></font>
+     <div class="well well-sm center well-header"><font size="3"><b>Autosub is initializing...</b></font>
 #end try
 
         </div>

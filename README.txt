@@ -84,6 +84,11 @@ the python html5lib module: https://pypi.python.org/pypi/html5lib/1.0b3
 
 Release information:
 
+Version 0.8.16
+- Added stop search function
+- improved search status in main menu
+- added some new addic7Id's mappings
+
 Version 0.8.9
 - Fixed the login test buttons for opensubtiles en addic7ed
 - Fixed the test button for pushover

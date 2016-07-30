@@ -18,6 +18,14 @@ from autosub.ProcessFilename import ProcessFilename
 # Settings
 log = logging.getLogger('thelogger')
 
+def decodeName(name):
+    if type(name) == str: # leave unicode ones alone
+        try:
+            name = name.decode('utf8')
+        except:
+            name = name.decode('windows-1252')
+    return name
+
 def WalkError(error):
     log.error('scanDir: Error walking the folders. Message is %s' % error)
 
@@ -42,6 +50,7 @@ def walkDir(path):
             SkipFoldersEN[idx] = os.path.normpath(os.path.join(path,folder.strip(" \/")))
 
     for dirname, dirnames, filenames in os.walk(path, True, WalkError):
+        #filenames = [decodeName(f) for f in filenames]
         SkipThisFolderNL = False
         for skip in SkipFoldersNL:
             if dirname.startswith(skip):
@@ -78,6 +87,9 @@ def walkDir(path):
         langs = []
         FileDict = {}
         for filename in filenames:
+            if autosub.SEARCHSTOP:
+                log.info('scanDisk: Forced Stop by user')
+                return
             try:
                 root,ext = os.path.splitext(filename)
                 if ext[1:] in ('avi', 'mkv', 'wmv', 'ts', 'mp4'):
@@ -162,7 +174,7 @@ def walkDir(path):
                     FileDict['folder'] = dirname
                     FileDict['ImdbId'],FileDict['A7Id'], FileDict['TvdbId'], FileDict['title'] = Helpers.getShowid(FileDict['title'])
                     if autosub.Helpers.SkipShow(FileDict['ImdbId'],FileDict['title'], FileDict['season'], FileDict['episode']):
-                        log.debug("scanDir: SKIPPED %s by Skipshow rules from config.")
+                        log.debug("scanDir: SKIPPED %s by Skipshow rules." % FileDict['file'])
                         continue
                     log.info("scanDir: %s WANTED FOR: %s" % (langs, filename))
                     autosub.WANTEDQUEUE.append(FileDict)
