@@ -18,13 +18,6 @@ from autosub.ProcessFilename import ProcessFilename
 # Settings
 log = logging.getLogger('thelogger')
 
-def decodeName(name):
-    if type(name) == str: # leave unicode ones alone
-        try:
-            name = name.decode('utf8')
-        except:
-            name = name.decode('windows-1252')
-    return name
 
 def WalkError(error):
     log.error('scanDir: Error walking the folders. Message is %s' % error)
@@ -48,9 +41,7 @@ def walkDir(path):
         SkipFoldersEN = autosub.SKIPFOLDERSEN.split(",") if len(autosub.SKIPFOLDERSEN) > 0  else []
         for idx,folder in enumerate(SkipFoldersEN):
             SkipFoldersEN[idx] = os.path.normpath(os.path.join(path,folder.strip(" \/")))
-
     for dirname, dirnames, filenames in os.walk(path, True, WalkError):
-        #filenames = [decodeName(f) for f in filenames]
         SkipThisFolderNL = False
         for skip in SkipFoldersNL:
             if dirname.startswith(skip):
@@ -164,7 +155,7 @@ def walkDir(path):
                     elif autosub.MINMATCHSCORE & 1 and not FileDict['releasegrp']: Skip = True
                     if Skip:
                         log.debug('scanDisk: Filespec does not meet minmatchscore so skipping this one')
-
+                        continue
                     FileDict['timestamp'] = unicode(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(os.path.getctime(os.path.join(dirname, filename)))))
                     FileDict['langs'] = langs
                     FileDict['NLext'] = NLext

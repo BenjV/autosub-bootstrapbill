@@ -365,53 +365,57 @@ def getShowid(ShowName):
     ImdbId = AddicId = TvdbId = AddicMappingId = ImdbNameMappingId = TvdbShowName = None
     UpdateCache = False
     SearchName, Suffix = _getShow(ShowName)
+    SearchList =[]
     if Suffix:
-        ShowName = SearchName + ' (' + Suffix +')' 
-    ShowNameUpper = ShowName.upper()
-    log.debug('getShowid: Trying to get info for %s' %ShowName)
-    # check if a suffix is present.
+        SearchList.append(SearchName +  ' (' + Suffix +')' )
+        SearchList.append(SearchName +  ' ' + Suffix )
+    SearchList.append(SearchName)
+    for ShowName in SearchList:
+        ShowNameUpper = ShowName.upper()
+        log.debug('getShowid: Trying to get info for %s' %ShowName)
 
-    # First we try the User Namemapping
-    if ShowNameUpper in autosub.NAMEMAPPING.keys():
-        ImdbNameMappingId = autosub.NAMEMAPPING[ShowNameUpper]
-        if ImdbNameMappingId:
-            # Try to find the addicId in the cache
-            if ImdbNameMappingId in autosub.ADDIC7EDMAPPING.keys():
-                AddicMappingId = autosub.ADDIC7EDMAPPING[ImdbNameMappingId]
-            if not AddicMappingId:
-                ImdbId, AddicMappingId, TvdbId, TvdbShowName = idCache().getId(ShowNameUpper)
-                if not AddicMappingId and autosub.ADDIC7EDLOGGED_IN:
-                    AddicMappingId = Addic7edAPI().geta7ID(TvdbShowName, ShowName)
-    else:
-        # Not found in NameMapping so check the cache
-        ImdbId, AddicId, TvdbId, TvdbShowName = idCache().getId(ShowNameUpper)
-        # No info in the cache we try Tvdb
-        if not ImdbId and checkAPICallsTvdb():
-            ImdbId, TvdbId, TvdbShowName = Tvdb.getShowidApi(ShowName)
-            if ImdbId:
-                UpdateCache = True
-                if ImdbId in autosub.ADDIC7EDMAPPING.keys():
-                    AddicId = unicode(autosub.ADDIC7EDMAPPING[ImdbId], "utf-8") 
-                if not AddicId and autosub.ADDIC7EDLOGGED_IN:
-                    AddicId = Addic7edAPI().geta7ID(TvdbShowName, ShowName)
-            else:
-                log.debug('getShowid: No ImdbId found on Tvdb for %s.' % ShowName)
-                return None, None, None, ShowName
+        # First we try the User Namemapping
+        if ShowNameUpper in autosub.NAMEMAPPING.keys():
+            ImdbNameMappingId = autosub.NAMEMAPPING[ShowNameUpper]
+            if ImdbNameMappingId:
+                # Try to find the addicId in the cache
+                if ImdbNameMappingId in autosub.ADDIC7EDMAPPING.keys():
+                    AddicMappingId = autosub.ADDIC7EDMAPPING[ImdbNameMappingId]
+                if not AddicMappingId:
+                    ImdbId, AddicMappingId, TvdbId, TvdbShowName = idCache().getId(ShowNameUpper)
+                    if not AddicMappingId and autosub.ADDIC7EDLOGGED_IN:
+                        AddicMappingId = Addic7edAPI().geta7ID(TvdbShowName, ShowName)
         else:
-            if not AddicId:           
-                if ImdbId in autosub.ADDIC7EDMAPPING.keys():
-                    AddicMappingId = unicode(autosub.ADDIC7EDMAPPING[ImdbId], "utf-8")
-                if not AddicMappingId and autosub.ADDIC7EDLOGGED_IN:
-                    AddicId = Addic7edAPI().geta7ID(TvdbShowName, ShowName)
+            # Not found in NameMapping so check the cache
+            ImdbId, AddicId, TvdbId, TvdbShowName = idCache().getId(ShowNameUpper)
+            # No info in the cache we try Tvdb
+            if not ImdbId and checkAPICallsTvdb():
+                ImdbId, TvdbId, TvdbShowName = Tvdb.getShowidApi(ShowName)
+                if ImdbId:
                     UpdateCache = True
+                    if ImdbId in autosub.ADDIC7EDMAPPING.keys():
+                        AddicId = unicode(autosub.ADDIC7EDMAPPING[ImdbId], "utf-8") 
+                    if not AddicId and autosub.ADDIC7EDLOGGED_IN:
+                        AddicId = Addic7edAPI().geta7ID(TvdbShowName, ShowName)
+            else:
+                if not AddicId:           
+                    if ImdbId in autosub.ADDIC7EDMAPPING.keys():
+                        AddicMappingId = unicode(autosub.ADDIC7EDMAPPING[ImdbId], "utf-8")
+                    if not AddicMappingId and autosub.ADDIC7EDLOGGED_IN:
+                        AddicId = Addic7edAPI().geta7ID(TvdbShowName, ShowName)
+                        UpdateCache = True
+        if ImdbId or ImdbNameMappingId:
+            if UpdateCache:
+                idCache().setId(TvdbShowName.upper(), ImdbId, AddicId, TvdbId, TvdbShowName)
+            if ImdbNameMappingId: ImdbId = ImdbNameMappingId
+            if AddicMappingId: AddicId = AddicMappingId
+            if not TvdbShowName: TvdbShowName = ShowName
+            log.debug("getShowid: Returned ID's - IMDB: %s, Addic7ed: %s, ShowName: %s" %(ImdbId,AddicId,TvdbShowName))
+            return ImdbId, AddicId, TvdbId, TvdbShowName
+    # no ImdbId found for this showname
+    log.debug('getShowid: No ImdbId found on Tvdb for %s.' % ShowName)
+    return None, None, None, ShowName
 
-    if UpdateCache:
-        idCache().setId(TvdbShowName.upper(), ImdbId, AddicId, TvdbId, TvdbShowName)
-    if ImdbNameMappingId: ImdbId = ImdbNameMappingId
-    if AddicMappingId: AddicId = AddicMappingId
-    if not TvdbShowName: TvdbShowName = ShowName
-    log.debug("getShowid: Returned ID's - IMDB: %s, Addic7ed: %s, ShowName: %s" %(ImdbId,AddicId,TvdbShowName))
-    return ImdbId, AddicId, TvdbId, TvdbShowName
 
 
 def DisplayLogFile(loglevel):
