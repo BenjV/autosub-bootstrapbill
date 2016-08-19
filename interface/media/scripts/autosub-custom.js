@@ -146,7 +146,6 @@ $(document).ready(function () {
 		var plexserverport = $("#plexserverport").val();
 		var plexserverusername = $("#plexserverusername").val();
 		var plexserverpassword = $("#plexserverpassword").val();
-		console.log(plexserverpassword);
 		var dummy = Date.now(); 
 		$.get(autosubRoot + "/config/testPlex", {
 			'plexserverhost': plexserverhost,
