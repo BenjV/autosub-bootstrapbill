@@ -1,0 +1,4 @@
+*.pyc
+*.log
+database.db
+config.properties

@@ -144,9 +144,19 @@ $(document).ready(function () {
         $('#testPlex-result').html('<span><img src="' + autosubRoot + '/images/loading16.gif"> Testing Plex Media Server...</span>');
         var plexserverhost = $("#plexserverhost").val();
 		var plexserverport = $("#plexserverport").val();
+		var plexserverusername = $("#plexserverusername").val();
+		var plexserverpassword = $("#plexserverpassword").val();
+		console.log(plexserverpassword);
 		var dummy = Date.now(); 
-		$.get(autosubRoot + "/config/testPlex", {'plexserverhost': plexserverhost, 'plexserverport': plexserverport, 'dummy': dummy},
-			function (data) { $('#testPlex-result').html(data); });
+		$.get(autosubRoot + "/config/testPlex", {
+			'plexserverhost': plexserverhost,
+			'plexserverport': plexserverport,
+			'plexserverusername': plexserverusername,
+			'plexserverpassword': plexserverpassword, 
+			'dummy': dummy
+		},
+			function (data) { $('#testPlex-result').html(data); 
+		});
     });
 	
 	$('#RetrieveAddic7edCount').click(function () {
