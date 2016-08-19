@@ -221,7 +221,7 @@ class Config:
                          mailusername, mailpassword, mailsubject, mailencryption, mailauth, growlhost, growlport, 
                          growlpass, nmaapi, twitterkey, twittersecret, notifyprowl, prowlapi, prowlpriority, 
                          notifypushalot, pushalotapi, notifypushbullet, pushbulletapi, notifypushover, pushoverappkey,pushoveruserkey, 
-                         nmapriority, notifyboxcar2, boxcar2token, notifyplex, plexserverhost, plexserverport):
+                         nmapriority, notifyboxcar2, boxcar2token, notifyplex, plexserverhost, plexserverport, plexserverusername, plexserverpassword):
 
         # Set all internal notify variables
         autosub.NOTIFYMAIL = notifymail
@@ -258,6 +258,8 @@ class Config:
         autosub.NOTIFYPLEX = notifyplex
         autosub.PLEXSERVERHOST = plexserverhost
         autosub.PLEXSERVERPORT = plexserverport
+        autosub.PLEXSERVERUSERNAME = plexserverusername
+        autosub.PLEXSERVERPASSWORD = plexserverpassword
 
         # Now save to the configfile
         message = autosub.Config.WriteConfig()
@@ -360,10 +362,10 @@ class Config:
    
    
     @cherrypy.expose
-    def testPlex(self, plexserverhost, plexserverport, dummy):
+    def testPlex(self, plexserverhost, plexserverport, plexserverusername, plexserverpassword, dummy):
         
         log.info("Notification: Testing Plex Media Server")
-        result = notify.plexmediaserver.test_update_library(plexserverhost, plexserverport)
+        result = notify.plexmediaserver.test_update_library(plexserverhost, plexserverport, plexserverusername, plexserverpassword)
         if result:
             return "Auto-Sub successfully updated the media library on your <strong>Plex Media Server</strong>."
         else:

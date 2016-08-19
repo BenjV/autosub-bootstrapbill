@@ -152,6 +152,9 @@ BOXCAR2TOKEN = u""
 NOTIFYPLEX = False
 PLEXSERVERHOST = u""
 PLEXSERVERPORT = u""
+PLEXSERVERUSERNAME = u""
+PLEXSERVERPASSWORD = u""
+PLEXSERVERTOKEN = u""
 
 
 MOBILEUSERAGENTS = ["midp", "240x320", "blackberry", "netfront", "nokia", "panasonic", 

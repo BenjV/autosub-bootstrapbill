@@ -377,16 +377,30 @@
 		
 		<div id="content_notifyplex">
 			<div class="form-group">
-				<label for="PlexHost" class="col-sm-2 control-label">Host <a data-placement="bottom" data-toggle="tooltip" data-original-title="What is the IP address of your Plex server?"><span class="glyphicon glyphicon-info-sign"></span></a></label>
+				<label for="plexserverhost" class="col-sm-2 control-label">Host <a data-placement="bottom" data-toggle="tooltip" data-original-title="What is the IP address of your Plex server?"><span class="glyphicon glyphicon-info-sign"></span></a></label>
 				<div class="col-sm-10">
 				<input type="text" class="form-control" name="plexserverhost" id="plexserverhost" value="$autosub.PLEXSERVERHOST" placeholder="127.0.0.1">
 				</div>
 			</div>
 			
 			<div class="form-group">
-				<label for="PlexPort" class="col-sm-2 control-label">Port <a data-placement="bottom" data-toggle="tooltip" data-original-title="What is the port of your Plex server? Default is 32400."><span class="glyphicon glyphicon-info-sign"></span></a></label>
+				<label for="plexserverport" class="col-sm-2 control-label">Port <a data-placement="bottom" data-toggle="tooltip" data-original-title="What is the port of your Plex server? Default is 32400."><span class="glyphicon glyphicon-info-sign"></span></a></label>
 				<div class="col-sm-10">
 				<input type="text" class="form-control" name="plexserverport" id="plexserverport" value="$autosub.PLEXSERVERPORT" placeholder="32400">
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label for="plexserverusername" class="col-sm-2 control-label">Username <a data-placement="bottom" data-toggle="tooltip" data-original-title="What is the username of your Plex server?"><span class="glyphicon glyphicon-info-sign"></span></a></label>
+				<div class="col-sm-10">
+				<input type="text" class="form-control" name="plexserverusername" id="plexserverusername" value="$autosub.PLEXSERVERUSERNAME">
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label for="plexserverpassword" class="col-sm-2 control-label">Password <a data-placement="bottom" data-toggle="tooltip" data-original-title="What is the password of your Plex server?"><span class="glyphicon glyphicon-info-sign"></span></a></label>
+				<div class="col-sm-10">
+				<input type="password" class="form-control" name="plexserverpassword" id="plexserverpassword" value="$autosub.PLEXSERVERPASSWORD">
 				</div>
 			</div>
 			
