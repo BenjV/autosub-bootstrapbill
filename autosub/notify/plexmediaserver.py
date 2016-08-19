@@ -1,7 +1,7 @@
 import autosub
 import logging
 
-import requests
+import library.requests as requests
 import base64
 
 from xml.etree import ElementTree as ET
