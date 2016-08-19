@@ -394,13 +394,13 @@ def getShowid(ShowName):
                 if ImdbId:
                     UpdateCache = True
                     if ImdbId in autosub.ADDIC7EDMAPPING.keys():
-                        AddicId = unicode(autosub.ADDIC7EDMAPPING[ImdbId], "utf-8") 
+                        AddicId = autosub.ADDIC7EDMAPPING[ImdbId]
                     if not AddicId and autosub.ADDIC7EDLOGGED_IN:
                         AddicId = Addic7edAPI().geta7ID(TvdbShowName, ShowName)
             else:
                 if not AddicId:           
                     if ImdbId in autosub.ADDIC7EDMAPPING.keys():
-                        AddicMappingId = unicode(autosub.ADDIC7EDMAPPING[ImdbId], "utf-8")
+                        AddicMappingId = autosub.ADDIC7EDMAPPING[ImdbId]
                     if not AddicMappingId and autosub.ADDIC7EDLOGGED_IN:
                         AddicId = Addic7edAPI().geta7ID(TvdbShowName, ShowName)
                         UpdateCache = True

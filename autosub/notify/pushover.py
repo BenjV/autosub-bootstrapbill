@@ -5,8 +5,6 @@ import library.requests as requests
 log = logging.getLogger('thelogger')
 
 API_URL = "https://api.pushover.net/1/messages.json"
-AUTOSUB_TOKEN = "aF9PCUbt6EmKwAHEFUaXBBxibmpdyw"
-#AUTOSUB_TOKEN  = 'a3MCLBD78E7LnKvUfg6NvWMfJYSNqd'
 
 def test_notify(pushoverappkey, pushoveruserkey):
     message = "Testing Pushover settings from AutoSub"

@@ -59,13 +59,17 @@ def getShowidApi(showName):
     Keyword arguments:
     showName -- Name of the show to search the showid for
     """
-    Url = "%sGetSeries.php?seriesname=%s" % (autosub.IMDBAPI, urllib.quote(showName.encode('utf8')))
+
+    Url = "%sGetSeries.php?seriesname=%s" % (autosub.IMDBAPI, urllib.quote(showName.encode('utf8','xmlcharrefreplace')))
     Session = requests.Session()
     try:
         Result = Session.get(Url)
     except:
         return None
-    root = ET.fromstring(Result.content)
+    try:
+        root = ET.fromstring(Result.content)
+    except Exception as error:
+        pass
     ImdbId = None
     TvdbId = None
     HighName = None
@@ -86,14 +90,17 @@ def getShowidApi(showName):
                     if ImdbId:
                         HighScore = Score
                         HighName = FoundName
-            except:
+            except Exception as error:
                 pass
     except Exception as error:
             log.error("getShowidApi: Could not find %s in %s on Tvdb URL: " % (Root,Tag,Url))
             log.error("getShowidApi: message is: " % error)
-    if ImdbId == u'1489904':
+    if ImdbId == '1489904':
         log.debug('getShowidAPI: Found a serie that is forbidden by Tvdb (1489904) so skipping it.')
         return None, None, None
+    ImdbId = ImdbId.decode('utf-8') if isinstance(ImdbId,str) else ImdbId
+    TvdbId = TvdbId.decode('utf-8') if isinstance(TvdbId,str) else TvdbId
+    HighName = HighName.decode('utf-8') if isinstance(HighName,str) else HighName
     return ImdbId,TvdbId, HighName
 
 
