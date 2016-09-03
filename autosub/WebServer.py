@@ -510,7 +510,7 @@ class Home:
 
     @cherrypy.expose
     def RebootAutoSub(self):
-        threading.Thread(target=autosub.Helpers.RebootAutoSub).start()
+        threading.Timer(1,autosub.Helpers.RebootAutoSub).start()
         redirect("/home")
 
     @cherrypy.expose

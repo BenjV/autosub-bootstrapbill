@@ -8,7 +8,6 @@ import autosub
 import logging
 from autosub.OpenSubtitles import OpenSubtitlesNoOp
 import library.requests as requests
-from bs4 import BeautifulSoup
 import zipfile
 from StringIO import StringIO
 import re 
@@ -31,15 +30,6 @@ import xmlrpclib, io, gzip
 # Settings
 log = logging.getLogger('thelogger')
 
-def getSoup(url):
-    try:
-        api = autosub.Helpers.API(url)
-        soup = BeautifulSoup(api.resp.read())
-        api.close()
-        return soup
-    except:
-        log.error("getSoup: The server returned an error for request %s" % url)
-        return None   
 
 def unzip(Session, url):
     # returns a file-like StringIO object    
@@ -184,7 +174,8 @@ def WriteSubFile(SubData,SubFileOnDisk):
 def MyPostProcess(Wanted,SubSpecs,Language):
 
     VideoSpecs = os.path.join(Wanted['folder'],Wanted ['file']+ Wanted['container'])
-    SerieName  = Wanted['title'][:-1].translate('\0/:*?"<>|\\') if  Wanted['title'].endswith('.') else Wanted['title'].translate('\0/:*?"<>|\\')
+    SerieName  = Wanted['title'][:-1] if  Wanted['title'].endswith('.') else Wanted['title']
+    SerieName  = re.sub(r'[\0/:*?"<>|\\]', r'',SerieName)
     SeasonNum  = Wanted['season']
     EpisodeNum = Wanted['episode']
     ImdbId     = Wanted['ImdbId']
@@ -195,7 +186,14 @@ def MyPostProcess(Wanted,SubSpecs,Language):
 
     log.debug('PostProcess: Starting Postprocess')
     SeasonDir     = 'Season ' + SeasonNum
-    EpisodeName   = GetEpisodeName(ImdbId,TvdbId,SeasonNum, EpisodeNum).translate(None,'\0/:*?"<>|\\')
+    if 'EpisodeTitle' in Wanted.keys():
+        EpisodeName = Wanted['EpisodeTitle']
+    else:
+        EpisodeName = GetEpisodeName(ImdbId,TvdbId,SeasonNum, EpisodeNum) +'?'
+        try:
+            EpisodeName = re.sub(r'[\0/:*?"<>|\\]', r'',EpisodeName)
+        except Exception as error:
+            log.debug('MyPostProcess: Error removing chars from EpisodeName')
     Head,SubExt   = os.path.splitext(SubSpecs)
     log.debug('PostProcess: EpisodeName is %s' % EpisodeName)
 

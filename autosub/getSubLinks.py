@@ -3,7 +3,7 @@
 #
 
 import logging
-import time,sys
+import time,sys,re
 from xml.dom import minidom
 try:
     import xml.etree.cElementTree as ET
@@ -11,7 +11,6 @@ except:
     import xml.etree.ElementTree as ET
 import library.requests as requests
 from operator import itemgetter
-from bs4 import BeautifulSoup
 import autosub.Helpers
 from autosub.ProcessFilename import ProcessFilename
 from autosub.OpenSubtitles import OpenSubtitlesNoOp
@@ -89,41 +88,38 @@ def Addic7ed( Wanted):
         log.debug('getSubLinks: No Addic7Id for %s, so it is skipped. ' % Wanted['file'])
         return ScoreListNL,ScoreListEN
 
-    Result = autosub.ADDIC7EDAPI.get(SearchUrl)
-    if Result:
-        try:
-            soup = BeautifulSoup(Result)
-        except:
-            log.debug("getSubLinks: Addic7ed no soup exception.")
-            return ScoreListNL,ScoreListEN
-    else:
-       return ScoreListNL,ScoreListEN
+    SubOverviewPage = autosub.ADDIC7EDAPI.get(SearchUrl)
+    if not SubOverviewPage:
+        log.debug('getSubLinks: Could not get the sub overview page from Addic7ed')
+        return ScoreListNL,ScoreListEN
 
-    for row in soup('tr', class_='epeven completed'):
-        try:
-            cells = row('td')
-            #Check if line is intact
-            if not len(cells) == 11:
+    try:
+        SubLines = re.findall('<tr class="epeven completed">(.*?)</tr>', SubOverviewPage, re.S)
+    except Exception as error:
+        return ScoreListNL,ScoreListEN
+    if SubLines:
+        for SubLine in SubLines:
+            SubInfo = re.findall('<td.*?>(.*?)</td>', SubLine, re.S)
+            if len(SubInfo) != 11:
                 continue
-            # check on downloadlink, Completed, wanted language and episode
-            if int(cells[1].string) != int(Wanted['episode']):
+            if int(SubInfo[1]) != int(Wanted['episode']):
                 continue
-            if cells[5].string != u'Completed':
+            if SubInfo[5] != u'Completed':
                 continue
-            if not cells[3].string:
+            if not SubInfo[3]:
                 continue
-            elif cells[3].string not in Wanted['langs']:
+            elif SubInfo[3] not in Wanted['langs']:
                 continue
-            if not cells[9].a['href']:
-                continue
-            else:
-                downloadUrl = cells[9].a['href']
-            if not cells[4].string:
+            if not SubInfo[9]:
                 continue
             else:
-                details = cells[4].string.lower()
-            HD = True if cells[8].text else False
-            hearingImpaired = True if cells[6].text else False
+                downloadUrl = SubInfo[9].split('"')[1]
+            if not SubInfo[4]:
+                continue
+            else:
+                details = SubInfo[4].lower()
+            HD = True if SubInfo[8] else False
+            hearingImpaired = True if SubInfo[6] else False
             if (hearingImpaired and not autosub.HI):
                 continue
             releasename = autosub.Addic7ed.makeReleaseName(details, Wanted['title'], Wanted['season'] , Wanted['episode'])
@@ -136,15 +132,24 @@ def Addic7ed( Wanted):
                 score = autosub.Helpers.scoreMatch(version, Wanted)
                 if score == 0:
                     continue
-                log.debug('Addic7ed: Score = %s of %s for %s sub of %s.' % (score, autosub.MINMATCHSCORE, cells[3].string, releasename))
+                log.debug('Addic7ed: Score = %s of %s for %s sub of %s.' % (score, autosub.MINMATCHSCORE, SubInfo[3], releasename))
                 if score >= autosub.MINMATCHSCORE:
-                    if cells[3].string == autosub.DUTCH:
-                        ScoreListNL.append({'score':score , 'releaseName':releasename, 'website':'addic7ed.com' , 'url':downloadUrl , 'Lang':cells[3].string, 'SubCodec':''})
-                    if cells[3].string == autosub.ENGLISH:
-                        ScoreListEN.append({'score':score , 'releaseName':releasename, 'website':'addic7ed.com' , 'url':downloadUrl , 'Lang':cells[3].string, 'SubCodec':''})
-        except:
-            pass
+                    if not 'EpisodeTitle' in Wanted.keys():
+                        try:
+                            Wanted['EpisodeTitle'] = re.findall('">(.*?)</a>', SubInfo[2])[0]
+                        except:
+                            pass
+                    if SubInfo[3] == autosub.DUTCH:
+                        ScoreListNL.append({'score':score , 'releaseName':releasename, 'website':'addic7ed.com' , 'url':downloadUrl , 'Lang':SubInfo[3], 'SubCodec':''})
+                    elif SubInfo[3] == autosub.ENGLISH:
+                        ScoreListEN.append({'score':score , 'releaseName':releasename, 'website':'addic7ed.com' , 'url':downloadUrl , 'Lang':SubInfo[3], 'SubCodec':''})
+
+
+    else:
+        log.error('Addic7ed: Addice7ed did not responded with the correct page')
     return ScoreListNL,ScoreListEN
+
+
 
 
 def Opensubtitles(Wanted):
@@ -155,7 +160,7 @@ def Opensubtitles(Wanted):
     Data['imdbid' ] = Wanted['ImdbId']
     Data['season']  = Wanted['season']
     Data['episode'] = Wanted['episode']
-    log.debug('getSubLinks:Opensubtitles search started for %s.' % Wanted['ImdbId'])
+    log.debug('getSubLinks: Opensubtitles search started for %s.' % Wanted['ImdbId'])
     time.sleep(3)
     if not OpenSubtitlesNoOp():
         return ScoreListNL,ScoreListEN
@@ -229,7 +234,7 @@ def getSubLinks(Wanted):
         scoreListAddic7edNL,scoreListAddic7edEN = Addic7ed(Wanted)
 
     # Use OpenSubtitles if selected
-    if autosub.OPENSUBTITLES and autosub.OPENSUBTITLESTOKEN:
+    if autosub.OPENSUBTITLES and autosub.OPENSUBTITLESTOKEN and Wanted['ImdbId']:
         scoreListOpensubtitlesNL,scoreListOpensubtitlesEN = Opensubtitles(Wanted)
 
     # merge the Dutch subs and sort them on the highest score

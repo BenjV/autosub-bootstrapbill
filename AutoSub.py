@@ -4,7 +4,7 @@ import os
 import signal
 import time
 import locale
-import platform
+import platform,shutil
 from uuid import getnode
 
 # Root path
@@ -101,7 +101,16 @@ def main(argv=None):
         f.close()
     except Exception as error:
         print 'AutoSub could not create the PID file. Error is:', error
-
+    #here we remove the beautifull soap folders because we don't use them anymore.
+    BsPath = os.path.join(autosub.PATH,'library','beautifulsoup')
+    Bs4Path = os.path.join(autosub.PATH,'library','bs4')
+    try:
+        if os.path.isdir(BsPath):
+            shutil.rmtree(BsPath)
+        if os.path.isdir(Bs4Path):
+            shutil.rmtree(Bs4Path)
+    except Exception as error:
+        print 'Autosub could not remove the absolute beutifullsoap folders'
     # check the logfile location and make it the default if neccessary
     LogPath,LogFile = os.path.split(autosub.LOGFILE)
     if not LogFile:

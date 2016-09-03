@@ -5,7 +5,6 @@
 import re
 import library.requests as requests
 import library.requests.packages.chardet as chardet
-from bs4 import BeautifulSoup
 import time
 import sys
 import urllib
@@ -587,23 +586,18 @@ class Addic7edAPI():
     
     def checkCurrentDownloads(self, logout=True):      
         self.login()
-            
+        
         try:
-            soup = BeautifulSoup(self.get('/panel.php'))
-            # Get Download Count
-            countTag = soup.select('a[href^="mydownloads.php"]')
-            pattern = re.compile('(\d*).*of.*\d*', re.IGNORECASE)
-            myDownloads = countTag[0].text if countTag else False
-            count = re.search(pattern, myDownloads).group(1)
-            autosub.DOWNLOADS_A7 = int(count)
-            
-            # Get account type and set download max
-            classTag = soup.select("tr")[20]
-            account = classTag.select("td")[1].string
-            if account == 'VIP':
-                autosub.DOWNLOADS_A7MAX = 80
-        except:
-            log.error("Addic7edAPI: Couldn't retrieve Addic7ed MyPanel data")
+            PageBuffer = self.get('/panel.php')
+            if re.findall(autosub.ADDIC7EDUSER,PageBuffer):
+                Temp = re.findall(r'<a href=[\'"]mydownloads.php\'>([^<]+)', PageBuffer)[0].split(" ")
+                autosub.DOWNLOADS_A7 = int(Temp[0])
+                autosub.DOWNLOADS_A7MAX = int(Temp[2])
+            else:
+                log.error("Addic7edAPI: Couldn't retrieve Addic7ed account info. Not logged in.")
+                return False
+        except Exception as error:
+            log.error("Addic7edAPI: Couldn't retrieve Addic7ed account info. Error is: %s" % error.message)
             return False
         
         if logout:
