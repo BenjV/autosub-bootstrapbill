@@ -1,9 +1,12 @@
+# coding: latin-1
+
 # Autosub Config.py
 #
 # The Autosub config Module
 #
 
 # python 2.5 support
+
 from __future__ import with_statement
 
 import os,re
