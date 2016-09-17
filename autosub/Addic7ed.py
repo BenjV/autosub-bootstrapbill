@@ -11,7 +11,7 @@ import urllib
 import autosub
 import autosub.Helpers
 import autosub.Tvdb
-
+from autosub.common import source,source_syn,quality,quality_syn,codec,codec_syn,rlsgrps_rest,rlsgrps_HD,rlsgrps_xvid,rlsgrps_webdl
 from itertools import product
 
 
@@ -27,162 +27,6 @@ log = logging.getLogger('thelogger')
 _show = [re.compile('(.+)\s+\(?(\d{4})\)?', re.IGNORECASE),
               re.compile('(.+)\s+\(?(us)\)?', re.IGNORECASE),
               re.compile('(.+)\s+\(?(uk)\)?', re.IGNORECASE)]
-
-
-_source = [re.compile("(ahdtv|hdtv|web[. _-]*dl|blu[. _-]*ray|dvdrip|web[-]*rip|hddvd)", re.IGNORECASE),
-          re.compile("(dvd|bdrip|web)", re.IGNORECASE)]
-
-#A dictionary containing as keys, the nonstandard naming. Followed by there standard naming.
-#Very important!!! Should be unicode and all LOWERCASE!!!
-_source_syn = {u'ahdtv'  : u'hdtv',
-               u'dvd'    : u'dvdrip',
-               u'bdrip'  : u'bluray',
-               u'blu-ray': u'bluray',
-               u'webdl'  : u'web-dl',
-               u'web'    : u'web-dl',
-               u'web-rip': u'webrip'}
-
-
-_quality = [re.compile("(1080p|720p|480p)" , re.IGNORECASE), 
-           re.compile("(1080[i]*|720|480)", re.IGNORECASE)]
-
-_quality_syn = {u'1080'  : u'1080p',
-                u'1080i' : u'1080p',
-                u'720'   : u'720p',
-                u'480p'  : u'sd',
-                u'480'   : u'sd'}
-
-_codec = [re.compile("([xh]*264|xvid|dvix)" , re.IGNORECASE)]
-
-#Note: x264 is the opensource implementation of h264.
-_codec_syn = {u'x264' : u'h264',
-             u'264' : u'h264'}
-
-#The following 2 variables create the regex used for guessing the releasegrp. Functions should not call them!
-_rlsgrps_rest = ['0TV',
-                'aAF',
-                'BATV',
-                'BTN',
-                'BWB',
-                'C4TV',
-                'ChameE',
-                'CLUE',
-                'CP',
-                'CRAVERS',
-                'DEMAND',
-                'DNR',
-                'EbP',
-                'eXcluSive',
-                'FUSiON',
-                'GFY',
-                'GreenBlade',
-                'HoodBag',
-                'hV',
-                'LFF',
-                'LP',
-                'Micromkv',
-                'MMI',
-                'mSD',
-                'NBS',
-                'NFT',
-                'NIN',
-                'nodlabs',
-                'OOO',
-                'ORPHEUS',
-                'P0W4',
-                'P0W4HD',
-                'playXD',
-                'PublicHD',
-                'RARBG',
-                'RANDi',
-                'REWARD',
-                'ROVERS',
-                'RRH',
-                'SAiNTS',
-                'SAPHiRE',
-                'SCT',
-                'SiNNERS',
-                'SkyM',
-                'SLOMO',
-                'SNEAkY',
-                'sozin',
-                'sundox',
-                'T00NG0D',
-                'TASTETV',
-                'TjHD',
-                'TOKUS',
-                'TOPAZ',
-                'UP',
-                'VASKITTU',
-                'XS']
-
-_rlsgrps_HD =  ['0SEC',
-                '2HD',
-                'BRISK',
-                'CTU',
-                'DIMENSION',
-                'EVOLVE',
-                'EXCELLENCE',
-                'FLEET',
-                'IMMERSE',
-                'KNiFESHARP',
-                'KILLERS',
-                'KYR',
-                'MOMENTUM',
-                'MORiTZ',
-                'ORENJi',
-                'ORGANiC',
-                'QCF',
-                'REMARKABLE',
-                'SERIOUSLY',
-                'SKGTV',
-                'spamTV',
-                'SVA']
-
-_rlsgrps_SD =  ['ASAP',
-                'AVS',
-                'BiA',
-                'COMPULSiON',
-                'FEVER',
-                'FoV',
-                'FoV',
-                'FQM',
-                'LOL',
-                'NoTV',
-                'XOR']
-
-_rlsgrps_xvid = ['AFG',
-                 'Hype'
-                 'HAGGIS']
-
-_rlsgrps_h264 = ['TLA',
-                 'BAJSKOR']
-
-_rlsgrps_webdl=['BS',
-                'Coo7',
-                'CtrlHD',
-                'DEFLATE ',
-                'DRACULA',
-                'ECI',
-                'FiRE',
-                'FUM',
-                'HWD',
-                'KiNGS',
-                'MAoS ',
-                'NFHD',
-                'NTb',
-                'Oosh',
-                'PCSYNDICATE',
-                'PLLs',
-                'POD',
-                'QUEENS,'
-                'R2D2',
-                'TVSmash',
-                'VietHD',
-                'ViSUM',
-                'YFN',
-                'Zakh']
-
 
 def _regexRls(releaseGroupList, list=False):
     releasegrp_pre = '(' + '|'.join(releaseGroupList) + ')'
@@ -216,24 +60,23 @@ def _checkSynonyms(synonyms, results):
 
 
 def _getSource(file_info):
-    results = _checkSynonyms(_source_syn,
-                            _returnHits(_source, file_info))
+    results = _checkSynonyms(source_syn,
+                            _returnHits(source, file_info))
     return results
 
 def _getQuality(file_info, HD):
-    results = _checkSynonyms(_quality_syn,
-                            _returnHits(_quality, file_info))
+    results = _checkSynonyms(quality_syn,
+                            _returnHits(quality, file_info))
     return results
 
 def _getCodec(file_info):
-    results = _checkSynonyms(_codec_syn,
-                            _returnHits(_codec, file_info))
+    results = _checkSynonyms(codec_syn,
+                            _returnHits(codec, file_info))
     
     return results
 
 def _getReleasegrp(file_info):
-    _allRlsgrps = _rlsgrps_rest + _rlsgrps_HD + _rlsgrps_SD + _rlsgrps_xvid + _rlsgrps_h264 + _rlsgrps_webdl
-    results = _returnHits(_regexRls(_allRlsgrps, list=True), file_info)
+    results = _returnHits(_regexRls(rlsgrps_rest + rlsgrps_HD + rlsgrps_xvid + rlsgrps_webdl, list=True), file_info)
     
     return results
 
@@ -302,24 +145,20 @@ def _checkConflicts(versionDicts):
 
         # Based on releasegroup
         if releasegroup:
-            if re.match(_regexRls(_rlsgrps_HD + _rlsgrps_SD + _rlsgrps_xvid + _rlsgrps_h264), releasegroup):
+            if re.match(_regexRls(rlsgrps_HD + rlsgrps_xvid), releasegroup):
                 if source == u'web-dl':
                     toDelete.append(index)
                     continue
-            if re.match(_regexRls(_rlsgrps_HD + _rlsgrps_h264) , releasegroup):
+            if re.match(_regexRls(rlsgrps_HD + rlsgrps_webdl) , releasegroup):
                 if codec == u'xvid':
                     toDelete.append(index)
                     continue
-            if re.match(_regexRls(_rlsgrps_HD), releasegroup):
+            if re.match(_regexRls(rlsgrps_HD + rlsgrps_webdl), releasegroup):
                 if quality == u'sd':
                     toDelete.append(index)
                     continue
-            if re.match(_regexRls(_rlsgrps_xvid), releasegroup):
+            if re.match(_regexRls(rlsgrps_xvid), releasegroup):
                 if codec == u'h264':
-                    toDelete.append(index)
-                    continue
-            if re.match(_regexRls(_rlsgrps_SD), releasegroup):
-                if quality == u'720p' or quality == u'1080p':
                     toDelete.append(index)
                     continue
     
@@ -341,9 +180,10 @@ def _addInfo(versionDicts,HD):
         releasegroup = versionDict['releasegrp']
     
         # Based on quality
-        if quality == u'1080p':
-            if not source:
-                versionDicts[index]['source'] = u'web-dl'
+        # Removed this one because 1080p is also available in HDTV now a day
+        #if quality == u'1080p':
+        #    if not source:
+        #        versionDicts[index]['source'] = u'web-dl'
 
     
         # Based on source
@@ -356,30 +196,25 @@ def _addInfo(versionDicts,HD):
                 versionDicts[index]['quality'] = u'720p'
 
         # Based on specific Releasegroups  
-        if releasegroup:  
-            if re.match(_regexRls(_rlsgrps_HD + _rlsgrps_SD + _rlsgrps_h264 + _rlsgrps_webdl), releasegroup):
-                if not codec:
+        if releasegroup:
+            if not codec:
+                if re.match(_regexRls(rlsgrps_HD + rlsgrps_webdl), releasegroup):
                     versionDicts[index]['codec'] = u'h264'
-            if re.match(_regexRls(_rlsgrps_xvid), releasegroup):
-                if not codec:
+                if re.match(_regexRls(rlsgrps_xvid), releasegroup):
                     versionDicts[index]['codec'] = u'xvid'
-            if re.match(_regexRls(_rlsgrps_HD + _rlsgrps_SD + _rlsgrps_xvid + _rlsgrps_h264), releasegroup):
-                if not source:
-                    versionDicts[index]['source'] = u'hdtv'  
-            if re.match(_regexRls(_rlsgrps_webdl), releasegroup):
-                if not source:
+            if not source:
+                if re.match(_regexRls(rlsgrps_webdl), releasegroup):
                     versionDicts[index]['source'] = u'web-dl'
-            else:
-                if quality == u'1080p' or quality == u'720p' or HD:
-                    if not source:
-                        versionDicts[index]['source'] = u'hdtv'
-            if re.match(_regexRls(_rlsgrps_HD), releasegroup):
-                if not quality:
+                elif re.match(_regexRls(rlsgrps_HD), releasegroup):
+                    versionDicts[index]['source'] = u'hdtv'
+                else:
+                    if quality == u'1080p' or quality == u'720p':
+                        versionDicts[index]['source'] = u'web-dl'
+                    elif HD:
+                         versionDicts[index]['source'] = u'hdtv'
+            if not quality:
+                if re.match(_regexRls(rlsgrps_HD + rlsgrps_webdl), releasegroup):
                     versionDicts[index]['quality'] = u'720p'
-            if re.match(_regexRls(_rlsgrps_SD), releasegroup):
-                if not quality:
-                    versionDicts[index]['quality'] = u'sd'
-
     return versionDicts
 
 

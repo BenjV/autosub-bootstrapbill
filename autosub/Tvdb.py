@@ -29,13 +29,13 @@ def FindName(Url,Root,Tag):
         Result = Session.get(Url)
     except:
         return None
-    root = ET.fromstring(Result.content)
+    PageRoot = ET.fromstring(Result.content)
     try:
-        for node in root.findall(Root):
+        for node in PageRoot.findall(Root):
             try:
                 Found = node.find(Tag).text
             except:
-                log.error("FindName: Could not find %s in %s on Tvdb URL: " % (Root,Tag,Url))
+                log.error("FindName: Could not find %s in %s on Tvdb URL: % " % (Root,Tag,Url))
                 log.error("FindName: message is: " % error)
                 return None
             if Found:
@@ -65,6 +65,10 @@ def getShowidApi(showName):
     try:
         Result = Session.get(Url)
     except:
+        log.debug('TvdbId:Problem connecting toTvdb. Check if the site is down')
+        return None
+    if not Result.ok:
+        log.debug('TvdbId: No correct response from Tvdb. Check if the site is down')
         return None
     try:
         root = ET.fromstring(Result.content)
@@ -79,7 +83,8 @@ def getShowidApi(showName):
         for node in root.findall('Series'):
             try:
                 FoundName = node.find('SeriesName').text
-                Score = SM(None, FoundName, showName).ratio()
+                FoundName = FoundName.decode('utf-8') if isinstance(FoundName,str) else FoundName
+                Score = SM(None, FoundName.upper(), showName.upper()).ratio()
                 if Score > HighScore:
                     ImdbId = None
                     try:
@@ -93,7 +98,7 @@ def getShowidApi(showName):
             except Exception as error:
                 pass
     except Exception as error:
-            log.error("getShowidApi: Could not find %s in %s on Tvdb URL: " % (Root,Tag,Url))
+            log.error("getShowidApi: Could not find %s in %s on Tvdb URL: " % (showName, Url))
             log.error("getShowidApi: message is: " % error)
     if ImdbId == '1489904':
         log.debug('getShowidAPI: Found a serie that is forbidden by Tvdb (1489904) so skipping it.')
