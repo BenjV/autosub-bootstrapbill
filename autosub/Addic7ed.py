@@ -320,42 +320,48 @@ class Addic7edAPI():
         self.session = requests.Session()
         self.server = 'http://www.addic7ed.com'
         self.session.headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko', 'Referer' : 'http://www.addic7ed.com', 'Pragma': 'no-cache'}
-        self.logged_in = False
                 
     def login(self, addic7eduser=None, addic7edpasswd=None):        
 
         # Expose to test login
         # When fields are empty it will check the config file
-        if not addic7eduser:
-            addic7eduser = autosub.ADDIC7EDUSER
-        
-        if not addic7edpasswd:
+
+        if addic7eduser or addic7edpasswd:
+            Test = True
+        else:
+            Test = False
+            addic7eduser   = autosub.ADDIC7EDUSER
             addic7edpasswd = autosub.ADDIC7EDPASSWD
-        
-        if addic7eduser == u"" or addic7edpasswd == u"":
-            log.error('Addic7edAPI: Username and password must be specified')
-            return False
+
 
         data = {'username': addic7eduser, 'password': addic7edpasswd, 'Submit': 'Log in'}
         try:
             r = self.session.post(self.server + '/dologin.php', data, timeout=10, allow_redirects=False)
         except requests.Timeout:
-            log.debug('Addic7edAPI: Timeout after 10 seconds')
+            log.error('Addic7edAPI: Timeout after 10 seconds')
             return False
         
         if r.status_code == 302:
-            log.info('Addic7edAPI: Logged in with username: %s' % addic7eduser)
-            self.logged_in = True
-            ADDIC7EDLOGGED_IN = True
-            return True
+            autosub.ADDIC7EDLOGGED_IN = True
+            if self.checkCurrentDownloads():
+                if Test:
+                    log.info('Addic7edAPI: Test Logged in as: %s' % addic7eduser)
+                    self.logout()
+                else:
+                    log.debug('Addic7edAPI: Logged in as: %s' % addic7eduser)
+                return True
+            else:
+                log.info('Addic7edAPI: Could not login with username: %s' % addic7eduser)
+                autosub.ADDIC7EDLOGGED_IN = False
+                return False
         else:
             log.error('Addic7edAPI: Failed to login')
-            ADDIC7EDLOGGED_IN = False
+            autosub.ADDIC7EDLOGGED_IN = False
             return False
 
     def logout(self):
-        ADDIC7EDLOGGED_IN = False
-        if self.logged_in:
+        if autosub.ADDIC7EDLOGGED_IN:
+            autosub.ADDIC7EDLOGGED_IN = False
             try:
                 r = self.session.get(self.server + '/logout.php', timeout=10)
                 log.debug('Addic7edAPI: Logged out')
@@ -373,11 +379,7 @@ class Addic7edAPI():
         :param string url: part of the URL to reach with the leading slash
         :rtype: text
         """
-        if not self.logged_in and login:
-            log.error("Addic7edAPI: You are not properly logged in. Check your credentials!")
-            return None
-
-        time.sleep(30)
+        time.sleep(10)
         try:
             r = self.session.get(self.server + url, timeout=15)
         except Exception as error:
@@ -390,11 +392,11 @@ class Addic7edAPI():
         return r.text
 
     def download(self, downloadlink):
-        if not self.logged_in:
+        if not autosub.ADDIC7EDLOGGED_IN:
             log.error("Addic7edAPI: You are not properly logged in. Check your credentials!")
             return None
-        log.debug("Addic7edAPI: Resting for 30 seconds to prevent a ban")
-        time.sleep(30)
+        log.debug("Addic7edAPI: Resting for 10 seconds to prevent a ban")
+        time.sleep(10)
         try:
             r = self.session.get(self.server + downloadlink, timeout=10)
         except requests.Timeout:
@@ -407,8 +409,10 @@ class Addic7edAPI():
         if r.status_code > 399:
             log.error('Addic7edAPI: Request failed with status code %d' % r.status_code)
         else:
-            log.debug('Addic7edAPI: Request successful with status code %d' % r.status_code)
-        
+            autosub.DOWNLOADS_A7 += 1
+            log.debug('Addic7edAPI: Request successful downloaded a sub with status code %d' % r.status_code)
+            if time.time() > autosub.DOWNLOADS_A7TIME + 43200:
+                self.checkCurrentDownloads()
         if r.headers['Content-Type'] == 'text/html':
             log.error('Addic7edAPI: Expected srt file but got HTML; report this!')
             log.debug("Addic7edAPI: Response content: %s" % r.text)
@@ -419,25 +423,25 @@ class Addic7edAPI():
             r.encoding = u'windows-1252'
         return r.text
     
-    def checkCurrentDownloads(self, logout=True):      
-        self.login()
+    def checkCurrentDownloads(self):
+        #if not autosub.ADDIC7EDLOGGED_IN:  
+        #    self.login()
         
+        time.sleep(10)
         try:
             PageBuffer = self.get('/panel.php')
             if re.findall(autosub.ADDIC7EDUSER,PageBuffer):
                 Temp = re.findall(r'<a href=[\'"]mydownloads.php\'>([^<]+)', PageBuffer)[0].split(" ")
                 autosub.DOWNLOADS_A7 = int(Temp[0])
                 autosub.DOWNLOADS_A7MAX = int(Temp[2])
+                autosub.DOWNLOADS_A7TIME = time.time()
+                log.debug('Addic7edAPI: Current download count for today on addic7ed is: %d' % autosub.DOWNLOADS_A7)
             else:
-                log.error("Addic7edAPI: Couldn't retrieve Addic7ed account info. Not logged in.")
+                log.error("Addic7edAPI: Couldn't retrieve Addic7ed account info for %s. Maybe not logged in." % autosub.ADDIC7EDUSER)
                 return False
         except Exception as error:
             log.error("Addic7edAPI: Couldn't retrieve Addic7ed account info. Error is: %s" % error.message)
             return False
-        
-        if logout:
-            self.logout()
-        
         return True    
     
     def geta7ID(self,TvdbShowName, localShowName):

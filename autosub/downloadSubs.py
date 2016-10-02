@@ -101,6 +101,8 @@ def openSubtitles(SubId, SubCodec):
             return None
         return(SubData)
     else:
+        if Result['status'][:3] == '407':
+            autosub.OPENSUBTITLESTOKEN = 'limit'
         log.error('Opensubtitles: Error from Opensubtitles downloadsubs API. Message : %s' % Result['status'])
         return None
 

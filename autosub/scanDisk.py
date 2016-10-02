@@ -182,17 +182,7 @@ class scanDisk():
     """
     def run(self):
         log.info("scanDisk: Starting round of local disk checking at %s" % autosub.SERIESPATH)
-        UseAddic= False
-        if autosub.ADDIC7EDUSER and autosub.ADDIC7EDPASSWD and autosub.ADDIC7ED:
-            try:
-                # Sets autosub.DOWNLOADS_A7 and autosub.DOWNLOADS_A7MAX
-                # and gives a True response if it's ok to download from a7
-                autosub.ADDIC7EDAPI = autosub.Addic7ed.Addic7edAPI()
-                autosub.ADDIC7EDLOGGED_IN = autosub.ADDIC7EDAPI.checkCurrentDownloads(logout=False)
-            except:
-                log.debug("checkSub: Couldn't connect with Addic7ed.com")
-        else:
-            autosub.ADDIC7EDLOGGED_IN = False
+
         seriespaths = [x.strip() for x in autosub.SERIESPATH.split(',')]
         for seriespath in seriespaths:
 

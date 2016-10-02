@@ -146,7 +146,7 @@ def Addic7ed( Wanted):
 
 
     else:
-        log.error('Addic7ed: Addice7ed did not responded with the correct page')
+        log.error('Addic7ed: Addic7ed did not responded with the correct page')
     return ScoreListNL,ScoreListEN
 
 
@@ -214,6 +214,10 @@ def getSubLinks(Wanted):
     scoreListAddic7edNL     , scoreListAddic7edEN      = [],[]
     scoreListOpensubtitlesNL, scoreListOpensubtitlesEN = [],[]
 
+    if not ( autosub.PODNAPISI or autosub.SUBSCENE or autosub.ADDIC7ED or autosub.OPENSUBTITLES):
+        log.debug('getSubLinks: No subtitle website selected in the config so nothing to do here!')
+        return fullScoreListNL,fullScoreListEN
+
     if autosub.PODNAPISI:
         sourceWebsites.append('podnapisi.net')
     if autosub.SUBSCENE:
@@ -226,12 +230,11 @@ def getSubLinks(Wanted):
 
     # Use Addic7ed if selected
     # and check if Addic7ed download limit has been reached
-    if autosub.ADDIC7EDLOGGED_IN and autosub.DOWNLOADS_A7 >= autosub.DOWNLOADS_A7MAX:
-        autosub.ADDIC7EDLOGGED_IN = False
-        log.debug("checkSub: You have reached your 24h limit of %s  Addic7ed downloads!" % autosub.DOWNLOADS_A7MAX)
-
-    if autosub.ADDIC7ED and Wanted['A7Id'] and autosub.ADDIC7EDLOGGED_IN:
-        scoreListAddic7edNL,scoreListAddic7edEN = Addic7ed(Wanted)
+    if Wanted['A7Id'] and autosub.ADDIC7EDLOGGED_IN:
+        if autosub.DOWNLOADS_A7 < autosub.DOWNLOADS_A7MAX:
+            scoreListAddic7edNL,scoreListAddic7edEN = Addic7ed(Wanted)
+        else:
+            log.debug("checkSub: You have reached your 24h limit of %s  Addic7ed downloads!" % autosub.DOWNLOADS_A7MAX)
 
     # Use OpenSubtitles if selected
     if autosub.OPENSUBTITLES and autosub.OPENSUBTITLESTOKEN and Wanted['ImdbId']:

@@ -25,6 +25,7 @@ import autosub.Helpers
 
 from autosub.Addic7ed import Addic7edAPI
 from autosub.OpenSubtitles import OpenSubtitlesLogin
+from autosub.OpenSubtitles import OpenSubtitlesLogout
 
 def redirect(abspath, *args, **KWs):
     assert abspath[0] == '/'
@@ -371,16 +372,16 @@ class Config:
         else:
             return "Failed to update the media library on your <strong>Plex Media Server</strong>."
     
-    @cherrypy.expose
-    def RetrieveAddic7edCount(self):
+    #@cherrypy.expose
+    #def RetrieveAddic7edCount(self):
 
-        log.info("Addic7ed: Retrieving Addic7ed download count")
-        #result = Addic7edAPI().checkCurrentDownloads()
-        result = True
-        if result:
-            return "Addic7ed count: %s of %s" % (autosub.DOWNLOADS_A7, autosub.DOWNLOADS_A7MAX)
-        else:
-            return "Unable to retrieve count at the moment."
+    #    log.info("Addic7ed: Retrieving Addic7ed download count")
+    #    result = Addic7edAPI().checkCurrentDownloads()
+    #    result = True
+    #    if result:
+    #        return "Addic7ed count: %s of %s" % (autosub.DOWNLOADS_A7, autosub.DOWNLOADS_A7MAX)
+    #    else:
+    #        return "Unable to retrieve count at the moment."
 
     @cherrypy.expose
     def testAddic7ed(self, addic7eduser, addic7edpasswd, dummy):
@@ -389,13 +390,15 @@ class Config:
         else:
             return "<strong>Failure</strong>."
 
+
     @cherrypy.expose
     def testOpenSubtitles(self, opensubtitlesuser, opensubtitlespasswd, dummy):
-        if  OpenSubtitlesLogin(opensubtitlesuser,opensubtitlespasswd):
+        if OpenSubtitlesLogin(opensubtitlesuser,opensubtitlespasswd):
+            OpenSubtitlesLogout()
             return "<strong>Success</strong>."
         else:
             return "<strong>Failure</strong>."
-    
+   
     @cherrypy.expose
     def regTwitter(self, token_key=None, token_secret=None, token_pin=None):
         import library.oauth2 as oauth

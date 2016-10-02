@@ -1,4 +1,3 @@
-
 import autosub
 import xmlrpclib
 import logging
@@ -18,7 +17,10 @@ def OpenSubtitlesLogin(opensubtitlesusername=None,opensubtitlespasswd=None):
         except:
             log.debug('OpenSubtitlesLogin: Login with user %s failed.'  % opensubtitlesusername)
             return False
-        log.info('OpenSubtitlesLogin: Test Login with User %s. Result is: %s' %  (opensubtitlesusername,Result['status']))
+        if opensubtitlesusername or opensubtitlespasswd:
+            log.info('OpenSubtitlesLogin: Test Login with User %s. Result is: %s' %  (opensubtitlesusername,Result['status']))
+        else:
+            log.debug('OpenSubtitlesLogin: Login with User %s. Result is: %s' %  (opensubtitlesusername,Result['status']))
         if Result['status'] == '200 OK':
             autosub.OPENSUBTITLESTIME = time.time()
             autosub.OPENSUBTITLESTOKEN = Result['token']
@@ -36,7 +38,7 @@ def OpenSubtitlesLogin(opensubtitlesusername=None,opensubtitlespasswd=None):
             except:
                 log.debug('OpenSubtitlesLogin: Login with user %s failed.'  % autosub.OPENSUBTITLESUSER)
                 return False
-            log.info('OpenSubtitlesLogin: Login with User %s. Message is: %s' %  (autosub.OPENSUBTITLESUSER, Result['status']))
+            log.info('OpenSubtitlesLogin: Logged in as %s.' % autosub.OPENSUBTITLESUSER)
             if Result['status'] == '200 OK':
                 autosub.OPENSUBTITLESTIME = time.time()
                 autosub.OPENSUBTITLESTOKEN = Result['token']
@@ -58,11 +60,14 @@ def OpenSubtitlesLogout():
             return False
         if Result['status'] == '200 OK':
             autosub.OPENSUBTITLESTOKEN = None
-            log.debug('OpenSubtitlesLogout: User: %s logged out.', autosub.OPENSUBTITLESUSER)
+            log.debug('OpenSubtitlesLogout: Logged out.')
             return True
         else:
+            autosub.OPENSUBTITLESTOKEN = None
             log.debug('OpenSubtitles: Logout with User %s failed. Message is: %s' %  (autosub.OPENSUBTITLESUSER, Result['status']))
             return False
+    else:
+        return True
 
 
 def OpenSubtitlesNoOp():
