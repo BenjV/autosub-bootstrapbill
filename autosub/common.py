@@ -165,6 +165,7 @@ rlsgrps_webdl = ['BS',
                 'Coo7',
                 'CtrlHD',
                 'DEFLATE',
+                'dbR',
                 'DRACULA',
                 'ECI',
                 'FiRE',
@@ -187,7 +188,7 @@ rlsgrps_webdl = ['BS',
                 'YFN',
                 'Zakh']
 
-All_rlsgrps = rlsgrps_rest + rlsgrps_HD + rlsgrps_xvid + rlsgrps_xvid
+All_rlsgrps = rlsgrps_rest + rlsgrps_HD + rlsgrps_xvid + rlsgrps_webdl
 
 _releasegrp_pre = '(' + '|'.join(All_rlsgrps) + ')'
 

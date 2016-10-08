@@ -182,6 +182,7 @@ def ReadConfig():
             u"DOCTOR WHO" : u"0436992",
             u"DRACULA" : u"2296682",
             u"EMILY OWENS M D" : u"2290339",
+            u"Eyewitness" : u"5369352",
             u"HOUSE OF CARDS" : u"1856010",
             u"LAW AND ORDER SVU" : u"0203259",
             u"LAW AND ORDER UK" :"1166893",
