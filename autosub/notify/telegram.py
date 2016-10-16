@@ -7,6 +7,7 @@ import urllib
 import urllib2
 import logging
 import autosub
+#import library.requests as requests
 log = logging.getLogger('thelogger')
 
 #    Use Telegram to send notifications
@@ -15,14 +16,14 @@ log = logging.getLogger('thelogger')
 
 
 
-def test_notify(id=None, api_key=None):
+def test_notify( api_key=None,id=None):
     """
     Send a test notification
     :param id: The Telegram user/group id to send the message to
     :param api_key: Your Telegram bot API token
     :returns: the notification
     """
-    return _send_notify('This is a test notification from Autosub', id, api_key)
+    return _send_notify('This is a test notification from Autosub', api_key,id)
 
 def send_notify(lang, subtitlefile, videofile, website):
     log.debug("Telegram: Trying to send a notification")
@@ -30,7 +31,7 @@ def send_notify(lang, subtitlefile, videofile, website):
     return _send_notify(message)
 
 
-def _send_notify(msg, id=None, api_key=None):
+def _send_notify(msg, api_key=None,id=None) :
     """
     Sends a Telegram notification
     :param msg: The message string to send
@@ -40,7 +41,7 @@ def _send_notify(msg, id=None, api_key=None):
     :returns: True if the message succeeded, False otherwise
     """
     id = autosub.TELEGRAMID if id is None else id
-    api_key = autosub.TELEGRAMAPPKEY if api_key is None else api_key
+    api_key = autosub.TELEGRAMAPI if api_key is None else api_key
 
     log.debug('telegram: Notification send to ID: %s' % id)
 
@@ -51,7 +52,7 @@ def _send_notify(msg, id=None, api_key=None):
     req = urllib2.Request(telegram_api % (api_key, 'sendMessage'), payload)
 
     try:
-        Result = urllib2.urlopen(req).read()
+        urllib2.urlopen(req)
         log.debug('telegram : message sent successfully.')
     except Exception as error:
         log.error('telegram: %s' % error)
