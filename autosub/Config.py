@@ -250,6 +250,9 @@ def ReadConfig():
     if cfg.has_option(section, 'notifyprowl'): autosub.NOTIFYPROWL                  = cfg.getboolean(section, 'notifyprowl')
     if cfg.has_option(section, 'prowlapi'): autosub.PROWLAPI                        = cfg.get(section, 'prowlapi')
     if cfg.has_option(section, 'prowlpriority'): autosub.PROWLPRIORITY              = cfg.getint(section, 'prowlpriority')
+    if cfg.has_option(section, 'notifytelegram'): autosub.NOTIFYTELEGRAM            = cfg.getboolean(section, 'notifytelegram')
+    if cfg.has_option(section, 'telegramapi'): autosub.TELEGRAMAPI                  = cfg.get(section, 'telegramapi')
+    if cfg.has_option(section, 'telegramid'): autosub.TELEGRAMID                    = cfg.get(section, 'telegramid')
     if cfg.has_option(section, 'notifypushalot'): autosub.NOTIFYPUSHALOT            = cfg.getboolean(section, 'notifypushalot')
     if cfg.has_option(section, 'pushalotapi'): autosub.PUSHALOTAPI                  = cfg.get(section, 'pushalotapi')
     if cfg.has_option(section, 'notifypushbullet'): autosub.NOTIFYPUSHBULLET        = cfg.getboolean(section, 'notifypushbullet')
@@ -351,6 +354,10 @@ def WriteConfig():
         cfg.set(section, "notifyprowl", str(autosub.NOTIFYPROWL))
         cfg.set(section, "prowlapi", autosub.PROWLAPI)
         cfg.set(section, "prowlpriority", str(autosub.PROWLPRIORITY))
+    if autosub.NOTIFYTELEGRAM:
+        cfg.set(section, "notifytelegram", str(autosub.NOTIFYTELEGRAM))
+        cfg.set(section, "telegramapi", autosub.TELEGRAMAPI)
+        cfg.set(section, "telegramid", autosub.TELEGRAMID)
     if autosub.NOTIFYPUSHALOT:
         cfg.set(section, "notifypushalot", str(autosub.NOTIFYPUSHALOT))
         cfg.set(section, "pushalotapi", autosub.PUSHALOTAPI)

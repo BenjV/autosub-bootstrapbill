@@ -362,7 +362,40 @@
 				<input type="button" class="btn btn-default" value="Test Prowl" id="testProwl" /> <input type="submit" value="Save Changes" class="btn btn-primary" />
 			</div>
 		</div>
+
+		<hr>
+		<div class="form-group">
+			<label for="Telegram" class="col-sm-2 control-label"><img src="$autosub.WEBROOT/images/notifiers/telegram.png" width="25px" height="24px" alt="" /> <b><a href="http://www.telegram.org/" target="_blank">Telegram</a></b></label>
+			<div class="col-sm-10">
+			<select name="notifytelegram" id="notifytelegram" class="form-control enabler">
+				<option value="True" #if $autosub.NOTIFYTELEGRAM == True then 'selected="selected"' else ""#>Enabled</option>
+				<option value="False" #if $autosub.NOTIFYTELEGRAM == False then 'selected="selected"' else ""#>Disabled</option>
+			</select>
+			<br>Telegram is the messanger for all platforms.
+			</div>
+		</div>
 		
+		<div id="content_notifytelegram">
+			<div class="form-group">
+				<label for="TelegramAPI" class="col-sm-2 control-label">API <a data-placement="bottom" data-toggle="tooltip" data-original-title="What is your Telegram bot API token?"><span class="glyphicon glyphicon-info-sign"></span></a></label>
+				<div class="col-sm-10">
+				<input type="text" class="form-control" name="telegramapi" id="telegramapi" value="$autosub.TELEGRAMAPI" placeholder="your Telegram bot API token">
+				</div>
+			</div>
+			
+			<div class="form-group">
+				<label for="TelegramId" class="col-sm-2 control-label">Id <a data-placement="bottom" data-toggle="tooltip" data-original-title="The Telegram user/group id to send the message to"><span class="glyphicon glyphicon-info-sign"></span></a></label>
+				<div class="col-sm-10">
+				<input type="text" class="form-control" name="telegramid" id="telegramid" value="$autosub.TELEGRAMID" placeholder="The Telegram user/group id">
+				</div>
+			</div>
+			
+			<div align="right">
+				<span id="testTelegram-result">Click below to test Telegram.</span><br>
+				<input type="button" class="btn btn-default" value="Test Telegram" id="testTelegram" /> <input type="submit" value="Save Changes" class="btn btn-primary" />
+			</div>
+		</div>
+
 		<hr>
 		<div class="form-group">
 			<label for="PlexMediaServer" class="col-sm-2 control-label"><img src="$autosub.WEBROOT/images/notifiers/plex.png" width="25px" height="24px" alt="" /> <b><a href="https://www.plex.tv/" target="_blank">Plex Media Server</a></b></label>

@@ -146,7 +146,7 @@ def Addic7ed( Wanted):
 
 
     else:
-        log.error('Addic7ed: Addic7ed did not responded with the correct page')
+        log.error('Addic7ed: Addic7ed did not respond with the correct page')
     return ScoreListNL,ScoreListEN
 
 

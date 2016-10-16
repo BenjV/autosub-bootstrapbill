@@ -220,7 +220,7 @@ class Config:
     @cherrypy.expose
     def saveNotification(self, notifymail, notifygrowl, notifynma, notifytwitter, mailsrv, mailfromaddr, mailtoaddr, 
                          mailusername, mailpassword, mailsubject, mailencryption, mailauth, growlhost, growlport, 
-                         growlpass, nmaapi, twitterkey, twittersecret, notifyprowl, prowlapi, prowlpriority, 
+                         growlpass, nmaapi, twitterkey, twittersecret, notifyprowl, prowlapi, prowlpriority, notifytelegram, telegramapi, telegramid,
                          notifypushalot, pushalotapi, notifypushbullet, pushbulletapi, notifypushover, pushoverappkey,pushoveruserkey, 
                          nmapriority, notifyboxcar2, boxcar2token, notifyplex, plexserverhost, plexserverport, plexserverusername, plexserverpassword):
 
@@ -247,6 +247,9 @@ class Config:
         autosub.NOTIFYPROWL = notifyprowl
         autosub.PROWLAPI = prowlapi
         autosub.PROWLPRIORITY = int(prowlpriority)
+        autosub.NOTIFYTELEGRAM = notifytelegram
+        autosub.TELEGRAMAPI = telegramapi
+        autosub.TELEGRAMID = telegramid
         autosub.NOTIFYPUSHALOT = notifypushalot
         autosub.PUSHALOTAPI = pushalotapi
         autosub.NOTIFYPUSHBULLET = notifypushbullet
@@ -350,7 +353,17 @@ class Config:
             return "Auto-Sub successfully sent a test message with <strong>Prowl</strong>."
         else:
             return "Failed to send a test message with <strong>Prowl</strong>."
-    
+
+    @cherrypy.expose
+    def testTelegram(self, telegramapi, telegramid, dummy):
+        
+        log.info("Notification: Testing Telegram")
+        result = notify.telegram.test_notify(telegramapi, telegramid)
+        if result:
+            return "Auto-Sub successfully sent a test message with <strong>Telegram</strong>."
+        else:
+            return "Failed to send a test message with <strong>Telegram</strong>."
+
     @cherrypy.expose
     def testBoxcar2(self, boxcar2token, dummy):
         
@@ -372,24 +385,12 @@ class Config:
         else:
             return "Failed to update the media library on your <strong>Plex Media Server</strong>."
     
-    #@cherrypy.expose
-    #def RetrieveAddic7edCount(self):
-
-    #    log.info("Addic7ed: Retrieving Addic7ed download count")
-    #    result = Addic7edAPI().checkCurrentDownloads()
-    #    result = True
-    #    if result:
-    #        return "Addic7ed count: %s of %s" % (autosub.DOWNLOADS_A7, autosub.DOWNLOADS_A7MAX)
-    #    else:
-    #        return "Unable to retrieve count at the moment."
-
     @cherrypy.expose
     def testAddic7ed(self, addic7eduser, addic7edpasswd, dummy):
         if autosub.Addic7ed.Addic7edAPI().login(addic7eduser, addic7edpasswd):
             return "<strong>Success</strong>."
         else:
             return "<strong>Failure</strong>."
-
 
     @cherrypy.expose
     def testOpenSubtitles(self, opensubtitlesuser, opensubtitlespasswd, dummy):

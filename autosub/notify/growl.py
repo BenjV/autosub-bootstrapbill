@@ -65,7 +65,7 @@ def send_notify(lang, subtitlefile, videofile, website):
     growlhost = autosub.GROWLHOST
     growlport = autosub.GROWLPORT
     password = autosub.GROWLPASS 
-    message = "Auto-Sub just downloaded the following subtitle: \n%s from %s" %(subtitlefile, website)
+    message = "%s downloaded from %s" %(subtitlefile, website)
     
     notice = gntp.GNTPNotice()
     notice.add_header('Application-Name', "Auto-Sub")

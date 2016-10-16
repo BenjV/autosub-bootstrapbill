@@ -46,10 +46,11 @@ def _update_library(plexserverhost, plexserverport, plexserverusername, plexserv
         url = "http://%s:%s/library/sections" % (plexserverhost, plexserverport)
 
         try:
-            xml_sections = ET.parse(requests.get(url))
-        except IOError, e:
-            log.error("plexmediaserver: Error while trying to contact: %s" % e)
+            response = requests.get(url)
+        except:
+            log.error("plexmediaserver: Error while trying to contact plexmedia server")
             return False
+    #SubLines = re.findall('<tr class="epeven completed">(.*?)</tr>', SubOverviewPage, re.S)
     else:
         #Fetch X-Plex-Token if it doesn't exist but a username/password do
         if not plexservertoken and plexserverusername and plexserverpassword:
@@ -62,8 +63,11 @@ def _update_library(plexserverhost, plexserverport, plexserverusername, plexserv
                 "X-Plex-Client-Identifier": "b3a6b24dcab2224bdb101fc6aa08ea5e2f3147d6",
                 "X-Plex-Version": "1.0"
             }
-            
-            response = requests.post("https://plex.tv/users/sign_in.xml", headers=headers);
+            try:
+                response = requests.post("https://plex.tv/users/sign_in.xml", headers=headers);
+            except:
+                log.error("Plex Media Server: Error while trying to contact plexmediaserver")
+                return False
 
             auth_tree = ET.fromstring(response.text)
             plexservertoken = auth_tree.findall(".//authentication-token")[0].text
@@ -78,25 +82,35 @@ def _update_library(plexserverhost, plexserverport, plexserverusername, plexserv
             ))
 
             xml_sections = ET.fromstring(response.text)
+    try:
+        sections = xml_sections.findall('Directory')
+    except:
+        pass
+    if not sections:
+        log.info("plexmediaserver: Server not running on: %s:%s" % (plexserverhost, plexserverport))
+        return False
 
-            sections = xml_sections.findall('Directory')
-
-            if not sections:
-                log.info("plexmediaserver: Server not running on: %s:%s" % (plexserverhost, plexserverport))
-                return False
-
-            for s in sections:
-                if s.get('type') == "show":
-                    try:
-                        requests.get('%s/%s?X-Plex-Token=%s' % (
-                            "%s:%s" % (plexserverhost, plexserverport),
-                            "library/sections/%s/refresh" % (s.get('key')),
-                            plexservertoken
-                        ))
-                        log.info("plexmediaserver: TV Shows library (%s) is currently updating." % s.get('title'))
-                        return True
-                    except Exception, e:
-                        log.error("plexmediaserver: Error updating library section: %s" % e)
-                        return False
-
-            return True
+    for s in sections:
+        if s.get('type') == "show":
+            if plexservertoken:
+                try:
+                    requests.get('%s/%s?X-Plex-Token=%s' % (
+                        "%s:%s" % (plexserverhost, plexserverport),
+                        "library/sections/%s/refresh" % (s.get('key')),
+                        plexservertoken
+                    ))
+                    log.info("plexmediaserver: TV Shows library (%s) is currently updating." % s.get('title'))
+                    return True
+                except Exception, e:
+                    log.error("plexmediaserver: Error updating library section: %s" % e)
+                    return False
+            else:
+                url = "http://%s:%s/library/sections/%s/refresh" % (plexserverhost, plexserverport, s.getAttribute('key'))
+                try:
+                    requests.get(url)
+                    log.info("Plex Media Server: TV Shows library is currently updating.")
+                    return True
+                except Exception, e:
+                    log.error("Plex Media Server: Error updating library section: %s" % e)
+                    return False
+    return True

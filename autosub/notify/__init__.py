@@ -1,4 +1,4 @@
-# Autosub notify library - http://code.google.com/p/auto-sub/
+# Autosub notify library - 
 # Every function should have 2 calls, send_notify and test_notify
 # Send notify should get 3 argument: videofile, subtitlefile (both without path) and lang (which should be the language)
 # test_notify doesn't require any argument
@@ -19,6 +19,7 @@ from autosub.notify import pushbullet
 from autosub.notify import pushover
 from autosub.notify import boxcar2
 from autosub.notify import plexmediaserver
+from autosub.notify import telegram
 
 log = logging.getLogger('thelogger')  
 
@@ -53,7 +54,11 @@ def notifySend(lang, subtitlefile, videofile, website):
     if autosub.NOTIFYPROWL:
         log.debug("Notification: Prowl is enabled")
         prowl.send_notify(lang, subtitlefile, videofile, website)
-    
+
+    if autosub.NOTIFYTELEGRAM:
+        log.debug("Notification: Telegram is enabled")
+        telegram.send_notify(lang, subtitlefile, videofile, website)    
+
     if autosub.NOTIFYPUSHALOT:
         log.debug("Notification: Pushalot is enabled")
         pushalot.send_notify(lang, subtitlefile, videofile, website)
@@ -73,3 +78,7 @@ def notifySend(lang, subtitlefile, videofile, website):
     if autosub.NOTIFYPLEX:
         log.debug("Notification: Plex Media Server is enabled")
         plexmediaserver.send_update_library()
+
+    if autosub.NOTIFYTELEGRAM:
+        log.debug("Notification: Telegram is enabled")
+        plexmediaserver.send_notify(lang, subtitlefile, videofile, website)

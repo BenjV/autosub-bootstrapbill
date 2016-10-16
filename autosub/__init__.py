@@ -156,6 +156,9 @@ PLEXSERVERPORT = u""
 PLEXSERVERUSERNAME = u""
 PLEXSERVERPASSWORD = u""
 PLEXSERVERTOKEN = u""
+NOTIFYTELEGRAM = False
+TELEGRAMAPI = u""
+TELEGRAMID = u""
 
 
 MOBILEUSERAGENTS = ["midp", "240x320", "blackberry", "netfront", "nokia", "panasonic", 

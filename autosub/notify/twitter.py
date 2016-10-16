@@ -40,7 +40,7 @@ def test_notify(twitterkey, twittersecret):
 
 def send_notify(lang, subtitlefile, videofile, website):
     log.debug("Twitter: Trying to send a notification.")
-    message = "Auto-Sub just downloaded the following subtitle: \n%s from %s" %(subtitlefile, website)
+    message = "%s downloaded from %s" %(subtitlefile, website)
     twitterkey = autosub.TWITTERKEY
     twittersecret = autosub.TWITTERSECRET
     return _send_notify(message, twitterkey, twittersecret)

@@ -29,7 +29,7 @@ def _returnHit(regex, file_info):
     for reg in regex:
         results = re.findall(reg, file_info)
         if results:
-            for result in results:
+            for result in reversed(results):
                 pos = file_info.find(result.lower())
                 if pos != -1:
                     end = pos + len(result)
@@ -95,17 +95,19 @@ def _getCodec(file_info, fileext):
     return result
 
 def _getReleasegrp(file_info):
-    result = _returnHit(releasegrp, file_info)
-    
+    #result = _returnHit(releasegrp, file_info)
+    result = None
     if not result:
         global _noextrainfo
         _noextrainfo += 1
         resultdict = _returnGroup(releasegrp_fallback, file_info)
         if 'releasegrp' in resultdict.keys():
             result = resultdict['releasegrp']
-        result = _checkSynonyms(releasegrp_syn,
-                                result)
-    
+        result = _checkSynonyms(releasegrp_syn, result)
+        if not result:
+            result = _returnHit(releasegrp, file_info)
+    if not result:
+        result = _returnHit(releasegrp, file_info)
     return result
 
 def _returnSceneNumber(number):
@@ -121,6 +123,7 @@ def _returnSceneNumber(number):
 
 def ProcessFilename(filename, fileext):
     filename = filename.replace(',','.')
+    filename = re.sub("[\[].*?[\]]", "", filename)
     show_info = _returnGroup(show_regex, filename)
     title = None
     season = None

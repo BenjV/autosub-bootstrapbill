@@ -12,7 +12,7 @@ def test_notify(pushoverappkey, pushoveruserkey):
 
 def send_notify(lang, subtitlefile, videofile, website):
     log.debug("Pushover: Trying to send a notification")
-    message = "Auto-Sub just downloaded the following subtitle: \n%s from %s" %(subtitlefile, website)
+    message = "%s downloaded from %s" %(subtitlefile, website)
     return _send_notify(autosub.PUSHOVERAPPKEY,autosub.PUSHOVERUSERKEY ,message)
 
 def _send_notify(appkey,userkey,message):
@@ -25,7 +25,7 @@ def _send_notify(appkey,userkey,message):
     params = {
                 'token': appkey,
                 'user': userkey,
-                'title': 'AutoSub',
+                'title': 'Auto-Sub',
                 'message': message,
                 'retry': 30, 
                 'expire': 180,

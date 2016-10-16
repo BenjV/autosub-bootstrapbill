@@ -31,11 +31,13 @@ $(document).ready(function () {
 		"bPaginate": true,
 		"aLengthMenu": [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ],
 		"aaSorting": [ [ 9, "desc"] ],
-		"aoColumnDefs": [ { "aDataSort": [ 0, 1, 2 ], "aTargets": [ 0 ] }, { "sType": "euro-date", "aTargets": [ 9 ] }, { "bSortable": false, "aTargets": [ 4, 5, 7, 8, 10 ] } ]
+		"aoColumnDefs": [ { "aDataSort": [ 0, 1, 2 ], "aTargets": [ 0 ] }, { "sType": "euro-date", "aTargets": [ 9 ] }, { "bSortable": false, "aTargets": [ 4, 5, 7, 8, 10 ] } ],
+		"fnDrawCallback": function(oSettings) {$("a").tooltip()}
 	});
 
 	$('#downloaded').dataTable({ 
 		"bStateSave": true,
+		"fnDrawCallback": function(oSettings) {$("a").tooltip()},
 		"fnStateSave": function (oSettings, oData) { localStorage.setItem( 'AutoSub-Downloaded', JSON.stringify(oData) ); },
 		"fnStateLoad": function (oSettings) { return JSON.parse( localStorage.getItem('AutoSub-Downloaded') ); },
 		"iCookieDuration": 60*60*24*365,
@@ -43,7 +45,8 @@ $(document).ready(function () {
 		"bPaginate": true,
 		"aLengthMenu": [ [5, 10, 25, 50, 100, -1], [5, 10, 25, 50, 100, "All"] ],
 		"aaSorting": [ [ 8, "desc" ] ],
-		"aoColumnDefs": [ { "aDataSort": [ 0, 1, 2 ], "aTargets": [ 0 ] }, { "sType": "euro-date", "aTargets": [ 8 ] }, { "bSortable": false, "aTargets": [ 7, 9 ] } ]
+		"aoColumnDefs": [ { "aDataSort": [ 0, 1, 2 ], "aTargets": [ 0 ] }, { "sType": "euro-date", "aTargets": [ 8 ] }, { "bSortable": false, "aTargets": [ 7, 9 ] } ],
+		"fnDrawCallback": function(oSettings) {$("a").tooltip()}
 	});
 	
     $('#testMail').click(function () {
@@ -121,6 +124,15 @@ $(document).ready(function () {
 		var dummy = Date.now(); 
 		$.get(autosubRoot + "/config/testProwl", {'prowlapi': prowlapi, 'prowlpriority': prowlpriority, 'dummy': dummy},
 			function (data) { $('#testProwl-result').html(data); });
+    });
+
+	$('#testTelegram').click(function () {
+        $('#testTelegram-result').html('<span><img src="' + autosubRoot + '/images/loading16.gif"> Testing Telegram...</span>');
+        var telegramapi = $("#telegramapi").val();
+		var telegramid = $("#telegramid").val();
+		var dummy = Date.now(); 
+		$.get(autosubRoot + "/config/testTelegram", {'telegramapi': telegramapi, 'telegramid': telegramid, 'dummy': dummy},
+			function (data) { $('#testTelegram-result').html(data); });
     });
 	
 	$('#testBoxcar2').click(function () {
