@@ -81,4 +81,4 @@ def notifySend(lang, subtitlefile, videofile, website):
 
     if autosub.NOTIFYTELEGRAM:
         log.debug("Notification: Telegram is enabled")
-        plexmediaserver.send_notify(lang, subtitlefile, videofile, website)
+        telegram.send_notify(lang, subtitlefile, videofile, website)
