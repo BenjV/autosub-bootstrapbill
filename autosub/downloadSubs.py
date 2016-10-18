@@ -324,7 +324,7 @@ def DownloadSub(Wanted,SubList):
     # Send notification 
 
     VideoFile = os.path.join(Wanted['folder'] , Wanted['file'] + Wanted['container'])
-    notify.notify(Sub['Lang'], destsrt.encode('ascii','replace'), VideoFile.encode('ascii','replace'), Sub['website'])
+    notify.notify(Sub['Lang'], destsrt.encode('ascii','replace'), VideoFile.encode('ascii','replace'), Sub['website'].split('.')[0])
 
     if autosub.POSTPROCESSCMD:
         postprocesscmdconstructed = autosub.POSTPROCESSCMD + ' "' + destsrt + '" "' + VideoFile + '" "' + Sub['Lang'] + '" "' + Wanted["title"] + '" "' + Wanted["season"] + '" "' + Wanted["episode"] + '" '

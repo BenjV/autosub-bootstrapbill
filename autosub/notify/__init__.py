@@ -78,7 +78,3 @@ def notifySend(lang, subtitlefile, videofile, website):
     if autosub.NOTIFYPLEX:
         log.debug("Notification: Plex Media Server is enabled")
         plexmediaserver.send_update_library()
-
-    if autosub.NOTIFYTELEGRAM:
-        log.debug("Notification: Telegram is enabled")
-        telegram.send_notify(lang, subtitlefile, videofile, website)
