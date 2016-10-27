@@ -177,7 +177,7 @@ def Opensubtitles(Wanted):
     NameDict = {}
     for Sub in Subs['data']:
         try:
-            if int(Sub['SubBad']) > 0 or not Sub['MovieReleaseName'] or not Sub['IDSubtitleFile'] or (Sub['SubHearingImpaired'] != '0' and not autopsub.HI):
+            if int(Sub['SubBad']) > 0 or not Sub['MovieReleaseName'] or not Sub['IDSubtitleFile'] or (Sub['SubHearingImpaired'] != '0' and not autosub.HI):
                 continue
         except:
             continue
