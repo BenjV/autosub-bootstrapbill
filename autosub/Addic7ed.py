@@ -337,8 +337,8 @@ class Addic7edAPI():
         data = {'username': addic7eduser, 'password': addic7edpasswd, 'Submit': 'Log in'}
         try:
             r = self.session.post(self.server + '/dologin.php', data, timeout=10, allow_redirects=False)
-        except requests.Timeout:
-            log.error('Addic7edAPI: Timeout after 10 seconds')
+        except Exception as error:
+            log.error('Addic7edAPI: %s' % error)
             return False
         
         if r.status_code == 302:
@@ -365,8 +365,8 @@ class Addic7edAPI():
             try:
                 r = self.session.get(self.server + '/logout.php', timeout=10)
                 log.debug('Addic7edAPI: Logged out')
-            except requests.Timeout:
-                log.debug('Addic7edAPI: Timeout after 10 seconds')
+            except Exception as error:
+                log.error('Addic7edAPI: %s' % error)
                 return None
             
             if r.status_code != 200:
@@ -399,8 +399,8 @@ class Addic7edAPI():
         time.sleep(10)
         try:
             r = self.session.get(self.server + downloadlink, timeout=10)
-        except requests.Timeout:
-            log.error('Addic7edAPI: Timeout after 10 seconds')
+        except Exception as error:
+            log.error('Addic7edAPI: %s' % error)
             return None
         except:
             log.error('Addic7edAPI: Unexpected error: %s' % sys.exc_info()[0])
