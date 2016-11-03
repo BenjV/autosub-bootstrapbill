@@ -93,14 +93,14 @@ def main(argv=None):
 
     print "AutoSub: Initializing variables and loading config"
     autosub.Initialize()
-    #Here we create a pid file
-    try:
-        pid = str(os.getpid())
-        f = open(os.path.join(autosub.PATH,'autosub.pid'), 'w')
-        f.write(pid)
-        f.close()
-    except Exception as error:
-        print 'AutoSub could not create the PID file. Error is:', error
+    ##Here we create a pid file
+    #try:
+    #    pid = str(os.getpid())
+    #    f = open(os.path.join(autosub.PATH,'autosub.pid'), 'w')
+    #    f.write(pid)
+    #    f.close()
+    #except Exception as error:
+    #    print 'AutoSub could not create the PID file. Error is:', error
     #here we remove the beautifull soap folders because we don't use them anymore.
     BsPath = os.path.join(autosub.PATH,'library','beautifulsoup')
     Bs4Path = os.path.join(autosub.PATH,'library','bs4')
@@ -110,7 +110,7 @@ def main(argv=None):
         if os.path.isdir(Bs4Path):
             shutil.rmtree(Bs4Path)
     except Exception as error:
-        print 'Autosub could not remove the absolute beutifullsoap folders'
+        print 'Autosub could not remove the absolute beautifullsoap folders'
     # check the logfile location and make it the default if neccessary
     LogPath,LogFile = os.path.split(autosub.LOGFILE)
     if not LogFile:
@@ -132,8 +132,20 @@ def main(argv=None):
     
     signal.signal(signal.SIGINT, autosub.AutoSub.signal_handler)
     
-    if autosub.DAEMON==True:
-        autosub.AutoSub.daemon()
+    DeamonPid = 0
+    if autosub.DAEMON == True:
+        DeamonPid = autosub.AutoSub.daemon()
+    if DeamonPid == 0:
+        pid = str(os.getpid())
+    else:
+        pid =str(DeamonPid)
+        #Here we create a pid file
+    try:
+        f = open(os.path.join(autosub.PATH,'autosub.pid'), 'w')
+        f.write(pid)
+        f.close()
+    except Exception as error:
+        print 'AutoSub could not create the PID file. Error is:', error
 
     import autosub.Db
     

@@ -41,6 +41,7 @@ def daemon():
     sys.stdin.close()
     sys.stdout.flush()
     sys.stderr.flush()
+    return pid
 
 def launchBrowser():
     host = autosub.WEBSERVERIP
