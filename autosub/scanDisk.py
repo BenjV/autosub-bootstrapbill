@@ -156,7 +156,7 @@ def walkDir(path):
                     if Skip:
                         log.debug('scanDisk: Filespec does not meet minmatchscore so skipping this one')
                         continue
-                    FileDict['timestamp'] = unicode(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(os.path.getctime(os.path.join(dirname, filename)))))
+                    FileDict['timestamp'] = unicode(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(os.path.getmtime(os.path.join(dirname, filename)))))
                     FileDict['langs'] = langs
                     FileDict['NLext'] = NLext
                     FileDict['ENext'] = ENext
