@@ -29,7 +29,7 @@ autosub.NAMEMAPPING={
             u"ONCE UPON A TIME" :                       [u"1843230", u"Once Upon a Time (2011)"],
             u"ONCE UPON TIME" :                         [u"1843230",u"Once Upon a Time (2011)"],
             u"ONCE UPON A TIME 2011" :                  [u"1843230",u"Once Upon a Time (2011)"],
-            u"SCANDAL" :                                [u"1837576", "Scandal (2012)"],
+            u"SCANDAL" :                                [u"1837576", u"Scandal (2012)"],
             u"SPARTACUS BLOOD AND SAND" :               [u"1442449", u"Spartacus"],
             u"THE AMERICANS" :                          [u"2149175", u"The Americans (2013)"],
             u"THE O C" :                                [u"0362359", u"The O.C"],
