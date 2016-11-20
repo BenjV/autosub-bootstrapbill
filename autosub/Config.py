@@ -166,63 +166,31 @@ def ReadConfig():
     autosub.USERADDIC7EDMAPPING={}
     autosub.USERADDIC7EDMAPPING = dict(cfg.items(section))
     for ImdbId in autosub.USERADDIC7EDMAPPING.iterkeys():
-        if ImdbId.isdigit and autosub.USERADDIC7EDMAPPING[ImdbId].isdigit():
-            autosub.ADDIC7EDMAPPING[ImdbId] = autosub.USERADDIC7EDMAPPING[ImdbId].strip()
-        else:
+        if not (ImdbId.isdigit and autosub.USERADDIC7EDMAPPING[ImdbId].isdigit()):
+            del autosub.USERADDIC7EDMAPPING[ImdbId]
             print'ReadConfig: Addic7ed mapping has an unkown format.',ImdbId,' = ', autosub.USERADDIC7EDMAPPING[ImdbId]
 
     # Settings
 
-    autosub.NAMEMAPPING = {
-            u"ATLANTIS" : u"2705602",
-            u"BEAUTY AND THE BEAST" : u"2193041",
-            u"CHICAGO FIRE" : u"2261391",
-            u"Dirk Gently’s Holistic Detective Agency" : u'4047038',
-            u"Dirk Gently's Holistic Detective Agency" : u'4047038',
-            u"DOCTOR WHO" : u"0436992",
-            u"DRACULA" : u"2296682",
-            u"EMILY OWENS M D" : u"2290339",
-            u"Eyewitness" : u"5369352",
-            u"HOUSE OF CARDS" : u"1856010",
-            u"LAW AND ORDER SVU" : u"0203259",
-            u"LAW AND ORDER UK" :"1166893",
-            u"MARVEL'S AGENTS OF S H I E L D" : u"2364582",
-            u"MARVELS AGENTS OF S H I E L D" : u"2364582",
-            u"MARVEL AGENTS OF SHIELD":u"2364582",
-            u"AGENTS OF S H I E L D" : u"2364582",
-            u"MERLIN" : u"1199099",
-            u"NASHVILLE" : u"2281375",
-            u"ONCE UPON A TIME" : u"1843230",
-            u"ONCE UPON TIME" : u"1843230",
-            u"ONCE UPON A TIME 2011" : u"1843230",
-            u"ONCE UPON A TIME IN WONDERLAND" : u"2802008",
-            u"REVOLUTION" : u"2070791",
-            u"SCANDAL" : u"1837576",
-            u"SPARTACUS" : u"1442449",
-            u"SPARTACUS BLOOD AND SAND" : u"1442449",
-            u"SPARTACUS GODS OF THE ARENA" : u"1758429",
-            u"SPARTACUS VENGEANCE" : u"1442449",
-            u"THE AMERICANS" : u"2149175",
-            u"THE O C" : u"0362359",
-            u"UNTOUCHABLES-THE VENTURE BROS" : u"0417373",
-            u"UTOPIA" : u"2384811"
-            }
+    
 
-    # ***********************
-    # * Namemapping Section *
-    # ***********************
+    # ****************************
+    # * User Namemapping Section *
+    # ****************************
     section = 'namemapping'
     if not cfg.has_section(section): cfg.add_section(section)
     NameMapping = dict(cfg.items(section))
     autosub.USERNAMEMAPPING={}
     for Name in NameMapping.iterkeys():
+        NameUpper = Name.upper().replace('~',':')
         if NameMapping[Name].isdigit():
-            autosub.NAMEMAPPING[Name.upper().replace('~',':')] = NameMapping[Name].strip()
-            autosub.USERNAMEMAPPING[Name.replace('~',':')]     = NameMapping[Name].strip()
+            if not NameUpper in autosub.NAMEMAPPING.keys():
+                autosub.NAMEMAPPING[NameUpper]  = [NameMapping[Name].strip(),u'']
+                autosub.USERNAMEMAPPING[NameUpper] = NameMapping[Name].strip()
         else:
             print 'ReadConfig: Username mapping has an unknown format.',Name,' = ',NameMapping[Name] 
    
-     # ******************
+    # ******************
     # * Notify Section *
     # ******************
     section = 'notify'

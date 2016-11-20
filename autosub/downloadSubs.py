@@ -318,9 +318,10 @@ def DownloadSub(Wanted,SubList):
         log.debug("downloadSubs: Could not download any correct subtitle file for %s" % Wanted['file'])
         return False   
     Wanted['subtitle'] = "%s downloaded from %s" % (Sub['releaseName'].strip(),Sub['website'])
-    Wanted['timestamp'] = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(os.path.getmtime(destsrt)))
-
+    VideoTimeStamp = Wanted['timestamp']
+    Wanted['timestamp'] = unicode(time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(os.path.getmtime(destsrt))))
     lastDown().setlastDown(Sub['Lang'],dict = Wanted)
+    Wanted['timestamp'] = VideoTimeStamp
     # Send notification 
 
     VideoFile = os.path.join(Wanted['folder'] , Wanted['file'] + Wanted['container'])

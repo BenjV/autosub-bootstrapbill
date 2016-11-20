@@ -444,7 +444,7 @@ class Addic7edAPI():
             return False
         return True    
     
-    def geta7ID(self,TvdbShowName, localShowName):
+    def geta7ID(self,ShowName, TvdbShowName):
         # lookup official name and try to match with a7 show list
 
         try:
@@ -471,27 +471,27 @@ class Addic7edAPI():
 
         # here we make a list of possible combinations of names and suffixes
         SearchList = []
-        #First the Tvdb show name from the parameterlist 
-        if TvdbShowName:
-            SearchList.append(TvdbShowName)
+        #First the file Show name from the parameterlist 
+        if ShowName:
+            SearchList.append(ShowName)
             # If there is a suffix add the combinations of suffixes e.g. with and without ()
-            SearchName, Suffix = _getShow(TvdbShowName)
+            SearchName, Suffix = _getShow(ShowName)
             if Suffix:
                 SearchList.append(SearchName)
-                if '(' + Suffix +')' in TvdbShowName:
+                if '(' + Suffix +')' in ShowName:
                     SearchList.append(SearchName + ' ' + Suffix)
                 else:
                     SearchList.append(SearchName + '(' + Suffix + ')')
 
-        # If the local show name is different then we do the same for that name
-        if TvdbShowName != localShowName:
-            if localShowName not in SearchList:
-                SearchList.append(localShowName)
-            SearchName, Suffix = _getShow(localShowName)
+        # If the Tvdb showname is different then we do the same for that name
+        if TvdbShowName and TvdbShowName != ShowName:
+            if TvdbShowName not in SearchList:
+                SearchList.append(TvdbShowName)
+            SearchName, Suffix = _getShow(TvdbShowName)
             if Suffix:
                 if SearchName not in SearchList:
                     SearchList.append(SearchName)
-                if '(' + Suffix +')' in localShowName :
+                if '(' + Suffix +')' in TvdbShowName :
                     SearchList.append(SearchName + ' ' + Suffix)
                 else:
                     SearchList.append(SearchName + ' (' + Suffix + ')')
@@ -499,8 +499,8 @@ class Addic7edAPI():
         # Try all the combinations untill we find one
         for Name in SearchList:
             if Name.lower() in show_ids:
-                log.debug("geta7IDApi: Addic7ed ID %s found using filename show name %s" % (show_ids[Name.lower()], localShowName))
+                log.debug("geta7IDApi: Addic7ed ID %s found using filename show name %s" % (show_ids[Name.lower()], ShowName))
                 return show_ids[Name.lower()]
 
-        log.info('geta7ID: The show %s could not be found on the Addic7ed website. Please make an Addic7ed map!' % localShowName)
+        log.info('geta7ID: The show %s could not be found on the Addic7ed website. Please make an Addic7ed map!' % ShowName)
         return None

@@ -1,7 +1,47 @@
+# coding: latin-1
+import autosub
+
+# Namemapping for series with difficult names
+# format is a dict of list were the key is de mapping naam en the list is the correct Imdb Id + the formal Tvdb name
+# 
+autosub.NAMEMAPPING={
+            u"ATLANTIS" :                               [u"2705602", u"Atlantis (2013)"],
+            u"BEAUTY AND THE BEAST" :                   [u"2193041", u"Beauty and the Beast (2012)"],
+            u"Dirk Gentlyâs Holistic Detective Agency": [u'4047038', u"Dirk Gently's Holistic Detective Agency"],
+            u"DOCTOR WHO" :                             [u"0436992", u"Doctor Who (2005)"],
+            u"EMILY OWENS M D" :                        [u"2290339", u"Emily Owens, M.D"],
+            u"EYEWITNESS" :                             [u"5369352", u"Eyewitness (US)"],
+            u"HOUSE OF CARDS" :                         [u"1856010", u"House of Cards (US)"],
+            u"LAW AND ORDER SVU" :                      [u"0203259", u"Law & Order: Special Victims Unit"],
+            u"LAW AND ORDER SPECIAL VICTIMS UNIT" :     [u"0203259", u"Law & Order: Special Victims Unit"],
+            u"LAW AND ORDER UK" :                       [u"1166893", u"Law & Order: UK"],
+            u"MARVEL'S AGENTS OF S H I E L D" :         [u"2364582", u"Marvel's Agents of S.H.I.E.L.D."],
+            u"MARVEL'S AGENTS OF S H I E L D " :        [u"2364582", u"Marvel's Agents of S.H.I.E.L.D."],
+            u"MARVELS AGENTS OF S H I E L D" :          [u"2364582", u"Marvel's Agents of S.H.I.E.L.D."],
+            u"MARVELS AGENTS OF S H I E L D " :         [u"2364582", u"Marvel's Agents of S.H.I.E.L.D."],
+            u"MARVELS AGENTS OF S.H.I.E.L.D." :         [u"2364582", u"Marvel's Agents of S.H.I.E.L.D."],
+            u"MARVEL AGENTS OF SHIELD":                 [u"2364582", u"Marvel's Agents of S.H.I.E.L.D."],
+            u"MARVELS AGENTS OF SHIELD":                [u"2364582", u"Marvel's Agents of S.H.I.E.L.D."],
+            u"MARVEL'S AGENTS OF SHIELD":               [u"2364582", u"Marvel's Agents of S.H.I.E.L.D."],
+            u"AGENTS OF S H I E L D" :                  [u"2364582", u"Marvel's Agents of S.H.I.E.L.D."],
+            u"MERLIN (2008)" :                          [u"1199099", u"Merlin"],
+            u"NASHVILLE" :                              [u"2281375", u"Nashville (2012)"],
+            u"ONCE UPON A TIME" :                       [u"1843230", u"Once Upon a Time (2011)"],
+            u"ONCE UPON TIME" :                         [u"1843230",u"Once Upon a Time (2011)"],
+            u"ONCE UPON A TIME 2011" :                  [u"1843230",u"Once Upon a Time (2011)"],
+            u"SCANDAL" :                                [u"1837576", "Scandal (2012)"],
+            u"SPARTACUS BLOOD AND SAND" :               [u"1442449", u"Spartacus"],
+            u"THE AMERICANS" :                          [u"2149175", u"The Americans (2013)"],
+            u"THE O C" :                                [u"0362359", u"The O.C"],
+            u"UNTOUCHABLES-THE VENTURE BROS" :          [u"0417373", u"The Venture Bros."]
+                    }
+
+
+
 # The ID dict for a7 ID lookup using IMDB ID
 #        Key = IMDB ID
 #        Value = a7 ID
-import autosub
+
     
 autosub.ADDIC7EDMAPPING = {
     u'0411008' : u'1',
@@ -3516,5 +3556,47 @@ autosub.ADDIC7EDMAPPING = {
     u'4835480' : u'6052',
     u'4922804' : u'6053',
     u'4183980' : u'6054',
-    u'0434665' : u'6055'
+    u'0434665' : u'6055',
+    u'0166037' : u'6058',
+    u'5905038' : u'6059',
+    u'5057130' : u'6061',
+    u'6038584' : u'6062',
+    u'5214372' : u'6064',
+    u'1396212' : u'6065',
+    u'0159876' : u'6069',
+    u'4939064' : u'6070',
+    u'5763648' : u'6071',
+    u'5865052' : u'6072',
+    u'5012644' : u'6073',
+    u'5711138' : u'6074',
+    u'3879306' : u'6075',
+    u'0364151' : u'6076',
+    u'4855114' : u'6077',
+    u'5722214' : u'6078',
+    u'4659174' : u'6079',
+    u'5460226' : u'6080',
+    u'6118306' : u'6081',
+    u'2471672' : u'6082',
+    u'4742700' : u'6083',
+    u'5194802' : u'6085',
+    u'4696944' : u'6087',
+    u'5932466' : u'6088',
+    u'5364016' : u'6089',
+    u'3920596' : u'6093',
+    u'5841196' : u'6094',
+    u'4834206' : u'6095',
+    u'5491994' : u'6096',
+    u'5686194' : u'6097',
+    u'4591834' : u'6099',
+    u'6233538' : u'6100',
+    u'4686698' : u'6101',
+    u'6119230' : u'6102',
+    u'5152552' : u'6103',
+    u'4999820' : u'6104',
+    u'4711184' : u'6105',
+    u'5882386' : u'6106',
+    u'5475704' : u'6107',
+    u'1081340' : u'6108',
+    u'5288312' : u'6109',
+    u'5507340' : u'6110'
              }

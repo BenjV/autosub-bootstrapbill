@@ -51,6 +51,7 @@ def FindName(Url,Root,Tag):
         log.error("FindName: Could not find %s in %s on Tvdb URL: " % (Root,Tag,Url))
         log.error("FindName: message is: " % error)
         return None, None
+    log.error("FindName: Could not find %s in %s on Tvdb URL: " % (Root,Tag,Url))
     return None, None
 
 def getShowidApi(showName):
@@ -85,13 +86,13 @@ def getShowidApi(showName):
                 FoundName = node.find('SeriesName').text
                 FoundName = FoundName.decode('utf-8') if isinstance(FoundName,str) else FoundName
                 Score = SM(None, FoundName.upper(), showName.upper()).ratio()
-                if Score > HighScore:
+                if Score >= HighScore:
                     ImdbId = None
                     try:
                         ImdbId = node.find('IMDB_ID').text[2:]
                         TvdbId = node.find('seriesid').text
                     except:
-                        ImdbId = None
+                        pass
                     if ImdbId:
                         HighScore = Score
                         HighName = FoundName
