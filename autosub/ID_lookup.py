@@ -32,7 +32,7 @@ autosub.NAMEMAPPING={
             u"SCANDAL" :                                [u"1837576", u"Scandal (2012)"],
             u"SPARTACUS BLOOD AND SAND" :               [u"1442449", u"Spartacus"],
             u"THE AMERICANS" :                          [u"2149175", u"The Americans (2013)"],
-            u"The Librarians US":                       [u"3663490", u"The Librarians (2014)"],
+            u"THE LIBRARIANS US":                       [u"3663490", u"The Librarians (2014)"],
             u"THE O C" :                                [u"0362359", u"The O.C"],
             u"UNTOUCHABLES-THE VENTURE BROS" :          [u"0417373", u"The Venture Bros."]
                     }
