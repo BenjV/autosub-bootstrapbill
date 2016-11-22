@@ -1,4 +1,4 @@
-# Autosub Db.py - https://github.com/Donny87/autosub-bootstrapbill
+# Autosub Db.py
 #
 # The Autosub DB module
 # 

@@ -164,7 +164,10 @@ def ReadConfig():
     section = 'addic7edmapping'
     if not cfg.has_section(section): cfg.add_section(section)
     autosub.USERADDIC7EDMAPPING={}
-    autosub.USERADDIC7EDMAPPING = dict(cfg.items(section))
+    try:
+        autosub.USERADDIC7EDMAPPING = dict(cfg.items(section))
+    except:
+        pass
     for ImdbId in autosub.USERADDIC7EDMAPPING.iterkeys():
         if not (ImdbId.isdigit and autosub.USERADDIC7EDMAPPING[ImdbId].isdigit()):
             del autosub.USERADDIC7EDMAPPING[ImdbId]
@@ -181,14 +184,14 @@ def ReadConfig():
     if not cfg.has_section(section): cfg.add_section(section)
     NameMapping = dict(cfg.items(section))
     autosub.USERNAMEMAPPING={}
-    for Name in NameMapping.iterkeys():
-        NameUpper = Name.upper().replace('~',':')
-        if NameMapping[Name].isdigit():
-            if not NameUpper in autosub.NAMEMAPPING.keys():
-                autosub.NAMEMAPPING[NameUpper]  = [NameMapping[Name].strip(),u'']
-                autosub.USERNAMEMAPPING[NameUpper] = NameMapping[Name].strip()
+    for ConfigName in NameMapping.iterkeys():
+        if NameMapping[ConfigName].isdigit():
+            Name = ConfigName.replace('~',':')
+            if not Name.upper() in autosub.NAMEMAPPING.keys():
+                autosub.NAMEMAPPING[Name.upper()]  = [NameMapping[ConfigName].strip(),u'']
+            autosub.USERNAMEMAPPING[Name] = NameMapping[ConfigName].strip()
         else:
-            print 'ReadConfig: Username mapping has an unknown format.',Name,' = ',NameMapping[Name] 
+            print 'ReadConfig: Username mapping has an unknown format.',ConfigName,' = ',NameMapping[ConfigName] 
    
     # ******************
     # * Notify Section *
