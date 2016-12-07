@@ -158,7 +158,6 @@ rlsgrps_xvid = ['AFG',
                  'Hype',
                  'HAGGIS',
                  'NoTV',
-                 'NTb',
                  'XOR']
 
 rlsgrps_webdl = ['BS',

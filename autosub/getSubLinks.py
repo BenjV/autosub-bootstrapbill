@@ -246,11 +246,11 @@ def getSubLinks(Wanted):
         if list: fullScoreListNL.extend(list)
     if fullScoreListNL:
         fullScoreListNL = sorted(fullScoreListNL, key=itemgetter('score', 'website'), reverse=True)
-        log.info('getSubLinks: Found %d DUTCH subs which matched the min match score.' % len(scoreListOpensubtitlesNL))
+        log.info('getSubLinks: Found %d DUTCH subs which matched the min match score.' % len(fullScoreListNL))
     # the same for the English subs
     for list in [scoreListSubSeekerEN, scoreListAddic7edEN, scoreListOpensubtitlesEN]:
         if list: fullScoreListEN.extend(list)
     if fullScoreListEN:
         fullScoreListEN = sorted(fullScoreListEN, key=itemgetter('score', 'website'), reverse=True)
-        log.info('getSubLinks: Found %d ENGLISH subs which matched the min match score.' % len(scoreListOpensubtitlesNL))
+        log.info('getSubLinks: Found %d ENGLISH subs which matched the min match score.' % len(fullScoreListEN))
     return fullScoreListNL,fullScoreListEN
