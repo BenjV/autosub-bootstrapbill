@@ -231,6 +231,7 @@ def ReadConfig():
     if cfg.has_option(section, 'notifypushover'): autosub.NOTIFYPUSHOVER            = cfg.getboolean(section, 'notifypushover')
     if cfg.has_option(section, 'pushoverappkey'): autosub.PUSHOVERAPPKEY            = cfg.get(section, 'pushoverappkey')
     if cfg.has_option(section, 'pushoveruserkey'): autosub.PUSHOVERUSERKEY          = cfg.get(section, 'pushoveruserkey')
+    if cfg.has_option(section, 'pushoverpriority'): autosub.PUSHOVERPRIORITY        = cfg.getint(section, 'pushoverpriority')
     if cfg.has_option(section, 'notifyboxcar2'): autosub.NOTIFYBOXCAR2              = cfg.getboolean(section, 'notifyboxcar2')
     if cfg.has_option(section, 'boxcar2token'): autosub.BOXCAR2TOKEN                = cfg.get(section, 'boxcar2token')
     if cfg.has_option(section, 'notifyplex'): autosub.NOTIFYPLEX                    = cfg.getboolean(section, 'notifyplex')
@@ -339,6 +340,7 @@ def WriteConfig():
         cfg.set(section, "notifypushover", str(autosub.NOTIFYPUSHOVER))
         cfg.set(section, "pushoverappkey", autosub.PUSHOVERAPPKEY)
         cfg.set(section, "pushoveruserkey", autosub.PUSHOVERUSERKEY)
+        cfg.set(section, "pushoverpriority", str(autosub.PUSHOVERPRIORITY))
     if autosub.NOTIFYBOXCAR2:
         cfg.set(section, "notifyboxcar2", str(autosub.NOTIFYBOXCAR2))
         cfg.set(section, "boxcar2token", autosub.BOXCAR2TOKEN)

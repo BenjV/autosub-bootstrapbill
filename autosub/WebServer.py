@@ -221,7 +221,7 @@ class Config:
     def saveNotification(self, notifymail, notifygrowl, notifynma, notifytwitter, mailsrv, mailfromaddr, mailtoaddr, 
                          mailusername, mailpassword, mailsubject, mailencryption, mailauth, growlhost, growlport, 
                          growlpass, nmaapi, twitterkey, twittersecret, notifyprowl, prowlapi, prowlpriority, notifytelegram, telegramapi, telegramid,
-                         notifypushalot, pushalotapi, notifypushbullet, pushbulletapi, notifypushover, pushoverappkey,pushoveruserkey, 
+                         notifypushalot, pushalotapi, notifypushbullet, pushbulletapi, notifypushover, pushoverappkey,pushoveruserkey, pushoverpriority,
                          nmapriority, notifyboxcar2, boxcar2token, notifyplex, plexserverhost, plexserverport, plexserverusername, plexserverpassword):
 
         # Set all internal notify variables
@@ -257,6 +257,7 @@ class Config:
         autosub.NOTIFYPUSHOVER = notifypushover
         autosub.PUSHOVERAPPKEY = pushoverappkey
         autosub.PUSHOVERUSERKEY = pushoveruserkey
+        autosub.PUSHOVERPRIORITY = pushoverpriority
         autosub.NOTIFYBOXCAR2 = notifyboxcar2
         autosub.BOXCAR2TOKEN = boxcar2token
         autosub.NOTIFYPLEX = notifyplex
@@ -325,10 +326,10 @@ class Config:
             return "Failed to send a test message with <strong>Notify My Android</strong>."
     
     @cherrypy.expose
-    def testPushover(self, pushoverappkey, pushoveruserkey, dummy):
+    def testPushover(self, pushoverappkey, pushoveruserkey, pushoverpriority, dummy):
         
         log.info("Notification: Testing Pushover")
-        result = notify.pushover.test_notify(pushoverappkey, pushoveruserkey)
+        result = notify.pushover.test_notify(pushoverappkey, pushoveruserkey,pushoverpriority)
         if result:
             return "Auto-Sub successfully sent a test message with <strong>Pushover</strong>."
         else:

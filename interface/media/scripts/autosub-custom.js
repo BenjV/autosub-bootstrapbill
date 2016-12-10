@@ -102,8 +102,9 @@ $(document).ready(function () {
         $('#testPushover-result').html('<span><img src="' + autosubRoot + '/images/loading16.gif"> Testing Pushover...</span>');
         var pushoverappkey = $("#pushoverappkey").val();
         var pushoveruserkey = $("#pushoveruserkey").val();
+		var pushoverpriority = $("#pushoverpriority").val();
 		var dummy = Date.now(); 
-		$.get(autosubRoot + "/config/testPushover", {'pushoverappkey': pushoverappkey,'pushoveruserkey': pushoveruserkey, 'dummy': dummy },
+		$.get(autosubRoot + "/config/testPushover", {'pushoverappkey': pushoverappkey,'pushoveruserkey': pushoveruserkey, 'pushoverpriority': pushoverpriority,'dummy': dummy },
 			function (data) { $('#testPushover-result').html(data); });
     });
 	
