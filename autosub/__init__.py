@@ -42,6 +42,7 @@ ADDIC7ED = False
 ADDIC7EDUSER = u''
 ADDIC7EDPASSWD = u''
 ADDIC7EDLOGGED_IN = False
+ADDICHIGHID = '0'
 
 OPENSUBTITLESUSER = u''
 OPENSUBTITLESPASSWD = u''
@@ -96,6 +97,7 @@ DBVERSION = None
 DBCONNECTION = None
 DBIDCACHE = None
 
+ADDICMAPURL = None
 VERSIONURL = None
 USERAGENT = None
 
@@ -171,7 +173,7 @@ def Initialize():
     global SERIESPATH,PATH, LOGFILE, LOGLEVEL, LOGLEVELCONSOLE, LOGSIZE, LOGNUM,  \
     CONFIGFILE, CERTIFICATEPATH, ZIPURL, APIKEY, API, IMDBAPI,  \
     APICALLSLASTRESET_TVDB, APICALLSLASTRESET_SUBSEEKER, \
-    USERAGENT, VERSION, VERSIONURL, TVDBURL, \
+    USERAGENT, VERSION, VERSIONURL, ADDICMAPURL, TVDBURL, \
     OPENSUBTITLESURL, OPENSUBTITLESUSERAGENT
 
     PATH = unicode(os.getcwd(), SYSENCODING)
@@ -182,7 +184,8 @@ def Initialize():
         versionnumber = version.autosubversion
 
     VERSION = int(versionnumber.split('.')[0]) * 1000 + int(versionnumber.split('.')[1]) * 100 + int(versionnumber.split('.')[2]) * 10
-    VERSIONURL = u'https://raw.githubusercontent.com/BenjV/autosub-bootstrapbill/master/autosub/version.py'
+    VERSIONURL =  u'https://raw.githubusercontent.com/BenjV/autosub-bootstrapbill/master/autosub/version.py'
+    ADDICMAPURL = u'https://raw.githubusercontent.com/BenjV/autosub-bootstrapbill/master/AddicMapping.txt'
     ZIPURL =  u'https://github.com/BenjV/autosub-bootstrapbill/archive/master.zip'
     USERAGENT = u'AutoSub/' + versionnumber
     OPENSUBTITLESUSERAGENT = u'PYAutosub V' + versionnumber

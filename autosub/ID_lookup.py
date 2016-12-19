@@ -5,6 +5,7 @@ import autosub
 # format is a dict of list were the key is de mapping naam en the list is the correct Imdb Id + the formal Tvdb name
 # 
 autosub.NAMEMAPPING={
+            u"3" :                                          [u"4922804", u"3%"],
             u"ATLANTIS" :                                   [u"2705602", u"Atlantis (2013)"],
             u"BEAUTY AND THE BEAST" :                       [u"2193041", u"Beauty and the Beast (2012)"],
             u"Dirk Gentlyâs Holistic Detective Agency":  [u'4047038', u"Dirk Gently's Holistic Detective Agency"],
@@ -3411,6 +3412,7 @@ autosub.ADDIC7EDMAPPING = {
     u'4976512' : u'5839',
     u'0115302' : u'5840',
     u'3738872' : u'5841',
+    u'4181172' : u'5842',
     u'5541338' : u'5843',
     u'3766376' : u'5844',
     u'4574334' : u'5845',

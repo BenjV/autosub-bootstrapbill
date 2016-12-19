@@ -146,7 +146,7 @@ def Addic7ed( Wanted):
 
 
     else:
-        log.error('Addic7ed: Addic7ed did not respond with the correct page')
+        log.debug('Addic7ed: No subs for this season found.')
     return ScoreListNL,ScoreListEN
 
 

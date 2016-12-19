@@ -5,6 +5,7 @@
 import logging
 import re
 import subprocess
+import json
 import zipfile, StringIO, urllib,filecmp
 
 from string import capwords
@@ -181,7 +182,28 @@ def UpdateAutoSub():
     log.debug('UpdateAutoSub: Python exec arguments are %s,  %s' %(sys.executable,args))
     os.execv(sys.executable, args)
 
-
+def UpdateA7IdMapping():
+# Get the latest id mapping for Addic7ed from github
+    with requests.Session() as GithubSession:
+        try:
+            Result = GithubSession.get(autosub.ADDICMAPURL)
+            Result.encoding ='utf-8'
+            GithubMapping = {}
+            GithubMapping = json.loads(Result.text)
+            if GithubMapping:
+                LastAddicId = GithubMapping[max(GithubMapping, key=GithubMapping.get)]
+                if int(LastAddicId) > int(autosub.ADDICHIGHID):
+                    autosub.ADDICHIGHID = LastAddicId
+                    log.debug('UpdateNameMapping: Addic7ed Id mapping is updated.')
+                    for NameMap in GithubMapping.iterkeys():
+                        if NameMap.isdigit() and GithubMapping[NameMap].isdigit():
+                            if not NameMap in autosub.ADDIC7EDMAPPING.keys():
+                                autosub.ADDIC7EDMAPPING[NameMap] = GithubMapping[NameMap]
+                        else:
+                            log.debug('UpdateNameMapping: Addic7ed namemapping from github is coruptted. %s = %s' %(NameMap,GithubMapping[NameMap])) 
+        except Exception as error:
+            log.debug('UpdateA7IdMapping: Problem get AddicIdMapping from github. %s' % error)
+    return
 
 def CleanSerieName(series_name):
     """Clean up series name by removing any . and _
@@ -382,7 +404,7 @@ def getShowid(ShowName):
                 if not TvdbShowName:
                     # if name in cache we add to the user mapping
                     if TvdbCacheName:
-                        TvdbShowName = CacheName
+                        TvdbShowName = TvdbCacheName
                     elif checkAPICallsTvdb():
                         # still no tvdb name we fetch it form the tvdb website
                         TvdbShowName,TvdbId = Tvdb.getShowName(ImdbNameMappingId)
@@ -510,47 +532,47 @@ def getAttr(name):
         return rv
     return inner_func
 
-class API:
-    """
-    One place to rule them all, a function that handels all the request to the servers
+#class API:
+#    """
+#    One place to rule them all, a function that handels all the request to the servers
 
-    Keyword arguments:
-    url - the URL that is requested
+#    Keyword arguments:
+#    url - the URL that is requested
     
-    """
-    def __init__(self,url):
-        self.errorcode = None        
-        self.req = None
-        self.req = urllib2.Request(url)
-        self.req.add_header("User-agent", autosub.USERAGENT)
-        self.connect()
+#    """
+#    def __init__(self,url):
+#        self.errorcode = None        
+#        self.req = None
+#        self.req = urllib2.Request(url)
+#        self.req.add_header("User-agent", autosub.USERAGENT)
+#        self.connect()
         
-    def connect(self):
-        import socket
-        socket.setdefaulttimeout(autosub.TIMEOUT)
+#    def connect(self):
+#        import socket
+#        socket.setdefaulttimeout(autosub.TIMEOUT)
         
-        try:
-            self.resp = urllib2.urlopen(self.req)
-            self.errorcode = self.resp.getcode()
-        except urllib2.HTTPError, e:
-            self.errorcode = e.getcode()
+#        try:
+#            self.resp = urllib2.urlopen(self.req)
+#            self.errorcode = self.resp.getcode()
+#        except urllib2.HTTPError, e:
+#            self.errorcode = e.getcode()
         
-        if self.errorcode == 200:
-            log.debug("API: HTTP Code: 200: OK!")
-        elif self.errorcode == 429:
-            # don't know if this code is valid for subtitleseeker
-            log.debug("API: HTTP Code: 429 You have exceeded your number of allowed requests for this period.")
-            log.error("API: You have exceeded your number of allowed requests for this period. (1000 con/day))")
-            log.warning("API: Forcing a 1 minute rest to relieve subtitleseeker.com. If you see this info more then once. Cleanup your wanted list!")
-            time.sleep(54)
-        elif self.errorcode == 503:
-            log.debug("API: HTTP Code: 503 You have exceeded your number of allowed requests for this period (MyMovieApi).")
-            log.error("API: You have exceeded your number of allowed requests for this period. (either 30 con/m or 2500 con/day))")
-            log.warning("API: Forcing a 1 minute rest to relieve mymovieapi.com. If you see this info more then once. Cleanup your wanted list!")
-            time.sleep(54)
+#        if self.errorcode == 200:
+#            log.debug("API: HTTP Code: 200: OK!")
+#        elif self.errorcode == 429:
+#            # don't know if this code is valid for subtitleseeker
+#            log.debug("API: HTTP Code: 429 You have exceeded your number of allowed requests for this period.")
+#            log.error("API: You have exceeded your number of allowed requests for this period. (1000 con/day))")
+#            log.warning("API: Forcing a 1 minute rest to relieve subtitleseeker.com. If you see this info more then once. Cleanup your wanted list!")
+#            time.sleep(54)
+#        elif self.errorcode == 503:
+#            log.debug("API: HTTP Code: 503 You have exceeded your number of allowed requests for this period (MyMovieApi).")
+#            log.error("API: You have exceeded your number of allowed requests for this period. (either 30 con/m or 2500 con/day))")
+#            log.warning("API: Forcing a 1 minute rest to relieve mymovieapi.com. If you see this info more then once. Cleanup your wanted list!")
+#            time.sleep(54)
         
-        log.debug("API: Resting for 6 seconds to prevent 429 errors")
-        time.sleep(6) #Max 0.5 connections each second
+#        log.debug("API: Resting for 6 seconds to prevent 429 errors")
+#        time.sleep(6) #Max 0.5 connections each second
     
-    def close(self):
-        self.resp.close()
+#    def close(self):
+#        self.resp.close()

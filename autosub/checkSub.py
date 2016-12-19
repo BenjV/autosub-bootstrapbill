@@ -9,10 +9,10 @@ import time
 import sqlite3
 
 # Autosub specific modules
-import autosub.getSubLinks
+from autosub.getSubLinks import getSubLinks
 import autosub.scanDisk
 from autosub.Db import idCache
-import autosub.Helpers as Helpers
+from autosub.Helpers import UpdateA7IdMapping
 from autosub.downloadSubs import DownloadSub
 from autosub.OpenSubtitles import OpenSubtitlesLogin, OpenSubtitlesLogout
 
@@ -31,6 +31,8 @@ class checkSub():
         autosub.DBCONNECTION = sqlite3.connect(autosub.DBFILE)
         autosub.DBIDCACHE = idCache()
         del autosub.WANTEDQUEUE[:]
+
+        UpdateA7IdMapping()
         autosub.scanDisk.scanDisk().run()
         Info = None
         if autosub.Addic7ed:
@@ -72,7 +74,7 @@ class checkSub():
 
                     log.info("checkSub: Searching downloadlink(s) for %s, for %s" % (Wanted['file'], Wanted['langs']))
                     # get all links above the minimal match score as input for downloadSub
-                    SubsNL,SubsEN = autosub.getSubLinks.getSubLinks(Wanted)
+                    SubsNL,SubsEN = getSubLinks(Wanted)
 
                     if not SubsNL and not SubsEN:
                         log.debug("checkSub: No subs found for %s" % Wanted['file'])

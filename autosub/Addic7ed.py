@@ -382,6 +382,7 @@ class Addic7edAPI():
         time.sleep(10)
         try:
             r = self.session.get(self.server + url, timeout=15)
+            r.encoding ='utf-8'
         except Exception as error:
             log.error('Addic7edAPI: Unexpected error: %s' % error)
             return None    
@@ -447,10 +448,11 @@ class Addic7edAPI():
     def geta7ID(self,ShowName, TvdbShowName):
         # lookup official name and try to match with a7 show list
 
+
         try:
-            fp   = urllib.urlopen('http://www.addic7ed.com/shows.php')
-            html = fp.read()
-            fp.close()
+            Result = self.session.get(self.server + '/shows.php',timeout=20)
+            Result.encoding ='utf-8'
+            html = Result.text
         except Exception as error:
             log.debug('geta7ID: Problem tring to get the addic7ed show page. Message is: %s' % error)
             return None

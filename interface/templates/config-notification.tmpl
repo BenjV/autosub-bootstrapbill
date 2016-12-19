@@ -83,8 +83,14 @@
 			</div>
 			
 			<div align="right">
-				<span id="testMail-result">Click below to test Mail.</span><br>
-				<input type="button" class="btn btn-default" value="Test Mail" id="testMail" /> <input type="submit" value="Save Changes" class="btn btn-primary" />
+				#if $autosub.SEARCHBUSY :
+					<span id="testMail-result">Test button is disabled during search</span><br>
+					<input type="button" disabled class="btn btn-default" value="Test Mail" id="testMail" />
+				#else:
+					<span id="testMail-result">Click below to test Mail.</span><br>
+					<input type="button" class="btn btn-default" value="Test Mail" id="testMail" /> 
+				#end if
+				<input type="submit" value="Save Changes" class="btn btn-primary" />
 			</div>
 		</div>
 		
@@ -114,10 +120,18 @@
 				<input type="text" class="form-control" name="twittersecret" id="twittersecret" value="$autosub.TWITTERSECRET" placeholder="token secret">
 				</div>
 			</div>
-			
+
 			<div align="right">
-				<span id="testTwitter-result">Click below to test Twitter.</span><br>
-				<input type="button" value="Register Twitter" onClick="parent.location='/config/regTwitter'" class="btn btn-default" /> <input type="button" class="btn btn-default" value="Test Twitter" id="testTwitter" /> <input type="submit" value="Save Changes" class="btn btn-primary" />
+				#if $autosub.SEARCHBUSY :
+					<span id="testTwitter-result">Buttons are disabled during search.</span><br>
+					<input type="button" disabled value="Register Twitter" onClick="parent.location='/config/regTwitter'" class="btn btn-default" /> 
+					<input type="button" disabled class="btn btn-default" value="Test Twitter" id="testTwitter" /> 
+				#else:
+					<span id="testTwitter-result">Click below to test Twitter.</span><br>
+					<input type="button" value="Register Twitter" onClick="parent.location='/config/regTwitter'" class="btn btn-default" /> 
+					<input type="button" class="btn btn-default" value="Test Twitter" id="testTwitter" /> 
+				#end if
+				<input type="submit" value="Save Changes" class="btn btn-primary" />
 			</div>
 		</div>
 
@@ -142,8 +156,14 @@
 			</div>
 			
 			<div align="right">
-				<span id="testPushalot-result">Click below to test Pushalot.</span><br>
-				<input type="button" class="btn btn-default" value="Test Pushalot" id="testPushalot" /> <input type="submit" value="Save Changes" class="btn btn-primary" />
+				#if $autosub.SEARCHBUSY :
+					<span id="testPushalot-result">Test button is disabled during search.</span><br>
+					<input type="button" disabled class="btn btn-default" value="Test Pushalot" id="testPushalot" />
+				#else:
+					<span id="testPushalot-result">Click below to test Pushalot.</span><br>
+					<input type="button" class="btn btn-default" value="Test Pushalot" id="testPushalot" />
+				#end if
+				<input type="submit" value="Save Changes" class="btn btn-primary" />
 			</div>
 		</div>
 
@@ -168,8 +188,14 @@
 			</div>
 			
 			<div align="right">
-				<span id="testPushbullet-result">Click below to test Pushbullet.</span><br>
-				<input type="button" class="btn btn-default" value="Test Pushbullet" id="testPushbullet" /> <input type="submit" value="Save Changes" class="btn btn-primary" />
+				#if $autosub.SEARCHBUSY :
+					<span id="testPushbullet-result">Test button is disabled during search.</span><br>
+					<input type="button" disabled class="btn btn-default" value="Test Pushbullet" id="testPushbullet" />
+				#else:
+					<span id="testPushbullet-result">Click below to test Pushbullet.</span><br>
+					<input type="button" class="btn btn-default" value="Test Pushbullet" id="testPushbullet" />
+				#end if
+				<input type="submit" value="Save Changes" class="btn btn-primary" />
 			</div>
 		</div>
 		
@@ -196,22 +222,28 @@
 			<div class="form-group">
 				<label for="NotifyMyAndroidPriority" class="col-sm-2 control-label">Priority <a data-placement="bottom" data-toggle="tooltip" data-original-title="What priority should be used to send the notification? Default is Normal."><span class="glyphicon glyphicon-info-sign"></span></a></label>
 				<div class="col-sm-10">
-				#set priormapper = {-2 : 'Very Low', -1 : 'Moderate', 0 : 'Normal', 1 : 'High', 2 : 'Emergency'}
-				<select name="nmapriority" id="nmapriority" class="form-control">
-				#for $prior in $range(-2, 3, 1):
-					#if $prior == $autosub.NMAPRIORITY
-						<option value="$prior" selected="selected">$priormapper[$prior]</option>
-					#else
-						<option value="$prior">$priormapper[$prior]</option>
-					#end if
-				#end for
-				</select>
+					#set priormapper = {-2 : 'Very Low', -1 : 'Moderate', 0 : 'Normal', 1 : 'High', 2 : 'Emergency'}
+					<select name="nmapriority" id="nmapriority" class="form-control">
+						#for $prior in $range(-2, 3, 1):
+							#if $prior == $autosub.NMAPRIORITY
+								<option value="$prior" selected="selected">$priormapper[$prior]</option>
+							#else
+								<option value="$prior">$priormapper[$prior]</option>
+							#end if
+						#end for
+					</select>
 				</div>
 			</div>
 			
 			<div align="right">
-				<span id="testNotifyMyAndroid-result">Click below to test Notify My Android.</span><br>
-				<input type="button" class="btn btn-default" value="Test Notify My Android" id="testNotifyMyAndroid" /> <input type="submit" value="Save Changes" class="btn btn-primary" />
+				#if $autosub.SEARCHBUSY :
+					<span id="testNotifyMyAndroid-result">Test button is disabled during search.</span><br>
+					<input type="button" disabled class="btn btn-default" value="Test Notify My Android" id="testNotifyMyAndroid" />
+				#else :
+					<span id="testNotifyMyAndroid-result">Click below to test Notify My Android.</span><br>
+					<input type="button" class="btn btn-default" value="Test Notify My Android" id="testNotifyMyAndroid" />
+				#end if
+				<input type="submit" value="Save Changes" class="btn btn-primary" />
 			</div>
 		</div>
 		
@@ -219,11 +251,11 @@
 		<div class="form-group">
 			<label for="Boxcar2" class="col-sm-2 control-label"><img src="$autosub.WEBROOT/images/notifiers/boxcar2.png" width="25px" height="24px" alt="" /> <b><a href="http://www.boxcar.io/sign-in" target="_blank">Boxcar2</a></b></label>
 			<div class="col-sm-10">
-			<select name="notifyboxcar2" id="notifyboxcar2" class="form-control enabler">
-				<option value="True" #if $autosub.NOTIFYBOXCAR2 == True then 'selected="selected"' else ""#>Enabled</option>
-				<option value="False" #if $autosub.NOTIFYBOXCAR2 == False then 'selected="selected"' else ""#>Disabled</option>
-			</select>
-			<br>Boxcar2 is a notifier for iOS and OSX.
+				<select name="notifyboxcar2" id="notifyboxcar2" class="form-control enabler">
+					<option value="True" #if $autosub.NOTIFYBOXCAR2 == True then 'selected="selected"' else ""#>Enabled</option>
+					<option value="False" #if $autosub.NOTIFYBOXCAR2 == False then 'selected="selected"' else ""#>Disabled</option>
+				</select>
+				<br>Boxcar2 is a notifier for iOS and OSX.
 			</div>
 		</div>
 		
@@ -231,13 +263,19 @@
 			<div class="form-group">
 				<label for="Boxcar2Token" class="col-sm-2 control-label">Access Token <a data-placement="bottom" data-toggle="tooltip" data-original-title="What is your access token for Boxcar2?"><span class="glyphicon glyphicon-info-sign"></span></a></label>
 				<div class="col-sm-10">
-				<input type="text" class="form-control" name="boxcar2token" id="boxcar2token" value="$autosub.BOXCAR2TOKEN" placeholder="Boxcar2 access token">
+					<input type="text" class="form-control" name="boxcar2token" id="boxcar2token" value="$autosub.BOXCAR2TOKEN" placeholder="Boxcar2 access token">
 				</div>
 			</div>
 			
 			<div align="right">
-				<span id="testBoxcar2-result">Click below to test Boxcar2.</span><br>
-				<input type="button" class="btn btn-default" value="Test Boxcar2" id="testBoxcar2" /> <input type="submit" value="Save Changes" class="btn btn-primary" />
+				#if $autosub.SEARCHBUSY :
+					<span id="testBoxcar2-result">Test button is disabled during search.</span><br>
+					<input type="button" disabled class="btn btn-default" value="Test Boxcar2" id="testBoxcar2" />
+				#else:
+					<span id="testBoxcar2-result">Click below to test Boxcar2.</span><br>
+					<input type="button" class="btn btn-default" value="Test Boxcar2" id="testBoxcar2" />
+				#end if
+				<input type="submit" value="Save Changes" class="btn btn-primary" />
 			</div>
 		</div>
 		
@@ -245,11 +283,11 @@
 		<div class="form-group">
 			<label for="Pushover" class="col-sm-2 control-label"><img src="$autosub.WEBROOT/images/notifiers/pushover.png" width="25px" height="24px" alt="" /> <b><a href="https://pushover.net/" target="_blank">Pushover</a></b></label>
 			<div class="col-sm-10">
-			<select name="notifypushover" id="notifypushover" class="form-control enabler">
-				<option value="True" #if $autosub.NOTIFYPUSHOVER == True then 'selected="selected"' else ""#>Enabled</option>
-				<option value="False" #if $autosub.NOTIFYPUSHOVER == False then 'selected="selected"' else ""#>Disabled</option>
-			</select>
-			<br>Pushover is a platform for iPhone and Android users.
+				<select name="notifypushover" id="notifypushover" class="form-control enabler">
+					<option value="True" #if $autosub.NOTIFYPUSHOVER == True then 'selected="selected"' else ""#>Enabled</option>
+					<option value="False" #if $autosub.NOTIFYPUSHOVER == False then 'selected="selected"' else ""#>Disabled</option>
+				</select>
+				<br>Pushover is a platform for iPhone and Android users.
 			</div>
 		</div>
 		
@@ -270,26 +308,32 @@
 					<input type="text" class="form-control" name="pushoveruserkey" id="pushoveruserkey" value="$autosub.PUSHOVERUSERKEY" placeholder="Pushover User Key">
 				</div>
 			</div>
-		<div class="form-group">
-			<label for="PushoverPriority" class="col-sm-2 control-label">Priority <a data-placement="bottom" data-toggle="tooltip" data-original-title="What priority should be used to send the notification? Default is Normal."><span class="glyphicon glyphicon-info-sign"></span></a></label>
-			<div class="col-sm-10">
-			#set priormapper = {-2 : 'Very Low', -1 : 'Low', 0 : 'Normal', 1 : 'High', 2 : 'Emergency'}
-			<select name="pushoverpriority" id="pushoverpriority" class="form-control">
-			#for $prior in $range(-2, 3, 1):
-				#if $prior == $autosub.PUSHOVERPRIORITY
-					<option value="$prior" selected="selected">$priormapper[$prior]</option>
-				#else
-					<option value="$prior">$priormapper[$prior]</option>
-				#end if
-			#end for
-			</select>
+			<div class="form-group">
+				<label for="PushoverPriority" class="col-sm-2 control-label">Priority <a data-placement="bottom" data-toggle="tooltip" data-original-title="What priority should be used to send the notification? Default is Normal."><span class="glyphicon glyphicon-info-sign"></span></a></label>
+				<div class="col-sm-10">
+					#set priormapper = {-2 : 'Very Low', -1 : 'Low', 0 : 'Normal', 1 : 'High', 2 : 'Emergency'}
+					<select name="pushoverpriority" id="pushoverpriority" class="form-control">
+						#for $prior in $range(-2, 3, 1):
+							#if $prior == $autosub.PUSHOVERPRIORITY
+								<option value="$prior" selected="selected">$priormapper[$prior]</option>
+							#else
+								<option value="$prior">$priormapper[$prior]</option>
+							#end if
+						#end for
+					</select>
+				</div>
 			</div>
-		</div>
 			<div align="right">
-				<span id="testPushover-result">Click below to test Pushover.</span><br>
-				<input type="button" class="btn btn-default" value="Test Pushover" id="testPushover" /> <input type="submit" value="Save Changes" class="btn btn-primary" />
+				#if $autosub.SEARCHBUSY :
+					<span id="testPushover-result">Test button is disabled during search.</span><br>
+					<input type="button" disabled class="btn btn-default" value="Test Pushover" id="testPushover" />
+				#else:
+					<span id="testPushover-result">Click below to test Pushover.</span><br>
+					<input type="button" class="btn btn-default" value="Test Pushover" id="testPushover" /> 
+				#end if
+				<input type="submit" value="Save Changes" class="btn btn-primary" />
 			</div>
-		
+
 		</div>
 		
 		<hr>
@@ -331,8 +375,14 @@
 			</div>
 			
 			<div align="right">
-				<span id="testGrowl-result">Click below to test Growl.</span><br>
-				<input type="button" class="btn btn-default" value="Test Growl" id="testGrowl" /> <input type="submit" value="Save Changes" class="btn btn-primary" />
+				#if $autosub.SEARCHBUSY :
+					<span id="testGrowl-result">Test button is disabled during search.</span><br>
+					<input type="button" disabled class="btn btn-default" value="Test Growl" id="testGrowl" />
+				#else:
+					<span id="testGrowl-result">Click below to test Growl.</span><br>
+					<input type="button" class="btn btn-default" value="Test Growl" id="testGrowl" />
+				#end if
+				<input type="submit" value="Save Changes" class="btn btn-primary" />
 			</div>
 		</div>
 		
@@ -373,8 +423,14 @@
 			</div>
 			
 			<div align="right">
-				<span id="testProwl-result">Click below to test Prowl.</span><br>
-				<input type="button" class="btn btn-default" value="Test Prowl" id="testProwl" /> <input type="submit" value="Save Changes" class="btn btn-primary" />
+				#if $autosub.SEARCHBUSY :
+					<span id="testProwl-result">Test button is disabled during search.</span><br>
+					<input type="button" disabled class="btn btn-default" value="Test Prowl" id="testProwl" />
+				#else:
+					<span id="testProwl-result">Click below to test Prowl.</span><br>
+					<input type="button" class="btn btn-default" value="Test Prowl" id="testProwl" />
+				#end if
+				<input type="submit" value="Save Changes" class="btn btn-primary" />
 			</div>
 		</div>
 
@@ -406,8 +462,14 @@
 			</div>
 			
 			<div align="right">
-				<span id="testTelegram-result">Click below to test Telegram.</span><br>
-				<input type="button" class="btn btn-default" value="Test Telegram" id="testTelegram" /> <input type="submit" value="Save Changes" class="btn btn-primary" />
+				#if $autosub.SEARCHBUSY :
+					<span id="testTelegram-result">Test button is disabled during search.</span><br>
+					<input type="button" disabled class="btn btn-default" value="Test Telegram" id="testTelegram" />
+				#else:
+					<span id="testTelegram-result">Click below to test Telegram.</span><br>
+					<input type="button" class="btn btn-default" value="Test Telegram" id="testTelegram" />
+				#end if
+				<input type="submit" value="Save Changes" class="btn btn-primary" />
 			</div>
 		</div>
 
@@ -453,8 +515,14 @@
 			</div>
 			
 			<div align="right">
-				<span id="testPlex-result">Click below to test Plex.</span><br>
-				<input type="button" class="btn btn-default" value="Test Plex" id="testPlex" /> <input type="submit" value="Save Changes" class="btn btn-primary" />
+				#if $autosub.SEARCHBUSY :
+					<span id="testPlex-result">Test button is disabled during search.</span><br>
+					<input type="button" disabled class="btn btn-default" value="Test Plex" id="testPlex" /> 
+				#else:
+					<span id="testPlex-result">Click below to test Plex.</span><br>
+					<input type="button" class="btn btn-default" value="Test Plex" id="testPlex" />
+				#end if
+				<input type="submit" value="Save Changes" class="btn btn-primary" />
 			</div>
 		</div>
 		
