@@ -165,6 +165,7 @@ def WriteSubFile(SubData,SubFileOnDisk):
                 fp = io.open(SubFileOnDisk, 'wb')
                 fp.write(SubData.encode(autosub.SUBCODEC,errors='replace'))
                 fp.close()
+                os.chmod(SubFileOnDisk, 0o666)
                 return True
             except Exception as error:
                 log.error('WriteSubFile: Problem writing subfile. Message is: %s' %error)

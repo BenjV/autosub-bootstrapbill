@@ -131,7 +131,7 @@ def createDatabase():
         cursor.execute("CREATE INDEX episode_index ON episode_cache(serie_os_id, season, episode);")
         cursor.execute("CREATE TABLE show_id_cache (imdb_id TEXT UNIQUE PRIMARY KEY, a7_id TEXT, os_id TEXT, show_name TEXT);")
         cursor.execute("CREATE TABLE last_downloads (id INTEGER PRIMARY KEY, show_name TEXT, season TEXT, episode TEXT, quality TEXT, source TEXT, language TEXT, codec TEXT, timestamp DATETIME, releasegrp TEXT, subtitle TEXT, destination TEXT);")
-        cursor.execute("PRAGMA user_version = 8")
+        cursor.execute("PRAGMA user_version = 9")
         connection.commit()
         connection.close()
         print "createDatabase: Succesfully created the sqlite database"

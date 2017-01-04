@@ -25,7 +25,8 @@ def daemon():
     except OSError:
         sys.exit(1)
 
-    os.chdir(autosub.PATH)
+
+    os.chdir("/")
     os.setsid()
     os.umask(0)
     try:
@@ -41,7 +42,7 @@ def daemon():
     sys.stdin.close()
     sys.stdout.flush()
     sys.stderr.flush()
-    return pid
+
 
 def launchBrowser():
     host = autosub.WEBSERVERIP
@@ -63,16 +64,9 @@ def launchBrowser():
         except:
             log.error('launchBrowser: Failed')
 
-def writePidFile():
-    pid = str(os.getpid())
-    f = open(os.path.join(autosub.PATH,'autosub.pid'), 'w')
-    f.write(pid)
-    f.close()
-
-
 def start():
 
-    # Only use authentication in CherryPy is a username and password is set by the user
+    # Only use authentication in CherryPy when a username and password is set by the user
     if autosub.USERNAME and autosub.PASSWORD:
         users = {autosub.USERNAME: autosub.PASSWORD}
         cherrypy.config.update({'server.socket_host': autosub.WEBSERVERIP,
@@ -125,19 +119,21 @@ def start():
     cherrypy.tree.mount(autosub.WebServer.WebServerInit(),autosub.WEBROOT, config = conf)
     log.info("AutoSub: Starting CherryPy webserver")
 
-    # TODO: Let CherryPy log do another log file and not to screen
+    # TODO: Let CherryPy log to another log file and not to screen
     # TODO: CherryPy settings, etc...
     try:
         cherrypy.server.start()
-    except:
-        log.error("AutoSub: Could not start webserver. Exiting")
+    except Exception as error:
+        log.error("AutoSub: Could not start webserver. Error is: %s" %error)
         os._exit(1)
-
+    cherrypy.config.update({'log.screen': False,
+                            'log.access_file': '',
+                            'log.error_file': ''})
     cherrypy.server.wait()
-    
+
     if autosub.LAUNCHBROWSER and not autosub.UPDATED:
         launchBrowser()
-    time.sleep(3)
+    time.sleep(1)
     log.info("AutoSub: Starting the Search thread thread")
     autosub.CHECKSUB = autosub.Scheduler.Scheduler(autosub.checkSub.checkSub(), True, "CHECKSUB")
     autosub.CHECKSUB.thread.start()
@@ -145,6 +141,7 @@ def start():
 
 def stop():
     log.info("AutoSub: Stopping Search thread")
+    autosub.SEARCHSTOP = True
     autosub.CHECKSUB.stop = True
     autosub.CHECKSUB.thread.join(10)
 
@@ -156,10 +153,12 @@ def stop():
     os._exit(0)
 
 def signal_handler(signum, frame):
+    autosub.SEARCHSTOP = True
+    cherrypy.engine.exit()
     try:
         os.remove(os.path.join(autosub.PATH,'autosub.pid'))
     except Exception as error:
         log.error('AutoSub: Could not remove the PID file. Error is: %s' % error)
 
-    log.debug("AutoSub: got signal. Shutting down")
+    log.info("AutoSub: got signal. Gracefully Shutting down")
     os._exit(0)

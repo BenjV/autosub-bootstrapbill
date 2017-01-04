@@ -36,7 +36,8 @@ autosub.NAMEMAPPING={
             u"THE AMERICANS" :                              [u"2149175", u"The Americans (2013)"],
             u"THE LIBRARIANS US":                           [u"3663490", u"The Librarians (2014)"],
             u"THE O C" :                                    [u"0362359", u"The O.C"],
-            u"UNTOUCHABLES-THE VENTURE BROS" :              [u"0417373", u"The Venture Bros."]
+            u"UNTOUCHABLES-THE VENTURE BROS":               [u"0417373", u"The Venture Bros."],
+            u"The Witness for the Prosecution (2016)":      [u"5834256", u"The Witness for the Prosecution"]
                     }
 
 
@@ -3622,5 +3623,23 @@ autosub.ADDIC7EDMAPPING = {
     u'6181672' : u'6134',
     u'5684430' : u'6135',
     u'6283542' : u'6136',
-    u'6246500' : u'6137'
+    u'6246500' : u'6137',
+    u'1024810' : u'6140',
+    u'4635282' : u'6141',
+    u'6101574' : u'6142',
+    u'5335658' : u'6143',
+    u'6313900' : u'6144',
+    u'6321326' : u'6145',
+    u'5419200' : u'6147',
+    u'5809150' : u'6148',
+    u'0072554' : u'6149',
+    u'5853176' : u'6152',
+    u'4903514' : u'6154',
+    u'0083478' : u'6155',
+    u'4651812' : u'6157',
+    u'4471496' : u'6158',
+    u'1475582' : u'6159',
+    u'5834256' : u'6161',
+    u'1821820' : u'6163',
+    u'1734135' : u'6166'
              }

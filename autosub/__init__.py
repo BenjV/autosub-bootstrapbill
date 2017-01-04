@@ -80,11 +80,11 @@ SEARCHBUSY = False
 SEARCHSTOP = False
 SCANDISK = None
 CHECKSUB = None
-#DOWNLOADSUBS = None
+WRITELOCK = False
 SUBCODEC = u'windows-1252'
 
 WEBSERVERIP = '0.0.0.0'
-WEBSERVERPORT = '8083'
+WEBSERVERPORT = '9960'
 LAUNCHBROWSER=True
 USERNAME = u''
 PASSWORD = u''
@@ -111,6 +111,7 @@ SKIPSTRINGEN = u''
 SKIPFOLDERSNL = u''
 SKIPFOLDERSEN = u''
 NODE_ID = None
+PID = None
 VERSION = int(0)
 HI = False
 OPENSUBTITLESSERVER = None
@@ -152,8 +153,8 @@ PUSHOVERPRIORITY = 0
 NOTIFYBOXCAR2 = False
 BOXCAR2TOKEN = u""
 NOTIFYPLEX = False
-PLEXSERVERHOST = u""
-PLEXSERVERPORT = u""
+PLEXSERVERHOST = u"127.0.0.1"
+PLEXSERVERPORT = u"32400"
 PLEXSERVERUSERNAME = u""
 PLEXSERVERPASSWORD = u""
 PLEXSERVERTOKEN = u""
@@ -184,9 +185,9 @@ def Initialize():
         versionnumber = version.autosubversion
 
     VERSION = int(versionnumber.split('.')[0]) * 1000 + int(versionnumber.split('.')[1]) * 100 + int(versionnumber.split('.')[2]) * 10
-    VERSIONURL =  u'https://raw.githubusercontent.com/BenjV/autosub-bootstrapbill/master/autosub/version.py'
-    ADDICMAPURL = u'https://raw.githubusercontent.com/BenjV/autosub-bootstrapbill/master/AddicMapping.txt'
-    ZIPURL =  u'https://github.com/BenjV/autosub-bootstrapbill/archive/master.zip'
+    VERSIONURL =  u'https://raw.githubusercontent.com/BenjV/autosub/master/autosub/version.py'
+    ADDICMAPURL = u'https://raw.githubusercontent.com/BenjV/autosub/master/AddicMapping.txt'
+    ZIPURL =  u'https://github.com/BenjV/autosub/archive/master.zip'
     USERAGENT = u'AutoSub/' + versionnumber
     OPENSUBTITLESUSERAGENT = u'PYAutosub V' + versionnumber
 

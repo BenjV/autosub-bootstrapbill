@@ -532,7 +532,7 @@ class Home:
         tmpl = PageTemplate(file="interface/templates/stopped.tmpl")
         if not hasattr(autosub.CHECKSUB, 'stop'):
             tmpl = PageTemplate(file="interface/templates/home.tmpl")
-            tmpl.message = "Auto-Sub is still running CheckSub, you cannot shutdown at the moment.<br>Please wait a few minutes."
+            tmpl.message = "Auto-Sub is still running CheckSub, you cannot shutdown at the moment.<br>Please wait a few minutes or stop the Search first."
             tmpl.displaymessage = "Yes"
             tmpl.modalheader = "Information"
             return str(tmpl) 

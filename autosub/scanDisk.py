@@ -187,7 +187,7 @@ class scanDisk():
         for seriespath in seriespaths:
 
             if not os.path.exists(seriespath):
-                log.error("scanDir: Root path %s does not exist, aborting..." % seriespath)
+                log.error("scanDir: Serie Search path %s does not exist, aborting..." % seriespath)
                 continue
 
             try:
