@@ -2,8 +2,15 @@
 # -*- coding: utf-8 -*-
 # vim:ts=4:sw=4:expandtab:fileencoding=utf-8
 
+import binascii
+
+import cherrypy
+from cherrypy._cpcompat import base64_decode
+
+
 __doc__ = """This module provides a CherryPy 3.x tool which implements
-the server-side of HTTP Basic Access Authentication, as described in :rfc:`2617`.
+the server-side of HTTP Basic Access Authentication, as described in
+:rfc:`2617`.
 
 Example usage, using the built-in checkpassword_dict function which uses a dict
 as the credentials store::
@@ -20,10 +27,6 @@ as the credentials store::
 
 __author__ = 'visteya'
 __date__ = 'April 2009'
-
-import binascii
-from cherrypy._cpcompat import base64_decode
-import cherrypy
 
 
 def checkpassword_dict(user_password_dict):
@@ -60,16 +63,17 @@ def basic_auth(realm, checkpassword, debug=False):
         username and password are the values obtained from the request's
         'authorization' header.  If authentication succeeds, checkpassword
         returns True, else it returns False.
-    
+
     """
-    
+
     if '"' in realm:
         raise ValueError('Realm cannot contain the " (quote) character.')
     request = cherrypy.serving.request
-    
+
     auth_header = request.headers.get('authorization')
     if auth_header is not None:
-        try:
+        # split() error, base64.decodestring() error
+        with cherrypy.HTTPError.handle((ValueError, binascii.Error), 400, 'Bad Request'):
             scheme, params = auth_header.split(' ', 1)
             if scheme.lower() == 'basic':
                 username, password = base64_decode(params).split(':', 1)
@@ -77,11 +81,10 @@ def basic_auth(realm, checkpassword, debug=False):
                     if debug:
                         cherrypy.log('Auth succeeded', 'TOOLS.AUTH_BASIC')
                     request.login = username
-                    return # successful authentication
-        except (ValueError, binascii.Error): # split() error, base64.decodestring() error
-            raise cherrypy.HTTPError(400, 'Bad Request')
-    
-    # Respond with 401 status and a WWW-Authenticate header
-    cherrypy.serving.response.headers['www-authenticate'] = 'Basic realm="%s"' % realm
-    raise cherrypy.HTTPError(401, "You are not authorized to access that resource")
+                    return  # successful authentication
 
+    # Respond with 401 status and a WWW-Authenticate header
+    cherrypy.serving.response.headers[
+        'www-authenticate'] = 'Basic realm="%s"' % realm
+    raise cherrypy.HTTPError(
+        401, 'You are not authorized to access that resource')

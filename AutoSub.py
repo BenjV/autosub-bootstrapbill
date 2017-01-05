@@ -93,14 +93,7 @@ def main(argv=None):
 
     print "AutoSub: Initializing variables and loading config"
     autosub.Initialize()
-    ##Here we create a pid file
-    #try:
-    #    pid = str(os.getpid())
-    #    f = open(os.path.join(autosub.PATH,'autosub.pid'), 'w')
-    #    f.write(pid)
-    #    f.close()
-    #except Exception as error:
-    #    print 'AutoSub could not create the PID file. Error is:', error
+
     #here we remove the beautifull soap folders because we don't use them anymore.
     BsPath = os.path.join(autosub.PATH,'library','beautifulsoup')
     Bs4Path = os.path.join(autosub.PATH,'library','bs4')
@@ -129,31 +122,31 @@ def main(argv=None):
     autosub.NODE_ID = getnode()
 
     import autosub.AutoSub
-    
+  
+    # setup de signal handler for Terminat en Keyboard interupt.  
+    signal.signal(signal.SIGTERM, autosub.AutoSub.signal_handler)
     signal.signal(signal.SIGINT, autosub.AutoSub.signal_handler)
-    
-    DeamonPid = 0
-    if autosub.DAEMON == True:
-        DeamonPid = autosub.AutoSub.daemon()
-    if DeamonPid == 0:
-        pid = str(os.getpid())
-    else:
-        pid =str(DeamonPid)
-        #Here we create a pid file
-    try:
-        f = open(os.path.join(autosub.PATH,'autosub.pid'), 'w')
-        f.write(pid)
-        f.close()
-    except Exception as error:
-        print 'AutoSub could not create the PID file. Error is:', error
+  
+    print "AutoSub: Starting output to log. Bye!"
+    log = autosub.initLogging(autosub.LOGFILE)    
 
-    import autosub.Db
-    
+    if autosub.DAEMON:
+        autosub.AutoSub.daemon()
+        os.chdir(autosub.PATH)
+
+    autosub.PID = str(os.getpid())
+    try:
+        with open('autosub.pid' , "w", 0) as pidfile:
+            pidfile.write(autosub.PID + '\n')
+    except Exception as error:
+        log.error('AutoSub: Could not create the PID file. Error is:', error)
+        sys.exit(1)
+
+    import autosub.Db  
     #make sure that sqlite database is loaded after you deamonise 
     autosub.Db.initDatabase()
 
-    print "AutoSub: Starting output to log. Bye!"
-    log = autosub.initLogging(autosub.LOGFILE)
+    log.info("AutoSub: PID is: %s" %str(os.getpid()))
     log.debug("AutoSub: Systemencoding is: %s" %autosub.SYSENCODING)
     log.debug("AutoSub: Configversion is: %d" %autosub.CONFIGVERSION)
     log.debug("AutoSub: Dbversion is: %d" %autosub.DBVERSION)
