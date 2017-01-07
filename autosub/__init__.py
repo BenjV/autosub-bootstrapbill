@@ -8,6 +8,7 @@ BOOTSTRAPVERSION='3.3.6'
 JQUERYVERSION = '1.9.1'
 JQUERYDATATABLES = '1.10.12'
 SERIESPATH = u''
+BCKPATH=u''
 BROWSERREFRESH = int(1)
 FALLBACKTOENG = False
 DOWNLOADENG = False
@@ -171,7 +172,7 @@ MOBILEUSERAGENTS = ["midp", "240x320", "blackberry", "netfront", "nokia", "panas
 DBFILE = 'database.db'
 
 def Initialize():
-    global SERIESPATH,PATH, LOGFILE, LOGLEVEL, LOGLEVELCONSOLE, LOGSIZE, LOGNUM,  \
+    global SERIESPATH,BCKPATH, PATH, LOGFILE, LOGLEVEL, LOGLEVELCONSOLE, LOGSIZE, LOGNUM,  \
     CONFIGFILE, CERTIFICATEPATH, ZIPURL, APIKEY, API, IMDBAPI,  \
     APICALLSLASTRESET_TVDB, APICALLSLASTRESET_SUBSEEKER, \
     USERAGENT, VERSION, VERSIONURL, ADDICMAPURL, TVDBURL, \
@@ -184,7 +185,7 @@ def Initialize():
     else:
         versionnumber = version.autosubversion
 
-    VERSION = int(versionnumber.split('.')[0]) * 1000 + int(versionnumber.split('.')[1]) * 100 + int(versionnumber.split('.')[2]) * 10
+    VERSION = int(versionnumber.split('.')[0]) * 1000 + int(versionnumber.split('.')[1]) * 100 + int(versionnumber.split('.')[2]) * 1
     VERSIONURL =  u'https://raw.githubusercontent.com/BenjV/autosub/master/autosub/version.py'
     ADDICMAPURL = u'https://raw.githubusercontent.com/BenjV/autosub/master/AddicMapping.txt'
     ZIPURL =  u'https://github.com/BenjV/autosub/archive/master.zip'

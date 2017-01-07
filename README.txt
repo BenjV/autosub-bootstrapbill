@@ -1,8 +1,5 @@
 README 
 
-Important info.
-Due to changes in the Website of Opensubtitle the scraper for Opensubtitles does not work anymore.
-Until this is fixed it is no longer possible to use Opensubtitles
 
 +--- AutoSub
      |
